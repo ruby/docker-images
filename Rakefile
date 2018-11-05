@@ -34,7 +34,4 @@ namespace :docker do
     ruby_version, tag_args = make_tag_args(ruby_version)
     sh 'docker', 'build', *tag_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
   end
-
-  task :push do
-  end
 end
