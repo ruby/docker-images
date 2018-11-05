@@ -16,14 +16,13 @@ namespace :docker do
   end
 
   def make_tag_args(ruby_version)
-    ruby_ver1 = ruby_version.split('.')[0]
     ruby_ver2 = ruby_version.split('.')[0,2].join('.')
     if ruby_version == 'trunk'
       commit_hash = get_ruby_trunk_head_hash
       ruby_version = "#{ruby_version}:#{commit_hash}"
       tags = ["trunk", "trunk-#{commit_hash}"]
     else
-      tags = ["#{ruby_ver1}", "#{ruby_ver2}", "#{ruby_version}"]
+      tags = ["#{ruby_ver2}", "#{ruby_version}"]
     end
     tag_args = tags.map {|t| ["-t", "#{docker_image_name}:#{t}-#{ubuntu_version}"] }.flatten
     return ruby_version, tag_args

@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Build docker image
           command: |
-            rake docker:build RUBY_VERSION=trunk
+            rake docker:build ruby_version=trunk
 
       - run:
           name: Push docker image
