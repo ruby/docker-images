@@ -111,5 +111,9 @@ workflows:
     triggers:
       - schedule:
           cron: "0 17 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
       - build_trunk
