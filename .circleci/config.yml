@@ -94,4 +94,4 @@ workflows:
               only:
                 - master
     jobs:
-      - build_trunk
+      - build
