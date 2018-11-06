@@ -17,9 +17,9 @@ namespace :docker do
 
   def make_tag_args(ruby_version)
     ruby_ver2 = ruby_version.split('.')[0,2].join('.')
-    if ruby_version == 'trunk'
-      commit_hash = get_ruby_trunk_head_hash
-      ruby_version = "#{ruby_version}:#{commit_hash}"
+    if /\Atrunk(?::([\da-f]+))?\z/ =~ ruby_version
+      commit_hash = Regexp.last_match[1] || get_ruby_trunk_head_hash
+      ruby_version = "trunk:#{commit_hash}"
       tags = ["trunk", "trunk-#{commit_hash}"]
     else
       tags = ["#{ruby_ver2}", "#{ruby_version}"]
