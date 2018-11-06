@@ -74,6 +74,8 @@ dpkg-query --show --showformat '${package}\n' \
   | grep -P '^libreadline\d+$' \
   | xargs apt-mark manual
 
-gem update --system "$RUBYGEMS_VERSION"
+if test $RUBY_VERSION != "trunk"; then
+  gem update --system "$RUBYGEMS_VERSION"
+fi
 gem install bundler --version "$BUNDLER_VERSION" --force
 rm -r /root/.gem/
