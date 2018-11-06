@@ -6,6 +6,7 @@ version: 2.1
 
 commands:
   install_docker_client:
+    description: "Install Docker client"
     steps:
       - run:
           name: Install Docker client
@@ -16,6 +17,7 @@ commands:
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
   build_image:
+    description: "Build Docker image"
     parameters:
       ruby_version:
         type: string
@@ -26,6 +28,7 @@ commands:
           command: |
             rake docker:build ruby_version=trunk
   push_image:
+    description: "Push Docker image"
     steps:
       - run:
           name: Push docker image
