@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM ubuntu:bionic
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -6,15 +6,16 @@ ENV DEBIAN_FRONTEND noninteractive
 # Ruby build dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-            bzip2 \
             ca-certificates \
             gcc \
             libffi-dev \
+            libgdbm-dev \
             libgmp-dev \
+            libncurses5-dev \
+            libreadline-dev \
             libssl-dev \
             libyaml-dev \
             make \
-            procps \
             zlib1g-dev \
             unzip \
             && \

@@ -2,13 +2,6 @@ autoconf
 bison
 dpkg-dev
 git-core
-libbz2-dev
-libgdbm-dev
-libglib2.0-dev
-libncurses-dev
-libreadline-dev
-libxml2-dev
-libxslt-dev
 ruby
 wget
 xz-utils
