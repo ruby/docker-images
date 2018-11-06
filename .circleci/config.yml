@@ -2,15 +2,11 @@
 #
 # Check https://circleci.com/docs/2.0/language-ruby/ for more details
 #
-version: 2
-jobs:
-  build_trunk:
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
+version: 2.1
+
+commands:
+  install_docker_client:
     steps:
-      - checkout
-      - setup_remote_docker
       - run:
           name: Install Docker client
           command: |
@@ -19,15 +15,36 @@ jobs:
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
+  build_image:
+    parameters:
+      ruby_version:
+        type: string
+        default: "trunk"
+    steps:
       - run:
           name: Build docker image
           command: |
             rake docker:build ruby_version=trunk
+  push_image:
+    steps:
       - run:
           name: Push docker image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push rubydata/ruby
+
+jobs:
+  build:
+    docker:
+      - image: ruby:latest
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - install_docker_client
+      - build_image:
+          ruby_version: "trunk"
+      - push_image
 
   build_2_5:
     docker:
@@ -36,23 +53,10 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-      - run:
-          name: Build docker image
-          command: |
-            rake docker:build ruby_version=2.5.3
-      - run:
-          name: Push docker image
-          command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push rubydata/ruby
+      - install_docker_client
+      - build_image:
+          ruby_version: "2.5.3"
+      - push_image
 
   build_2_4:
     docker:
@@ -61,23 +65,10 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-      - run:
-          name: Build docker image
-          command: |
-            rake docker:build ruby_version=2.4.5
-      - run:
-          name: Push docker image
-          command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push rubydata/ruby
+      - install_docker_client
+      - build_image:
+          ruby_version: "2.4.5"
+      - push_image
 
   build_2_3:
     docker:
@@ -86,23 +77,10 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
-      - run:
-          name: Build docker image
-          command: |
-            rake docker:build ruby_version=2.3.8
-      - run:
-          name: Push docker image
-          command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push rubydata/ruby
+      - install_docker_client
+      - build_image:
+          ruby_version: "2.3.8"
+      - push_image
 
 workflows:
   version: 2
