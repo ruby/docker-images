@@ -32,5 +32,10 @@ namespace :docker do
     ruby_version = ENV['ruby_version'] || '2.5.3'
     ruby_version, tag_args = make_tag_args(ruby_version)
     sh 'docker', 'build', *tag_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
+    if ruby_version.start_with? 'trunk'
+      image_name = tag_args[3]
+      svn_revision = `docker run --rm #{tag_args[3]} ruby -e 'puts RUBY_DESCRIPTION[/trunk (\\d+)/, 1]'`.chomp
+      sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-r#{svn_revision}")
+    end
   end
 end
