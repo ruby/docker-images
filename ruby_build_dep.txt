@@ -1,7 +1,0 @@
-autoconf
-bison
-dpkg-dev
-git-core
-ruby
-wget
-xz-utils

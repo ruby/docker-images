@@ -33,6 +33,21 @@ ENV RUBY_VERSION=$RUBY_VERSION
 ENV RUBYGEMS_VERSION=2.7.8
 ENV BUNDLER_VERSION=1.17.1
 
-ADD ruby_build_dep.txt /tmp
 ADD install_ruby.sh /tmp
-RUN /tmp/install_ruby.sh
+
+RUN set -ex && \
+    \
+    buildDeps='autoconf \
+               bison \
+               dpkg-dev \
+               git-core \
+               ruby \
+               wget \
+               xz-utils'; \
+    apt-get update && \
+    apt-get install -y --no-install-recommends $buildDeps && \
+    \
+    /tmp/install_ruby.sh && \
+    rm /tmp/install_ruby.sh && \
+    \
+    apt-get purge -y --auto-remove $buildDeps

@@ -33,10 +33,6 @@ case $RUBY_VERSION in
     ;;
 esac
 
-buildDeps=$(cat /tmp/ruby_build_dep.txt)
-
-apt-get update
-apt-get install -y --no-install-recommends $buildDeps
 case $RUBY_VERSION in
   2.3.*)
     # Need to down grade openssl to 1.0.x for Ruby 2.3.x
