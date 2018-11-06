@@ -12,6 +12,9 @@ case $RUBY_VERSION in
     RUBY_TRUNK_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
     RUBY_VERSION=trunk
     ;;
+  2.6.0-preview3)
+    RUBY_DOWNLOAD_SHA256=9856d9e0e32df9e5cdf01928eec363d037f1a76dab2abbf828170647beaf64fe
+    ;;
   2.6.0-preview2)
     RUBY_DOWNLOAD_SHA256=00ddfb5e33dee24469dd0b203597f7ecee66522ebb496f620f5815372ea2d3ec
     ;;

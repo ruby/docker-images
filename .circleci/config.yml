@@ -49,6 +49,18 @@ jobs:
           ruby_version: "trunk"
       - push_image
 
+  build_2_6:
+    docker:
+      - image: ruby:latest
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - install_docker_client
+      - build_image:
+          ruby_version: "2.6.0-preview3"
+      - push_image
+
   build_2_5:
     docker:
       - image: ruby:latest
