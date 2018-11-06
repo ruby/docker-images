@@ -54,30 +54,25 @@ else
   rm ruby.tar.xz
 fi
 
-cd /usr/src/ruby
+(
+  cd /usr/src/ruby
+  autoconf
+  gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
+  ./configure \
+    --build="$gnuArch" \
+    --prefix=/usr/local \
+    --disable-install-doc \
+    --enable-shared \
+    optflags="-O3 -mtune=native -march=native" \
+    debugflags="-g3"
 
-{
-  echo '#define ENABLE_PATH_CHECK 0'
-  echo
-  cat file.c
-} > file.c.new
-mv file.c.new file.c
-
-autoconf
-gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
-./configure \
-  --build="$gnuArch" \
-  --disable-install-doc \
-  --enable-shared
-
-make -j "$(nproc)"
-make install
+  make -j "$(nproc)"
+  make install
+)
 
 dpkg-query --show --showformat '${package}\n' \
   | grep -P '^libreadline\d+$' \
   | xargs apt-mark manual
-cd /
-rm -r /usr/src/ruby
 
 gem update --system "$RUBYGEMS_VERSION"
 gem install bundler --version "$BUNDLER_VERSION" --force

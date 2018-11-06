@@ -35,10 +35,3 @@ ENV BUNDLER_VERSION=1.17.1
 ADD ruby_build_dep.txt /tmp
 ADD install_ruby.sh /tmp
 RUN /tmp/install_ruby.sh
-
-ENV GEM_HOME /usr/local/bundle
-ENV BUNDLE_PATH="$GEM_HOME" \
-    BUNDLE_SILENCE_ROOT_WARNING=1 \
-    BUNDLE_APP_CONFIG="$GEM_HOME"
-ENV PATH $GEM_HOME/bin:$BUNDLE_PATH/gems/bin:$PATH
-RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
