@@ -16,8 +16,8 @@ RUN apt-get update && \
             libssl-dev \
             libyaml-dev \
             make \
+            tzdata \
             zlib1g-dev \
-            unzip \
             && \
     rm -rf /var/lib/apt/lists/*
 
