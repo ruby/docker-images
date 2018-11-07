@@ -41,13 +41,8 @@ case $RUBY_VERSION in
 esac
 
 if test -n "$RUBY_TRUNK_COMMIT"; then
-  if test -d /usr/src/ruby; then
-    cd /usr/src/ruby
-    git pull --rebase origin
-  else
-    git clone https://github.com/ruby/ruby.git /usr/src/ruby
-    cd /usr/src/ruby
-  fi
+  git clone https://github.com/ruby/ruby.git /usr/src/ruby
+  cd /usr/src/ruby
   git checkout $RUBY_TRUNK_COMMIT
 else
   wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR}/ruby-${RUBY_VERSION}.tar.xz"
