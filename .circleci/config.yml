@@ -22,14 +22,11 @@ commands:
       ruby_version:
         type: string
         default: "trunk"
-      ruby_srcdir:
-        type: string
-        default: "tmp/ruby"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version<< parameters.ruby_version >> srcdir=<< parameters.ruby_srcdir >>
+            rake docker:build ruby_version=<< parameters.ruby_version >>
   push_image:
     description: "Push Docker image"
     steps:
