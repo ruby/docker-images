@@ -52,7 +52,6 @@ jobs:
             git clone https://github.com/ruby/ruby.git tmp/ruby
       - build_image:
           ruby_version: "trunk"
-          ruby_srcdir: "tmp/ruby"
       - push_image
 
   build_2_6:
