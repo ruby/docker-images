@@ -24,8 +24,13 @@ commands:
             - ruby-trunk
       - run:
           command: |
-            mkdir -p tmp
-            git clone https://github.com/ruby/ruby.git tmp/ruby
+            if test -f tmp/ruby/configure.ac; then
+              cd tmp/ruby
+              git pull --rebase
+            else
+              mkdir -p tmp
+              git clone https://github.com/ruby/ruby.git tmp/ruby
+            fi
       - save_cache:
           key: ruby-trunk
           paths:
