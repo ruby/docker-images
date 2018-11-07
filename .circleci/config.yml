@@ -19,10 +19,17 @@ commands:
   checkout_ruby_trunk:
     description: "Checkout Ruby trunk"
     steps:
+      - restore_cache:
+          keys:
+            - ruby-trunk
       - run:
           command: |
             mkdir -p tmp
             git clone https://github.com/ruby/ruby.git tmp/ruby
+      - save_cache:
+          key: ruby-trunk
+          paths:
+            - tmp/ruby
   build_image:
     description: "Build Docker image"
     parameters:
