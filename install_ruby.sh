@@ -58,7 +58,7 @@ fi
   autoconf
 
   mkdir -p /tmp/ruby-build
-  cd /tmp/ruby-build
+  pushd /tmp/ruby-build
 
   gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
   /usr/src/ruby/configure \
@@ -72,7 +72,7 @@ fi
   make -j "$(nproc)"
   make install
 
-  cd /
+  popd
   rm -rf /tmp/ruby-build
 )
 
