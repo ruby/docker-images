@@ -18,8 +18,6 @@ RUN apt-get update && \
             make \
             tzdata \
             zlib1g-dev \
-            && \
-    rm -rf /var/lib/apt/lists/*
 
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc && \
@@ -50,4 +48,6 @@ RUN set -ex && \
     /tmp/install_ruby.sh && \
     rm /tmp/install_ruby.sh && \
     \
-    apt-get purge -y --auto-remove $buildDeps
+    apt-get purge -y --auto-remove $buildDeps &&
+    \
+    rm -rf /var/lib/apt/lists/*
