@@ -37,7 +37,7 @@ commands:
             docker push rubydata/ruby
 
 jobs:
-  build:
+  build_trunk:
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -102,7 +102,7 @@ workflows:
 
   github:
     jobs:
-      - build
+      - build_trunk
 
   nightly:
     triggers:
@@ -113,4 +113,4 @@ workflows:
               only:
                 - master
     jobs:
-      - build
+      - build_trunk
