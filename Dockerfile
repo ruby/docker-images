@@ -8,6 +8,7 @@ ENV RUBY_VERSION=$RUBY_VERSION
 ENV RUBYGEMS_VERSION=2.7.8
 ENV BUNDLER_VERSION=1.17.1
 
+ADD tmp/ruby /usr/src
 ADD install_ruby.sh /tmp
 RUN set -ex && \
     \

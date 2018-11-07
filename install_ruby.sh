@@ -41,7 +41,7 @@ case $RUBY_VERSION in
 esac
 
 if test -n "$RUBY_TRUNK_COMMIT"; then
-  if test -d /usr/src/ruby; then
+  if test -f /usr/src/ruby/configure.ac; then
     cd /usr/src/ruby
     git pull --rebase origin
   else
