@@ -66,7 +66,7 @@ fi
     --disable-install-doc \
     --enable-shared \
     optflags="-O3 -mtune=native -march=native" \
-    debugflags="-g3"
+    debugflags="-g"
 
   make -j "$(nproc)"
   make install
@@ -74,6 +74,8 @@ fi
   popd
   rm -rf /tmp/ruby-build
 )
+
+rm -r /usr/src/ruby
 
 if test $RUBY_VERSION != "trunk"; then
   gem update --system "$RUBYGEMS_VERSION"
