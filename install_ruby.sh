@@ -56,8 +56,12 @@ fi
 (
   cd /usr/src/ruby
   autoconf
+
+  mkdir -p /tmp/ruby-build
+  cd /tmp/ruby-build
+
   gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
-  ./configure \
+  /usr/src/ruby/configure \
     --build="$gnuArch" \
     --prefix=/usr/local \
     --disable-install-doc \
@@ -67,6 +71,9 @@ fi
 
   make -j "$(nproc)"
   make install
+
+  cd /
+  rm -rf /tmp/ruby-build
 )
 
 if test $RUBY_VERSION != "trunk"; then
