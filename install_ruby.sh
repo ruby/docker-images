@@ -80,12 +80,10 @@ fi
   rm -rf /tmp/ruby-build
 )
 
-rm -r /usr/src/ruby
-
 if test $RUBY_VERSION != "trunk"; then
   gem update --system "$RUBYGEMS_VERSION"
 fi
 
 gem install bundler --version "$BUNDLER_VERSION" --force
 
-rm -r /root/.gem/
+rm -r /usr/src/ruby /root/.gem/
