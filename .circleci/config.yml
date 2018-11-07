@@ -22,11 +22,14 @@ commands:
       ruby_version:
         type: string
         default: "trunk"
+      ruby_srcdir:
+        type: string
+        default: "tmp/ruby"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=trunk
+            rake docker:build ruby_version<< parameters.ruby_version >> srcdir=<< parameters.ruby_srcdir >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -45,8 +48,14 @@ jobs:
       - checkout
       - setup_remote_docker
       - install_docker_client
+      - run:
+          name: Clone ruby-trunk
+          command: |
+            mkdir -p tmp
+            git clone https://github.com/ruby/ruby.git tmp/ruby
       - build_image:
           ruby_version: "trunk"
+          ruby_srcdir: "tmp/ruby"
       - push_image
 
   build_2_6:
