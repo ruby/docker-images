@@ -39,7 +39,6 @@ case $RUBY_VERSION in
     apt-get install -y --no-install-recommends libssl1.0-dev
     ;;
 esac
-rm -rf /var/lib/apt/lists/*
 
 if test -n "$RUBY_TRUNK_COMMIT"; then
   git clone https://github.com/ruby/ruby.git /usr/src/ruby
