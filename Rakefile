@@ -40,6 +40,11 @@ namespace :docker do
       image_name = tag_args[3]
       svn_revision = `docker run --rm #{tag_args[3]} ruby -e 'puts RUBY_DESCRIPTION[/trunk (\\d+)/, 1]'`.chomp
       sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-r#{svn_revision}")
+      if ENV['nightly']
+        today = Time.now.getlocal("+09:00").strftime('%Y%m%d')
+        sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-nightly-#{today}")
+        sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-nightly")
+      end
     end
   end
 end
