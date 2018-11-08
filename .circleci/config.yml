@@ -65,6 +65,9 @@ jobs:
       - setup_remote_docker
       - install_docker_client
       - checkout_ruby_trunk
+      - run:
+          command: |
+            docker pull rubydata/ruby:trunk-bionic || :
       - build_image:
           ruby_version: "trunk"
       - push_image
