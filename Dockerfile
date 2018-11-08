@@ -3,22 +3,9 @@ FROM ubuntu:bionic
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG RUBY_VERSION=2.5.3
-ENV RUBY_VERSION=$RUBY_VERSION
-ENV RUBYGEMS_VERSION=2.7.8
-ENV BUNDLER_VERSION=1.17.1
+ADD ruby_build_deps.txt /tmp/
 
-ADD tmp/ruby /usr/src/ruby
-ADD install_ruby.sh /tmp
 RUN set -ex && \
-    \
-    buildDeps='autoconf \
-               bison \
-               dpkg-dev \
-               git-core \
-               ruby \
-               wget \
-               xz-utils'; \
     \
     apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -34,8 +21,17 @@ RUN set -ex && \
             make \
             tzdata \
             zlib1g-dev \
-            $buildDeps && \
-    \
+            $(cat /tmp/ruby_build_deps.txt)
+
+ADD tmp/ruby /usr/src/ruby
+ADD install_ruby.sh /tmp/
+
+ARG RUBY_VERSION=2.5.3
+ENV RUBY_VERSION=$RUBY_VERSION
+ENV RUBYGEMS_VERSION=2.7.8
+ENV BUNDLER_VERSION=1.17.1
+
+RUN set -ex && \
 # skip installing gem documentation
     mkdir -p /usr/local/etc && \
     { \
@@ -50,7 +46,8 @@ RUN set -ex && \
       | grep -P '^libreadline\d+$' \
       | xargs apt-mark manual && \
     \
-    apt-get purge -y --auto-remove $buildDeps && \
+    apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
+    rm /tmp/ruby_build_deps.txt && \
     \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -r /var/lib/apt/lists/*

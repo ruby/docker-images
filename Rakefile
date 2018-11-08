@@ -33,6 +33,7 @@ namespace :docker do
     ruby_version, tag_args = make_tag_args(ruby_version)
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
+      IO.write('tmp/ruby/.keep', '')
     end
     sh 'docker', 'build', *tag_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
     if ruby_version.start_with? 'trunk'

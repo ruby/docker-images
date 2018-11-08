@@ -45,6 +45,7 @@ if test -n "$RUBY_TRUNK_COMMIT"; then
     cd /usr/src/ruby
     git pull --rebase origin
   else
+    rm -r /usr/src/ruby
     git clone https://github.com/ruby/ruby.git /usr/src/ruby
     cd /usr/src/ruby
   fi
