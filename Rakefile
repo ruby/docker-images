@@ -1,6 +1,6 @@
 namespace :docker do
   def docker_hub_org
-    "rubydata"
+    "rubylang"
   end
 
   def docker_image_name
