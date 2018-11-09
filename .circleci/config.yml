@@ -56,7 +56,7 @@ commands:
           name: Push docker image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push rubydata/ruby
+            docker push rubylang/ruby
 
 jobs:
   build_trunk:
@@ -72,9 +72,6 @@ jobs:
       - setup_remote_docker
       - install_docker_client
       - checkout_ruby_trunk
-      - run:
-          command: |
-            docker pull rubydata/ruby:trunk-bionic || :
       - build_image:
           ruby_version: "trunk"
           nightly: << parameters.nightly >>
