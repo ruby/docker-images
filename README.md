@@ -8,3 +8,11 @@ https://hub.docker.com/r/rubylang/ruby/
 ```
 rake docker:build ruby_version=<Ruby version you want to build>
 ```
+
+## Author
+
+Kenta Murata
+
+## License
+
+MIT
