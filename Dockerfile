@@ -19,6 +19,9 @@ RUN set -ex && \
             libssl-dev \
             libyaml-dev \
             make \
+            autoconf \
+            bison \
+            git \
             tzdata \
             zlib1g-dev \
             $(cat /tmp/ruby_build_deps.txt)
