@@ -19,9 +19,15 @@ RUN set -ex && \
             libssl-dev \
             libyaml-dev \
             make \
+            autoconf \
+            bison \
+            git \
             tzdata \
             zlib1g-dev \
             $(cat /tmp/ruby_build_deps.txt)
+
+RUN set -ex && \
+    useradd -ms /bin/bash ubuntu
 
 ADD tmp/ruby /usr/src/ruby
 ADD install_ruby.sh /tmp/
