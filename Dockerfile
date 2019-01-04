@@ -32,10 +32,10 @@ RUN set -ex && \
 ADD tmp/ruby /usr/src/ruby
 ADD install_ruby.sh /tmp/
 
-ARG RUBY_VERSION=2.5.3
+ARG RUBY_VERSION=2.6.0
 ENV RUBY_VERSION=$RUBY_VERSION
-ENV RUBYGEMS_VERSION=2.7.8
-ENV BUNDLER_VERSION=1.17.1
+ENV RUBYGEMS_VERSION=3.0.1
+ENV BUNDLER_VERSION=1.17.2
 
 RUN set -ex && \
 # skip installing gem documentation
