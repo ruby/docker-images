@@ -29,7 +29,7 @@ namespace :docker do
   end
 
   task :build do
-    ruby_version = ENV['ruby_version'] || '2.5.3'
+    ruby_version = ENV['ruby_version'] || '2.6.1'
     ruby_version, tag_args = make_tag_args(ruby_version)
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
