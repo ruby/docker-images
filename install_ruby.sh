@@ -4,8 +4,8 @@ set -ex
 
 RUBY_VERSION=${RUBY_VERSION-2.6.0}
 RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
-RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.1}
-BUNDLER_VERSION=${BUNDLER_VERSION-1.17.2}
+RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.3}
+BUNDLER_VERSION=${BUNDLER_VERSION-1.17.3}
 
 wget -O index.txt "https://cache.ruby-lang.org/pub/ruby/index.txt"
 
