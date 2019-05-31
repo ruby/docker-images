@@ -14,8 +14,8 @@ case $RUBY_VERSION in
     RUBY_TRUNK_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
     RUBY_VERSION=trunk
     ;;
-  2.6.1)
-    RUBY_DOWNLOAD_SHA256=47b629808e9fd44ce1f760cdf3ed14875fc9b19d4f334e82e2cf25cb2898f2f2
+  2.7.0-preview1)
+    RUBY_DOWNLOAD_SHA256=8c546df3345398b3edc9d0ab097846f033783d33762889fd0f3dc8bb465c3354
     ;;
   *)
     entry=$(grep ruby-$RUBY_VERSION.tar.xz index.txt)
@@ -79,17 +79,20 @@ fi
   rm -rf /tmp/ruby-build
 )
 
-if test $RUBY_VERSION != "trunk"; then
-  gem update --system "$RUBYGEMS_VERSION"
-fi
-
 case $RUBY_VERSION in
+  trunk)
+    # DO NOTHING
+    ;;
+  2.7.*)
+    # DO NOTHING
+    ;;
   2.6.*)
     # DO NOTHING
     ;;
   *)
+    gem update --system "$RUBYGEMS_VERSION"
     gem install bundler --version "$BUNDLER_VERSION" --force
     ;;
 esac
 
-rm -r /usr/src/ruby /root/.gem/
+rm -fr /usr/src/ruby /root/.gem/
