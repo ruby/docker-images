@@ -69,7 +69,7 @@ fi
     --prefix=/usr/local \
     --disable-install-doc \
     --enable-shared \
-    optflags="-O3 -mtune=native -march=native" \
+    optflags="-O3" \
     debugflags="-g"
 
   make -j "$(nproc)"
