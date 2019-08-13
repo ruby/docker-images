@@ -35,7 +35,6 @@ ADD install_ruby.sh /tmp/
 ARG RUBY_VERSION=2.6.3
 ENV RUBY_VERSION=$RUBY_VERSION
 ENV RUBYGEMS_VERSION=3.0.3
-ENV BUNDLER_VERSION=1.17.3
 
 RUN set -ex && \
 # skip installing gem documentation
