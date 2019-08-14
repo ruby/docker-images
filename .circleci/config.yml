@@ -64,6 +64,9 @@ jobs:
       nightly:
         type: boolean
         default: false
+      push:
+        type: boolean
+        default: false
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -75,9 +78,16 @@ jobs:
       - build_image:
           ruby_version: "trunk"
           nightly: << parameters.nightly >>
-      - push_image
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
 
   build_2_6:
+    parameters:
+      push:
+        type: boolean
+        default: false
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -87,9 +97,16 @@ jobs:
       - install_docker_client
       - build_image:
           ruby_version: "2.6.0-preview3"
-      - push_image
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
 
   build_2_5:
+    parameters:
+      push:
+        type: boolean
+        default: false
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -99,9 +116,16 @@ jobs:
       - install_docker_client
       - build_image:
           ruby_version: "2.5.3"
-      - push_image
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
 
   build_2_4:
+    parameters:
+      push:
+        type: boolean
+        default: false
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -111,9 +135,16 @@ jobs:
       - install_docker_client
       - build_image:
           ruby_version: "2.4.5"
-      - push_image
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
 
   build_2_3:
+    parameters:
+      push:
+        type: boolean
+        default: false
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -123,14 +154,31 @@ jobs:
       - install_docker_client
       - build_image:
           ruby_version: "2.3.8"
-      - push_image
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
 
 workflows:
   version: 2
 
   github:
     jobs:
-      - build_trunk
+      - build_trunk:
+          push: true
+          filters:
+            branches:
+              only:
+                - master
+      - build_trunk:
+          filters:
+            branches:
+              ignore:
+                - master
+      - build_2_6
+      - build_2_5
+      - build_2_4
+      - build_2_3
 
   nightly:
     triggers:
