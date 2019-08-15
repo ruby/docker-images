@@ -5,7 +5,6 @@ set -ex
 RUBY_VERSION=${RUBY_VERSION-2.6.0}
 RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.3}
-BUNDLER_VERSION=${BUNDLER_VERSION-1.17.3}
 
 wget -O index.txt "https://cache.ruby-lang.org/pub/ruby/index.txt"
 
@@ -91,8 +90,10 @@ case $RUBY_VERSION in
     ;;
   *)
     gem update --system "$RUBYGEMS_VERSION"
-    gem install bundler --version "$BUNDLER_VERSION" --force
     ;;
 esac
 
 rm -fr /usr/src/ruby /root/.gem/
+
+# rough smoke test
+(cd && ruby --version && gem --version && bundle --version)
