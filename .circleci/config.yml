@@ -191,3 +191,4 @@ workflows:
     jobs:
       - build_trunk:
           nightly: true
+          push: true
