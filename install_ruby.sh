@@ -9,9 +9,9 @@ RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.3}
 wget -O index.txt "https://cache.ruby-lang.org/pub/ruby/index.txt"
 
 case $RUBY_VERSION in
-  trunk:*)
-    RUBY_TRUNK_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
-    RUBY_VERSION=trunk
+  master:*)
+    RUBY_MASTER_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
+    RUBY_VERSION=master
     ;;
   2.7.0-preview1)
     RUBY_DOWNLOAD_SHA256=8c546df3345398b3edc9d0ab097846f033783d33762889fd0f3dc8bb465c3354
@@ -34,7 +34,7 @@ case $RUBY_VERSION in
     ;;
 esac
 
-if test -n "$RUBY_TRUNK_COMMIT"; then
+if test -n "$RUBY_MASTER_COMMIT"; then
   if test -f /usr/src/ruby/configure.ac; then
     cd /usr/src/ruby
     git pull --rebase origin
@@ -43,7 +43,7 @@ if test -n "$RUBY_TRUNK_COMMIT"; then
     git clone https://github.com/ruby/ruby.git /usr/src/ruby
     cd /usr/src/ruby
   fi
-  git checkout $RUBY_TRUNK_COMMIT
+  git checkout $RUBY_MASTER_COMMIT
 else
   if test -z "$RUBY_DOWNLOAD_URI"; then
     RUBY_DOWNLOAD_URI="https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR}/ruby-${RUBY_VERSION}.tar.xz"
@@ -79,7 +79,7 @@ fi
 )
 
 case $RUBY_VERSION in
-  trunk)
+  master)
     # DO NOTHING
     ;;
   2.7.*)
