@@ -11,16 +11,16 @@ namespace :docker do
     "bionic"
   end
 
-  def get_ruby_trunk_head_hash
-    `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/trunk`.chomp
+  def get_ruby_master_head_hash
+    `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
   end
 
   def make_tag_args(ruby_version)
     ruby_ver2 = ruby_version.split('.')[0,2].join('.')
-    if /\Atrunk(?::([\da-f]+))?\z/ =~ ruby_version
-      commit_hash = Regexp.last_match[1] || get_ruby_trunk_head_hash
-      ruby_version = "trunk:#{commit_hash}"
-      tags = ["trunk", "trunk-#{commit_hash}"]
+    if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
+      commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
+      ruby_version = "master:#{commit_hash}"
+      tags = ["master", "master-#{commit_hash}"]
     else
       tags = ["#{ruby_ver2}", "#{ruby_version}"]
     end
@@ -36,12 +36,12 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
     sh 'docker', 'build', *tag_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
-    if ruby_version.start_with? 'trunk'
+    if ruby_version.start_with? 'master'
       image_name = tag_args[3]
       if ENV['nightly']
         today = Time.now.getlocal("+09:00").strftime('%Y%m%d')
-        sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-nightly-#{today}")
-        sh 'docker', 'tag', image_name, image_name.sub(/trunk-([\da-f]+)/, "trunk-nightly")
+        sh 'docker', 'tag', image_name, image_name.sub(/master-([\da-f]+)/, "master-nightly-#{today}")
+        sh 'docker', 'tag', image_name, image_name.sub(/master-([\da-f]+)/, "master-nightly")
       end
     end
   end
