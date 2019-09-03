@@ -26,7 +26,7 @@ jobs:
       run: |
         curl -O http://cache.ruby-lang.org/pub/ruby/index.txt
         ls
-        cat index.txt
 
     - name: Check index.txt
       run: |
+        ruby check_index.rb index.txt
