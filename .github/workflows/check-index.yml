@@ -2,8 +2,11 @@ name: Check index.txt
 
 on:
   # See https://github.com/ruby/actions/blob/master/.github/workflows/update_index.yml#L5
-  schedule:
-  - cron: '11 2-23/3 * * *'
+  # schedule:
+  #- cron: '11 2-23/3 * * *'
+  push:
+    branches:
+    - check-index-test
 
 jobs:
   build:
