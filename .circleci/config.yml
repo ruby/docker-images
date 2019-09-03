@@ -177,9 +177,25 @@ workflows:
                 - master
                 - check-index-test
       - build_2_6
+          filters:
+            branches:
+              ignore:
+                - check-index-test
       - build_2_5
+          filters:
+            branches:
+              ignore:
+                - check-index-test
       - build_2_4
+          filters:
+            branches:
+              ignore:
+                - check-index-test
       - build_2_3
+          filters:
+            branches:
+              ignore:
+                - check-index-test
 
   nightly:
     triggers:
