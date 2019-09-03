@@ -17,6 +17,7 @@ jobs:
     - name: Download index.txt
       run: |
         curl -O http://cache.ruby-lang.org/pub/ruby/index.txt
+        ls
         cat index.txt
 
     - name: Check index.txt
