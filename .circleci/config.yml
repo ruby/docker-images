@@ -175,6 +175,7 @@ workflows:
             branches:
               ignore:
                 - master
+                - check-index-test
       - build_2_6
       - build_2_5
       - build_2_4
