@@ -176,22 +176,22 @@ workflows:
               ignore:
                 - master
                 - check-index-test
-      - build_2_6
+      - build_2_6:
           filters:
             branches:
               ignore:
                 - check-index-test
-      - build_2_5
+      - build_2_5:
           filters:
             branches:
               ignore:
                 - check-index-test
-      - build_2_4
+      - build_2_4:
           filters:
             branches:
               ignore:
                 - check-index-test
-      - build_2_3
+      - build_2_3:
           filters:
             branches:
               ignore:
