@@ -14,8 +14,11 @@ ARGF.each_line do |line|
   $stderr.puts base_version
   next unless base_version >= MINIMUM_BASE_VERSION
 
-  full_version = "#{version}-#{preview}" if preview
-  versions[base_version] = full_version
+  versions[base_version] = if preview
+                             version
+                           else
+                             "#{version}-#{preview}"
+                           end
 end
 
 puts versions.values
