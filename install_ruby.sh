@@ -48,7 +48,7 @@ if test -n "$RUBY_MASTER_COMMIT"; then
     git pull --rebase origin
   else
     rm -r /usr/src/ruby
-    git clone https://github.com/ruby/ruby.git /usr/src/ruby
+    git clone --depth 1 https://github.com/ruby/ruby.git /usr/src/ruby
     cd /usr/src/ruby
   fi
   git checkout $RUBY_MASTER_COMMIT
