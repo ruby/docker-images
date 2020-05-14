@@ -76,8 +76,10 @@ fi
     --prefix=/usr/local \
     --disable-install-doc \
     --enable-shared \
-    optflags="-O3" \
-    debugflags="-g"
+    ${cppflags:+cppflags="${cppflags}"} \
+    ${optflags:+optflags="${debugflags}"} \
+    optflags="${optflags:--O3}" \
+    ${debugflags:+debugflags="${debugflags}"}
 
   make -j "$(nproc)"
   make install
