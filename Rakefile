@@ -36,7 +36,7 @@ namespace :docker do
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')
     end
-    env_args = %w(cppflags optflags).map {|name| ["-e", "#{name}=#{ENV[name]}"] }.flatten
+    env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
     sh 'docker', 'build', *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
     if ruby_version.start_with? 'master'
       image_name = tag_args[3]
