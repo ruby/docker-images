@@ -206,6 +206,17 @@ workflows:
             branches:
               ignore:
                 - master
+      - build_master_debug:
+          push: true
+          filters:
+            branches:
+              only:
+                - master
+      - build_master_debug:
+          filters:
+            branches:
+              ignore:
+                - master
       - build_2_6
       - build_2_5
       - build_2_4
