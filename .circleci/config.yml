@@ -44,11 +44,14 @@ commands:
       nightly:
         type: boolean
         default: false
+      image_name_suffix:
+        type: string
+        default: ''
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -78,6 +81,34 @@ jobs:
       - build_image:
           ruby_version: "master"
           nightly: << parameters.nightly >>
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
+
+  build_master_debug:
+    parameters:
+      nightly:
+        type: boolean
+        default: false
+      push:
+        type: boolean
+        default: false
+    docker:
+      - image: ruby:latest
+    working_directory: ~/repo
+    environment:
+      cppflags: -DRUBY_DEBUG=1
+      optflags: -O3 -fno-inline
+    steps:
+      - checkout
+      - setup_remote_docker
+      - install_docker_client
+      - checkout_ruby_master
+      - build_image:
+          ruby_version: "master"
+          nightly: << parameters.nightly >>
+          image_name_suffix: -debug
       - when:
           condition: <<parameters.push>>
           steps:
@@ -175,6 +206,17 @@ workflows:
             branches:
               ignore:
                 - master
+      - build_master_debug:
+          push: true
+          filters:
+            branches:
+              only:
+                - master
+      - build_master_debug:
+          filters:
+            branches:
+              ignore:
+                - master
       - build_2_6
       - build_2_5
       - build_2_4
@@ -190,5 +232,8 @@ workflows:
                 - master
     jobs:
       - build_master:
+          nightly: true
+          push: true
+      - build_master_debug:
           nightly: true
           push: true

@@ -36,6 +36,10 @@ ARG RUBY_VERSION=2.6.3
 ENV RUBY_VERSION=$RUBY_VERSION
 ENV RUBYGEMS_VERSION=3.0.3
 
+ARG optflags
+ARG debugflags
+ARG cppflags
+
 RUN set -ex && \
 # skip installing gem documentation
     mkdir -p /usr/local/etc && \
