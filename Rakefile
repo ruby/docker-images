@@ -15,7 +15,7 @@ namespace :docker do
     `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
   end
 
-  def make_tag_args(ruby_version, suffix)
+  def make_tag_args(ruby_version, suffix, arch=nil)
     ruby_ver2 = ruby_version.split('.')[0,2].join('.')
     if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
       commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
@@ -24,20 +24,34 @@ namespace :docker do
     else
       tags = ["#{ruby_ver2}#{suffix}", "#{ruby_version}#{suffix}"]
     end
-    tag_args = tags.map {|t| ["-t", "#{docker_image_name}:#{t}-#{ubuntu_version}"] }.flatten
+    arch = "-#{arch}" if arch
+    tag_args = tags.map {|t| ["-t", "#{docker_image_name}:#{t}-#{ubuntu_version}#{arch}"] }.flatten
     return ruby_version, tag_args
   end
 
   task :build do
     ruby_version = ENV['ruby_version'] || '2.6.1'
     suffix = ENV["image_name_suffix"]
-    ruby_version, tag_args = make_tag_args(ruby_version, suffix)
+    arch = ENV["arch"]
+    # NOTE: the architecture name is based on Debian ports
+    # https://www.debian.org/ports/index.en.html
+    case arch
+    when 'arm64'
+      dockerfile = 'Dockerfile-arm64'
+    when 'amd64', nil
+      arch = nil
+      dockerfile = 'Dockerfile'
+    else
+      abort "unknown architecture name: '#{arch}'"
+    end
+    ruby_version, tag_args = make_tag_args(ruby_version, suffix, arch)
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
-    sh 'docker', 'build', *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
+    sh 'docker', 'run', '--rm', '--privileged', 'multiarch/qemu-user-static:register', '--reset' if arch
+    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
     if ruby_version.start_with? 'master'
       image_name = tag_args[3]
       if ENV['nightly']
