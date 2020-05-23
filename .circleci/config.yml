@@ -47,11 +47,14 @@ commands:
       image_name_suffix:
         type: string
         default: ''
+      arch:
+        type: string
+        default: "amd64"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -70,6 +73,9 @@ jobs:
       push:
         type: boolean
         default: false
+      arch:
+        type: string
+        default: "amd64"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -81,6 +87,7 @@ jobs:
       - build_image:
           ruby_version: "master"
           nightly: << parameters.nightly >>
+          arch: << parameters.arch >>
       - when:
           condition: <<parameters.push>>
           steps:
@@ -114,6 +121,25 @@ jobs:
           steps:
             - push_image
 
+  build_2_7:
+    parameters:
+      push:
+        type: boolean
+        default: false
+    docker:
+      - image: ruby:latest
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - install_docker_client
+      - build_image:
+          ruby_version: "2.7.1"
+      - when:
+          condition: <<parameters.push>>
+          steps:
+            - push_image
+
   build_2_6:
     parameters:
       push:
@@ -127,7 +153,7 @@ jobs:
       - setup_remote_docker
       - install_docker_client
       - build_image:
-          ruby_version: "2.6.0-preview3"
+          ruby_version: "2.6.6"
       - when:
           condition: <<parameters.push>>
           steps:
@@ -146,7 +172,7 @@ jobs:
       - setup_remote_docker
       - install_docker_client
       - build_image:
-          ruby_version: "2.5.3"
+          ruby_version: "2.5.8"
       - when:
           condition: <<parameters.push>>
           steps:
@@ -165,7 +191,7 @@ jobs:
       - setup_remote_docker
       - install_docker_client
       - build_image:
-          ruby_version: "2.4.5"
+          ruby_version: "2.4.10"
       - when:
           condition: <<parameters.push>>
           steps:
@@ -196,27 +222,39 @@ workflows:
   github:
     jobs:
       - build_master:
+          name: build_master_amd64_push
           push: true
           filters:
             branches:
               only:
                 - master
       - build_master:
+          name: build_master_amd64
+          filters:
+            branches:
+              ignore:
+                - master
+      - build_master:
+          name: build_master_arm64
+          arch: 'arm64'
           filters:
             branches:
               ignore:
                 - master
       - build_master_debug:
+          name: build_master_debug_amd64_push
           push: true
           filters:
             branches:
               only:
                 - master
       - build_master_debug:
+          name: build_master_debug_amd64
           filters:
             branches:
               ignore:
                 - master
+      - build_2_7
       - build_2_6
       - build_2_5
       - build_2_4
