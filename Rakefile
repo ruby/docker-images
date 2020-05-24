@@ -51,7 +51,7 @@ namespace :docker do
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
     sh 'docker', 'run', '--rm', '--privileged', 'multiarch/qemu-user-static:register', '--reset' if arch
-    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
+    sh 'docker', 'build', '-f', dockerfile, '--security-opt', 'seccomp=unconfined', *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
     if ruby_version.start_with? 'master'
       image_name = tag_args[3]
       if ENV['nightly']
