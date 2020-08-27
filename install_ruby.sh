@@ -48,7 +48,7 @@ if test -n "$RUBY_MASTER_COMMIT"; then
     git pull --rebase origin
   else
     rm -r /usr/src/ruby
-    git clone --depth 1 https://github.com/ruby/ruby.git /usr/src/ruby
+    git clone --shallow-since=$RUBY_MASTER_COMMIT https://github.com/ruby/ruby.git /usr/src/ruby
     cd /usr/src/ruby
   fi
   git checkout $RUBY_MASTER_COMMIT
@@ -80,6 +80,7 @@ fi
     ${optflags:+optflags="${debugflags}"} \
     optflags="${optflags:--O3}" \
     ${debugflags:+debugflags="${debugflags}"}
+  cp config.log /config.log
 
   make -j "$(nproc)"
   make install
