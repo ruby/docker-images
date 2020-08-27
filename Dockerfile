@@ -11,6 +11,7 @@ RUN set -ex && \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             gcc \
+            g++ \
             libffi-dev \
             libgdbm-dev \
             libgmp-dev \
