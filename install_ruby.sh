@@ -80,7 +80,6 @@ fi
     ${optflags:+optflags="${debugflags}"} \
     optflags="${optflags:--O3}" \
     ${debugflags:+debugflags="${debugflags}"}
-  cp config.log /config.log
 
   make -j "$(nproc)"
   make install
