@@ -1,0 +1,29 @@
+name: Build Docker image
+
+on:
+  workflow_dispatch:
+    inputs:
+      RUBY_VERSION:
+        description: The version of Ruby to be build
+        required: true
+        default: master
+      ARCH:
+        description: Which architecture amd64 or arm64 do you want to build? (The default is amd64)
+        required: false
+        default: amd64
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }}
+
+      - name: Check image
+        run: |
+          docker images
+          docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-bionic ruby -v
