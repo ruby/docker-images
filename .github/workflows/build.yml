@@ -39,7 +39,7 @@ jobs:
 
       - name: Renaming images
         run: |
-          docker images rubylang/ruby | grep ^rubylang/ruby | ruby -e <<EOS
+          docker images rubylang/ruby | grep ^rubylang/ruby | ruby <<EOS
             while x = gets
               name, tag, = x.strip.split(",")
               name = name.split("/")[1]
