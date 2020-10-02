@@ -41,8 +41,10 @@ jobs:
         run: |
           docker images rubylang/ruby | grep ^rubylang/ruby | ruby rename_images.rb
 
-      - name: Login GitHub Package Registory
-        run: docker login ghcr.io -u owner -p ${{ secrets.GITHUB_TOKEN }}
+      - name: Login GitHub Container Registry
+        run: |
+          GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
+          echo $GHCR_TOKEN | docker login ghcr.io -u owner --password-stdin
 
-      - name: Push image to GitHub Package Registory
+      - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository }}/ruby
