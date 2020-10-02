@@ -34,5 +34,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push images
+      - name: Push images to DockerHub
         run: docker push rubylang/ruby
+
+      - name: Renaming images
+        run: |
+          docker images rubylang/ruby | grep ^rubylang/ruby | ruby -e <<EOS
+            while x = gets
+              name, tag, = x.strip.split(",")
+              name = name.split("/")[1]
+              system "docker", "tag", "rubylang/#{tag}", "ruby-docker-images/#{tag}"
+            end
+          EOS
+
+      - name: Login GitHub Package Registory
+        run: docker login docker.pkg.github.com -u owner -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to GitHub Package Registory
+        run: docker push docker.pkg.github.com/${{ github.repository }}/ruby
