@@ -27,3 +27,9 @@ jobs:
         run: |
           docker images
           docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-bionic ruby -v
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
