@@ -43,7 +43,7 @@ jobs:
             while x = gets
               name, tag, = x.strip.split(",")
               name = name.split("/")[1]
-              system "docker", "tag", "rubylang/#{tag}", "ruby-docker-images/#{tag}"
+              system "docker", "tag", "rubylang/#{tag}", "ruby/ruby-docker-images/#{tag}"
             end
           EOS
 
