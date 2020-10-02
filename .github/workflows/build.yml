@@ -39,13 +39,7 @@ jobs:
 
       - name: Renaming images
         run: |
-          docker images rubylang/ruby | grep ^rubylang/ruby | ruby <<EOS
-            while x = gets
-              name, tag, = x.strip.split(",")
-              name = name.split("/")[1]
-              system "docker", "tag", "rubylang/#{tag}", "ruby/ruby-docker-images/#{tag}"
-            end
-          EOS
+          docker images rubylang/ruby | grep ^rubylang/ruby | ruby rename_images.rb
 
       - name: Login GitHub Package Registory
         run: docker login docker.pkg.github.com -u owner -p ${{ secrets.GITHUB_TOKEN }}
