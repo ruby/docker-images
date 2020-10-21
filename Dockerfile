@@ -5,6 +5,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ADD ruby_build_deps.txt /tmp/
 
+RUN apt-add-repository ppa:git-core/ppa
+
 RUN set -ex && \
     \
     apt-get update && \
