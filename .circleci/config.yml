@@ -144,11 +144,11 @@ workflows:
               only:
                 - master
     jobs:
-      - build_master_focal:
+      - build_master:
           nightly: true
           push: true
           ubuntu_version: "focal"
-      - build_master_bionic:
+      - build_master:
           nightly: true
           push: true
           ubuntu_version: "bionic"
