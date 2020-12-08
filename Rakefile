@@ -7,8 +7,16 @@ namespace :docker do
     "#{docker_hub_org}/ruby"
   end
 
-  def ubuntu_version
-    "bionic"
+  def default_ubuntu_version(ruby_version)
+    if ruby_version < "3.0"
+      "bionic"
+    else
+      "focal"
+    end
+  end
+
+  def ubuntu_version(ruby_version)
+    ENV.fetch("ubuntu_version", default_ubuntu_version(ruby_version))
   end
 
   def get_ruby_master_head_hash
@@ -25,7 +33,7 @@ namespace :docker do
       tags = ["#{ruby_ver2}#{suffix}", "#{ruby_version}#{suffix}"]
     end
     arch = "-#{arch}" if arch
-    tag_args = tags.map {|t| ["-t", "#{docker_image_name}:#{t}-#{ubuntu_version}#{arch}"] }.flatten
+    tag_args = tags.map {|t| ["-t", "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{arch}"] }.flatten
     return ruby_version, tag_args
   end
 
@@ -51,7 +59,10 @@ namespace :docker do
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
     sh 'docker', 'run', '--rm', '--privileged', 'multiarch/qemu-user-static:register', '--reset' if arch
-    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args, '--build-arg', "RUBY_VERSION=#{ruby_version}", '.'
+    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args,
+       '--build-arg', "RUBY_VERSION=#{ruby_version}",
+       '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
+       '.'
     if ruby_version.start_with? 'master'
       image_name = tag_args[3]
       if ENV['nightly']
