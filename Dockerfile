@@ -1,4 +1,5 @@
-FROM ubuntu:bionic
+ARG BASE_IMAGE_TAG=focal
+FROM ubuntu:$BASE_IMAGE_TAG
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive

@@ -50,11 +50,14 @@ commands:
       arch:
         type: string
         default: "amd64"
+      ubuntu_version:
+        type: string
+        default: "focal"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> ubuntu_version=<< parameters.ubuntu_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -76,6 +79,9 @@ jobs:
       arch:
         type: string
         default: "amd64"
+      ubuntu_version:
+        type: string
+        default: "focal"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -88,6 +94,7 @@ jobs:
           ruby_version: "master"
           nightly: << parameters.nightly >>
           arch: << parameters.arch >>
+          ubuntu_version: << parameters.ubuntu_version >>
       - when:
           condition: <<parameters.push>>
           steps:
@@ -101,6 +108,9 @@ jobs:
       push:
         type: boolean
         default: false
+      ubuntu_version:
+        type: string
+        default: "focal"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -115,102 +125,8 @@ jobs:
       - build_image:
           ruby_version: "master"
           nightly: << parameters.nightly >>
+          ubuntu_version: << parameters.ubuntu_version >>
           image_name_suffix: -debug
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
-
-  build_2_7:
-    parameters:
-      push:
-        type: boolean
-        default: false
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - build_image:
-          ruby_version: "2.7.1"
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
-
-  build_2_6:
-    parameters:
-      push:
-        type: boolean
-        default: false
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - build_image:
-          ruby_version: "2.6.6"
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
-
-  build_2_5:
-    parameters:
-      push:
-        type: boolean
-        default: false
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - build_image:
-          ruby_version: "2.5.8"
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
-
-  build_2_4:
-    parameters:
-      push:
-        type: boolean
-        default: false
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - build_image:
-          ruby_version: "2.4.10"
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
-
-  build_2_3:
-    parameters:
-      push:
-        type: boolean
-        default: false
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - build_image:
-          ruby_version: "2.3.8"
       - when:
           condition: <<parameters.push>>
           steps:
@@ -218,47 +134,6 @@ jobs:
 
 workflows:
   version: 2
-
-  github:
-    jobs:
-      - build_master:
-          name: build_master_amd64_push
-          push: true
-          filters:
-            branches:
-              only:
-                - master
-      - build_master:
-          name: build_master_amd64
-          filters:
-            branches:
-              ignore:
-                - master
-      - build_master:
-          name: build_master_arm64
-          arch: 'arm64'
-          filters:
-            branches:
-              ignore:
-                - master
-      - build_master_debug:
-          name: build_master_debug_amd64_push
-          push: true
-          filters:
-            branches:
-              only:
-                - master
-      - build_master_debug:
-          name: build_master_debug_amd64
-          filters:
-            branches:
-              ignore:
-                - master
-      - build_2_7
-      - build_2_6
-      - build_2_5
-      - build_2_4
-      - build_2_3
 
   nightly:
     triggers:
@@ -272,6 +147,11 @@ workflows:
       - build_master:
           nightly: true
           push: true
+          ubuntu_version: "focal"
+      - build_master:
+          nightly: true
+          push: true
+          ubuntu_version: "bionic"
       - build_master_debug:
           nightly: true
           push: true
