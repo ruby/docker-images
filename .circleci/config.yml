@@ -50,11 +50,14 @@ commands:
       arch:
         type: string
         default: "amd64"
+      ubuntu_version:
+        type: string
+        default: "focal"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> ubuntu_version=<< parameters.ubuntu_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -76,6 +79,9 @@ jobs:
       arch:
         type: string
         default: "amd64"
+      ubuntu_version:
+        type: string
+        default: "focal"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -88,6 +94,7 @@ jobs:
           ruby_version: "master"
           nightly: << parameters.nightly >>
           arch: << parameters.arch >>
+          ubuntu_version: << parameters.ubuntu_version >>
       - when:
           condition: <<parameters.push>>
           steps:
@@ -101,6 +108,9 @@ jobs:
       push:
         type: boolean
         default: false
+      ubuntu_version:
+        type: string
+        default: "focal"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -115,6 +125,7 @@ jobs:
       - build_image:
           ruby_version: "master"
           nightly: << parameters.nightly >>
+          ubuntu_version: << parameters.ubuntu_version >>
           image_name_suffix: -debug
       - when:
           condition: <<parameters.push>>
@@ -269,9 +280,14 @@ workflows:
               only:
                 - master
     jobs:
-      - build_master:
+      - build_master_focal:
           nightly: true
           push: true
+          ubuntu_version: "focal"
+      - build_master_bionic:
+          nightly: true
+          push: true
+          ubuntu_version: "bionic"
       - build_master_debug:
           nightly: true
           push: true
