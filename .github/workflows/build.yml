@@ -51,4 +51,4 @@ jobs:
           echo $GHCR_TOKEN | docker login ghcr.io -u owner --password-stdin
 
       - name: Push image to GitHub Container Registry
-        run: docker push ghcr.io/${{ github.repository }}/ruby
+        run: docker push ghcr.io/${{ github.repository_owner }}/ruby
