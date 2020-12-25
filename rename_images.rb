@@ -6,5 +6,5 @@ end
 while x = gets
   name, tag, = x.strip.split(" ")
   name = name.split("/")[1]
-  execute "docker", "tag", "rubylang/ruby:#{tag}", "ghcr.io/ruby/ruby-docker-images/ruby:#{tag}"
+  execute "docker", "tag", "rubylang/ruby:#{tag}", "ghcr.io/ruby/ruby:#{tag}"
 end
