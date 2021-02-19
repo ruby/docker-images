@@ -10,9 +10,11 @@ RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
       software-properties-common && \
-    apt-add-repository ppa:git-core/ppa
+    apt-add-repository ppa:git-core/ppa && \
+    apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             gcc \
@@ -30,7 +32,8 @@ RUN set -ex && \
             git \
             tzdata \
             zlib1g-dev \
-            $(cat /tmp/ruby_build_deps.txt)
+            $(cat /tmp/ruby_build_deps.txt) && \
+            apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
     useradd -ms /bin/bash ubuntu
@@ -62,7 +65,5 @@ RUN set -ex && \
       | xargs apt-mark manual && \
     \
     apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
-    rm /tmp/ruby_build_deps.txt && \
-    \
-    apt-get clean && \
-    rm -r /var/lib/apt/lists/*
+    rm /tmp/ruby_build_deps.txt
+
