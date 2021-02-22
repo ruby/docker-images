@@ -7,7 +7,6 @@ RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.3}
 
 function get_released_ruby() {
-  rm -rf /tmp/www
   git clone --depth 1 https://github.com/ruby/www.ruby-lang.org.git /tmp/www
 
   cat << RUBY | ruby - $1 /tmp/www/_data/releases.yml
@@ -17,6 +16,7 @@ releases = Psych.load_file(ARGV[1])
 release = releases.find {|x| x["version"] == version }
 puts "#{release["url"]["xz"]} #{release["sha256"]["xz"]}"
 RUBY
+  rm -rf /tmp/www
 }
 
 case $RUBY_VERSION in
