@@ -39,7 +39,7 @@ jobs:
 
       - name: Renaming images
         run: |
-          docker images rubylang/ruby --format='docker tag {{.Repository}}:{{.Tag}} ghcr.io/ruby/ruby-docker-images/ruby:{{.Tag}}' | sh -ex
+          docker images rubylang/ruby --format='docker tag {{.Repository}}:{{.Tag}} ghcr.io/ruby/ruby:{{.Tag}}' | sh -ex
 
       - name: Login GitHub Container Registry
         run: |
