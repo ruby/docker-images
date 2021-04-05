@@ -4,7 +4,7 @@ set -ex
 
 RUBY_VERSION=${RUBY_VERSION-2.6.0}
 RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
-RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.0.3}
+RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
 
 function get_released_ruby() {
   git clone --depth 1 https://github.com/ruby/www.ruby-lang.org.git /tmp/www
@@ -90,6 +90,9 @@ fi
 
 case $RUBY_VERSION in
   master)
+    # DO NOTHING
+    ;;
+  3.0.*)
     # DO NOTHING
     ;;
   2.7.*)
