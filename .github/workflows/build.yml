@@ -18,6 +18,7 @@ on:
 
 jobs:
   build:
+    name: ${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}-${{ github.event.inputs.ARCH }}
     runs-on: ubuntu-latest
 
     steps:
