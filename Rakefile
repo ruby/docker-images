@@ -41,6 +41,7 @@ def ruby_latest_full_version?(version)
 end
 
 def ruby_version_exist?(version)
+  return true if version.start_with?("master")
   ver2 = version.split('.')[0,2].join('.')
   ruby_versions[ver2]&.include?(version)
 end
