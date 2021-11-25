@@ -1,5 +1,3 @@
-name: Build Docker image
-
 on:
   workflow_dispatch:
     inputs:
@@ -15,6 +13,8 @@ on:
         description: Which architecture amd64 or arm64 do you want to build? (The default is amd64)
         required: false
         default: amd64
+
+name: Build ${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}-${{ github.event.inputs.ARCH }}
 
 jobs:
   build:
