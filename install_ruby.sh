@@ -92,6 +92,9 @@ case $RUBY_VERSION in
   master)
     # DO NOTHING
     ;;
+  3.1.*)
+    # DO NOTHING
+    ;;
   3.0.*)
     # DO NOTHING
     ;;
