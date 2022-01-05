@@ -22,7 +22,7 @@ def ruby_versions
   unless @ruby_versions
     require "psych"
     releases_yml = download("https://raw.githubusercontent.com/ruby/www.ruby-lang.org/master/_data/releases.yml")
-    releases = Psych.load(releases_yml, "releases.yml")
+    releases = Psych.respond_to?(:unsafe_load) ? Psych.unsafe_load(releases_yml, filename: "releases.yml") : Psych.load(releases_yml, "releases.yml")
     versions = {}
     releases.each do |release|
       version = release["version"]
