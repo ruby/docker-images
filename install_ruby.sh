@@ -88,24 +88,6 @@ fi
   rm -rf /tmp/ruby-build
 )
 
-case $RUBY_VERSION in
-  master)
-    # DO NOTHING
-    ;;
-  3.0.*)
-    # DO NOTHING
-    ;;
-  2.7.*)
-    # DO NOTHING
-    ;;
-  2.6.*)
-    # DO NOTHING
-    ;;
-  *)
-    gem update --system "$RUBYGEMS_VERSION"
-    ;;
-esac
-
 rm -fr /usr/src/ruby /root/.gem/
 
 # rough smoke test
