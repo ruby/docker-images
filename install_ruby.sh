@@ -42,6 +42,11 @@ case $RUBY_VERSION in
     ;;
 esac
 
+# Since Ruby 2.6, Bundler is a part of Ruby’s standard library, but below this version we need to install Bundler.
+ if [ "$(printf '%s\n' "$RUBY_VERSION" "2.6.0" | sort -V | head -n1)" = "$RUBY_VERSION" ]; then
+  gem install bundler
+fi
+
 if test -n "$RUBY_MASTER_COMMIT"; then
   if test -f /usr/src/ruby/configure.ac; then
     cd /usr/src/ruby
