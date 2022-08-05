@@ -4,7 +4,7 @@ FROM ubuntu:$BASE_IMAGE_TAG
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
-ADD ruby_build_deps.txt /tmp/
+COPY ruby_build_deps.txt /tmp/
 
 RUN set -ex && \
     apt-get update && \
@@ -38,8 +38,8 @@ RUN set -ex && \
 RUN set -ex && \
     useradd -ms /bin/bash ubuntu
 
-ADD tmp/ruby /usr/src/ruby
-ADD install_ruby.sh /tmp/
+COPY tmp/ruby /usr/src/ruby
+COPY install_ruby.sh /tmp/
 
 ARG RUBY_VERSION=2.6.3
 ENV RUBY_VERSION=$RUBY_VERSION
@@ -66,4 +66,3 @@ RUN set -ex && \
     \
     apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
     rm /tmp/ruby_build_deps.txt
-
