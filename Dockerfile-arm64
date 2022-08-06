@@ -1,4 +1,5 @@
-FROM multiarch/ubuntu-core:arm64-bionic
+ARG BASE_IMAGE_TAG=focal
+FROM multiarch/ubuntu-core:arm64-$BASE_IMAGE_TAG
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
