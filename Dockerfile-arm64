@@ -7,11 +7,18 @@ ENV DEBIAN_FRONTEND noninteractive
 COPY ruby_build_deps.txt /tmp/
 
 RUN set -ex && \
-    \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      software-properties-common && \
+    apt-add-repository ppa:git-core/ppa && \
+    apt-get clean && rm -r /var/lib/apt/lists/*
+
+RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             gcc \
+            g++ \
             libffi-dev \
             libgdbm-dev \
             libgmp-dev \
