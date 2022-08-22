@@ -38,9 +38,6 @@ commands:
   checkout_ruby_master:
     description: "Checkout Ruby master"
     steps:
-      - restore_cache:
-          keys:
-            - ruby-master
       - run:
           command: |
             if test -f tmp/ruby/configure.ac; then
@@ -50,10 +47,6 @@ commands:
               mkdir -p tmp
               git clone https://github.com/ruby/ruby.git tmp/ruby
             fi
-      - save_cache:
-          key: ruby-master
-          paths:
-            - tmp/ruby
   build_image:
     description: "Build Docker image"
     parameters:
