@@ -117,10 +117,8 @@ namespace :docker do
     # https://www.debian.org/ports/index.en.html
     case arch
     when 'arm64'
-      dockerfile = 'Dockerfile-arm64'
     when 'amd64', nil
       arch = nil
-      dockerfile = 'Dockerfile'
     else
       abort "unknown architecture name: '#{arch}'"
     end
@@ -130,8 +128,7 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
-    sh 'docker', 'run', '--rm', '--privileged', 'multiarch/qemu-user-static:register', '--reset' if arch
-    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args,
+    sh 'docker', 'build', '-f', 'Dockerfile', *tag_args, *env_args,
        '--build-arg', "RUBY_VERSION=#{ruby_version}",
        '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
        '.'
