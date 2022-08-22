@@ -92,7 +92,7 @@ commands:
           name: Push docker image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            echo docker push rubylang/ruby << parameters.tag >>
+            docker push rubylang/ruby << parameters.tag >>
 
 jobs:
   build_master:
@@ -146,7 +146,8 @@ jobs:
       - when:
           condition: <<parameters.tag>>
           steps:
-            - push_image_by_tag
+            - push_image_by_tag:
+                tag: <<parameters.tag>>
 
   build_master_debug:
     parameters:
