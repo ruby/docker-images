@@ -113,25 +113,26 @@ namespace :docker do
     end
     suffix = ENV["image_name_suffix"]
     arch = ENV["arch"]
+    tag = ENV["tag"] || ""
     # NOTE: the architecture name is based on Debian ports
     # https://www.debian.org/ports/index.en.html
     case arch
     when 'arm64'
-      dockerfile = 'Dockerfile-arm64'
     when 'amd64', nil
       arch = nil
-      dockerfile = 'Dockerfile'
     else
       abort "unknown architecture name: '#{arch}'"
     end
     ruby_version, tag_args = make_tag_args(ruby_version, suffix, arch)
+    if !tag.empty?
+      tag_args = ["-t", "#{docker_image_name}:#{tag}"]
+    end
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
-    sh 'docker', 'run', '--rm', '--privileged', 'multiarch/qemu-user-static:register', '--reset' if arch
-    sh 'docker', 'build', '-f', dockerfile, *tag_args, *env_args,
+    sh 'docker', 'build', '-f', 'Dockerfile', *tag_args, *env_args,
        '--build-arg', "RUBY_VERSION=#{ruby_version}",
        '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
        '.'
