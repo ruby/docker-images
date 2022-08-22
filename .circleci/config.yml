@@ -72,7 +72,7 @@ commands:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >> ubuntu_version=<< parameters.ubuntu_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> ubuntu_version=<< parameters.ubuntu_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >> tag=<< parameters.tag >>
   push_image:
     description: "Push Docker image"
     steps:
