@@ -113,6 +113,7 @@ namespace :docker do
     end
     suffix = ENV["image_name_suffix"]
     arch = ENV["arch"]
+    tag = ENV["tag"] || ""
     # NOTE: the architecture name is based on Debian ports
     # https://www.debian.org/ports/index.en.html
     case arch
@@ -123,6 +124,9 @@ namespace :docker do
       abort "unknown architecture name: '#{arch}'"
     end
     ruby_version, tag_args = make_tag_args(ruby_version, suffix, arch)
+    if !tag.empty?
+      tag_args = ["-t", "#{docker_image_name}:#{tag}"]
+    end
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')

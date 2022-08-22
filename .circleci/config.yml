@@ -4,6 +4,25 @@
 #
 version: 2.1
 
+executors:
+  amd64:
+    machine:
+      image: ubuntu-2004:202111-02
+      docker_layer_caching: true
+    resource_class: medium
+    environment:
+      DOCKER_BUILDKIT: 1
+  arm64:
+    machine:
+      image: ubuntu-2004:202101-01
+      docker_layer_caching: true
+    resource_class: arm.medium
+    environment:
+      DOCKER_BUILDKIT: 1
+  docker:
+    docker:
+      - image: ruby:latest
+
 commands:
   install_docker_client:
     description: "Install Docker client"
@@ -53,6 +72,9 @@ commands:
       ubuntu_version:
         type: string
         default: "focal"
+      tag:
+        type: string
+        default: ""
     steps:
       - run:
           name: Build docker image
@@ -82,19 +104,36 @@ jobs:
       ubuntu_version:
         type: string
         default: "focal"
-    docker:
-      - image: ruby:latest
+      ruby_version:
+        type: string
+        default: "master"
+      executor:
+        type: executor
+        default: "docker"
+      tag:
+        type: string
+        default: ""
+    executor: << parameters.executor >>
     working_directory: ~/repo
     steps:
       - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - checkout_ruby_master
+      - when:
+        condition:
+          equal: ["docker", << parameters.executor >>]
+          stepts:
+            - setup_remote_docker
+            - install_docker_client
+      - when:
+          condition:
+            equal: ["master", << parameters.ruby_version >>]
+          steps:
+            - checkout_ruby_master
       - build_image:
-          ruby_version: "master"
+          ruby_version: << parameters.ruby_version >>
           nightly: << parameters.nightly >>
           arch: << parameters.arch >>
           ubuntu_version: << parameters.ubuntu_version >>
+          tag: << parameters.tag >>
       - when:
           condition: <<parameters.push>>
           steps:
@@ -132,6 +171,36 @@ jobs:
           steps:
             - push_image
 
+  deploy_multiarch:
+    parameters:
+      tag:
+        type: string
+        default: "3.1.2-focal"
+    executor: "docker"
+    steps:
+      - setup_remote_docker
+      - install_docker_client
+      - run:
+          name: "Create manifest"
+          command: |
+            docker manifest create rubylang/ruby:<< parameters.tag >>-multi \
+              --amend rubylang/ruby:<< parameters.tag >>-amd64-${CIRCLE_SHA1} \
+              --amend rubylang/ruby:<< parameters.tag >>-arm64-${CIRCLE_SHA1}
+      - run:
+          name: "Push manifest"
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker manifest push rubylang/ruby:<< parameters.tag >>-multi
+
+parameters:
+  ruby_version:
+    type: string
+    description: '"master" or version nunmber ("3.1.2")'
+    default: "master"
+  ubuntu_version:
+    type: string
+    default: "focal"
+
 workflows:
   version: 2
 
@@ -155,3 +224,28 @@ workflows:
       - build_master_debug:
           nightly: true
           push: true
+
+  # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
+  # only triggered when pipeline is kicked over API
+  build_multiarch:
+    when:
+      and:
+        - equal: [ api, << pipeline.trigger_source >> ]
+    jobs:
+      - build_master:
+          name: "build_master_amd64"
+          ruby_version: << pipeline.parameters.ruby_version >>
+          ubuntu_version: "focal"
+          executor: "amd64"
+          tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-amd64-${CIRCLE_SHA1}
+      - build_master:
+          name: "build_master_arm64"
+          ruby_version: << pipeline.parameters.ruby_version >>
+          ubuntu_version: "focal"
+          executor: "arm64"
+          tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
+      - deploy_multiarch:
+          requires:
+            - build_master_amd64
+            - build_master_arm64
+          tag: << pipeline.parameters.ubuntu_version >>-<< pipeline.parameters.ruby_version >>
