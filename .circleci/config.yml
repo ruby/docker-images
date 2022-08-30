@@ -207,7 +207,7 @@ parameters:
   ruby_version:
     type: string
     description: '"master" or version nunmber ("3.1.2")'
-    default: "master"
+    default: ""
   ubuntu_version:
     type: string
     default: "focal"
@@ -241,18 +241,20 @@ workflows:
   build_multiarch:
     when:
       and:
-        - equal: [ api, << pipeline.trigger_source >> ]
+        - not:
+            equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - << pipeline.parameters.ruby_version >>
     jobs:
       - build_master:
           name: "build_master_amd64"
           ruby_version: << pipeline.parameters.ruby_version >>
-          ubuntu_version: "focal"
+          ubuntu_version: << pipeline.parameters.ubuntu_version >>
           executor: "amd64"
           tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-amd64-${CIRCLE_SHA1}
       - build_master:
           name: "build_master_arm64"
           ruby_version: << pipeline.parameters.ruby_version >>
-          ubuntu_version: "focal"
+          ubuntu_version: << pipeline.parameters.ubuntu_version >>
           executor: "arm64"
           tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
       - deploy_multiarch:
