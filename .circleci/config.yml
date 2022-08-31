@@ -19,7 +19,7 @@ executors:
     resource_class: arm.medium
     environment:
       DOCKER_BUILDKIT: 1
-  docker:
+  docker: &docker-executor
     docker:
       - image: ruby:latest
 
@@ -124,7 +124,7 @@ jobs:
       - checkout
       - when:
         condition:
-          equal: ["docker", << parameters.executor >>]
+          equal: [*docker-executor, << parameters.executor >>]
           stepts:
             - setup_remote_docker
             - install_docker_client
