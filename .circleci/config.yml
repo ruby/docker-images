@@ -114,7 +114,6 @@ jobs:
         default: "master"
       executor:
         type: executor
-        default: "docker"
       tag:
         type: string
         default: ""
@@ -228,10 +227,12 @@ workflows:
           nightly: true
           push: true
           ubuntu_version: "focal"
+          executor: docker
       - build_master:
           nightly: true
           push: true
           ubuntu_version: "bionic"
+          executor: docker
       - build_master_debug:
           nightly: true
           push: true
