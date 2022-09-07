@@ -123,8 +123,8 @@ jobs:
       - checkout
       - when:
         condition:
-          equal: [docker, << parameters.executor >>]
-          stepts:
+          equal: [true, << parameters.nightly >>]
+          stepts: # assume nightly uses docker
             - setup_remote_docker
             - install_docker_client
       - when:
