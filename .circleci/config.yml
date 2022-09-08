@@ -122,9 +122,15 @@ jobs:
     steps:
       - checkout
       - when:
-        condition:
-          equal: ["", << parameters.tag >>]
-          stepts:
+          condition:
+            equal: ["", << parameters.tag >>]
+          steps:
+            - setup_remote_docker
+            - install_docker_client
+      - when:
+          condition:
+            equal: [docker, << parameters.executor >>]
+          steps:
             - setup_remote_docker
             - install_docker_client
       - when:
@@ -217,7 +223,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "0 17 * * *"
+          cron: "40 17 * * *"
           filters:
             branches:
               only:
