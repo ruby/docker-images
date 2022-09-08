@@ -122,14 +122,8 @@ jobs:
     steps:
       - checkout
       - when:
-          condition:
+          condition: # if tag is not set, assume it's not multiarch
             equal: ["", << parameters.tag >>]
-          steps:
-            - setup_remote_docker
-            - install_docker_client
-      - when:
-          condition:
-            equal: [docker, << parameters.executor >>]
           steps:
             - setup_remote_docker
             - install_docker_client
@@ -223,7 +217,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "40 17 * * *"
+          cron: "0 17 * * *"
           filters:
             branches:
               only:
