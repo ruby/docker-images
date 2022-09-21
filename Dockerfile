@@ -31,8 +31,7 @@ RUN set -ex && \
             bison \
             git \
             tzdata \
-            zlib1g-dev \
-            $(cat /tmp/ruby_build_deps.txt) && \
+            zlib1g-dev && \
             apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
@@ -49,7 +48,9 @@ ARG optflags
 ARG debugflags
 ARG cppflags
 
-RUN set -ex && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends $(cat /tmp/ruby_build_deps.txt) && \
+    set -ex && \
 # skip installing gem documentation
     mkdir -p /usr/local/etc && \
     { \
@@ -65,4 +66,5 @@ RUN set -ex && \
       | xargs apt-mark manual && \
     \
     apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
+    apt-get clean && rm -r /var/lib/apt/lists/* && \
     rm /tmp/ruby_build_deps.txt

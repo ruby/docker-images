@@ -76,6 +76,7 @@ fi
     --prefix=/usr/local \
     --disable-install-doc \
     --enable-shared \
+    --enable-yjit \
     ${cppflags:+cppflags="${cppflags}"} \
     ${optflags:+optflags="${debugflags}"} \
     optflags="${optflags:--O3}" \

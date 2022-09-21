@@ -2,3 +2,4 @@ dpkg-dev
 ruby
 wget
 xz-utils
+rustc
