@@ -64,7 +64,7 @@ commands:
         default: "amd64"
       ubuntu_version:
         type: string
-        default: "focal"
+        default: "jammy"
       tag:
         type: string
         default: ""
@@ -108,7 +108,7 @@ jobs:
         default: "amd64"
       ubuntu_version:
         type: string
-        default: "focal"
+        default: "jammy"
       ruby_version:
         type: string
         default: "master"
@@ -158,7 +158,7 @@ jobs:
         default: false
       ubuntu_version:
         type: string
-        default: "focal"
+        default: "jammy"
     docker:
       - image: ruby:latest
     working_directory: ~/repo
@@ -184,7 +184,7 @@ jobs:
     parameters:
       tag:
         type: string
-        default: "3.1.2-focal"
+        default: "3.1.2-jammy"
     docker:
       - image: cimg/base:2022.06
     steps:
@@ -209,7 +209,7 @@ parameters:
     default: ""
   ubuntu_version:
     type: string
-    default: "focal"
+    default: "jammy"
 
 workflows:
   version: 2
@@ -226,7 +226,7 @@ workflows:
       - build_master:
           nightly: true
           push: true
-          ubuntu_version: "focal"
+          ubuntu_version: "jammy"
           executor: docker
       - build_master:
           nightly: true
@@ -237,7 +237,7 @@ workflows:
           nightly: true
           push: true
 
-  # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
+  # Build amd64/arm64 multiarch docker image as "jammy-3.1.2-multi"
   # only triggered when pipeline is kicked over API
   build_multiarch:
     when:

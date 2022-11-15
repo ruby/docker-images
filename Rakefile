@@ -75,7 +75,7 @@ namespace :docker do
     if ruby_version < "3.0"
       "bionic"
     else
-      "focal"
+      "jammy"
     end
   end
 

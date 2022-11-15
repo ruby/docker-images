@@ -1,17 +1,10 @@
-ARG BASE_IMAGE_TAG=focal
+ARG BASE_IMAGE_TAG=jammy
 FROM ubuntu:$BASE_IMAGE_TAG
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY ruby_build_deps.txt /tmp/
-
-RUN set -ex && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-      software-properties-common && \
-    apt-add-repository ppa:git-core/ppa && \
-    apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
     apt-get update && \
