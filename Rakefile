@@ -139,7 +139,7 @@ namespace :docker do
     if ruby_version.start_with? 'master'
       image_name = tag_args[3]
       if ENV['nightly']
-        today = Time.now.getlocal("+09:00").strftime('%Y%m%d')
+        today = Time.now.utc.strftime('%Y%m%d')
         sh 'docker', 'tag', image_name, image_name.sub(/master#{suffix}-([\da-f]+)/, "master#{suffix}-nightly-#{today}")
         sh 'docker', 'tag', image_name, image_name.sub(/master#{suffix}-([\da-f]+)/, "master#{suffix}-nightly")
       end
