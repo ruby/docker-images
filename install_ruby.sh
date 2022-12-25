@@ -65,7 +65,7 @@ fi
 
 (
   cd /usr/src/ruby
-  autoconf
+  ./autogen.sh
 
   mkdir -p /tmp/ruby-build
   pushd /tmp/ruby-build
