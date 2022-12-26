@@ -24,6 +24,11 @@ on:
         - arm64
         default: amd64
         required: true
+      LATEST:
+        description: Whether the latest tag should be created
+        type: boolean
+        default: false
+        required: true
 
 jobs:
   build:
