@@ -68,7 +68,7 @@ jobs:
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
-        if: ${{ ! github.inputs.NOPUSH }}
+        if: ${{ ! github.event.inputs.NOPUSH }}
 
       - name: Renaming images
         run: |
@@ -81,4 +81,4 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
-        if: ${{ ! github.inputs.NOPUSH }}
+        if: ${{ ! github.event.inputs.NOPUSH }}
