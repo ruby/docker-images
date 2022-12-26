@@ -1,5 +1,10 @@
 ARG BASE_IMAGE_TAG=jammy
-FROM ubuntu:$BASE_IMAGE_TAG
+ARG RUBY_VERSION=3.2.0
+
+FROM ubuntu:$BASE_IMAGE_TAG as build
+
+ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -42,7 +47,6 @@ RUN set -ex && \
 COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
 
-ARG RUBY_VERSION=2.6.3
 ENV RUBY_VERSION=$RUBY_VERSION
 ENV RUBYGEMS_VERSION=3.2.3
 
@@ -70,3 +74,22 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
     apt-get clean && rm -r /var/lib/apt/lists/* && \
     rm /tmp/ruby_build_deps.txt
+
+
+# FROM ubuntu:$BASE_IMAGE_TAG as ruby
+ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION
+
+# Copy Ruby from rubylang/ruby
+
+COPY --from=build:$RUBY_VERSION-$BASE_IMAGE_TAG \
+     /opt/ruby/bin /usr/local/bin/
+
+COPY --from=build:$RUBY_VERSION-$BASE_IMAGE_TAG \
+     /usr/local/etc/gemrc \
+     /usr/local/etc/
+
+# NOTE: DO NOT CHANGE the version in the path of include directory
+COPY --from=build:$RUBY_VERSION-$BASE_IMAGE_TAG \
+     /usr/local/include/ruby-3.2.0/ \
+     /usr/local/include/ruby-3.2.0/

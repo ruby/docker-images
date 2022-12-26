@@ -59,7 +59,9 @@ jobs:
         run: |
           docker images
 
-          [[ "${{ github.event.inputs.ARCH }}" != "amd64" ]] && ARCH_SUFFIX=-amd64
+          if [[ "${{ github.event.inputs.ARCH }}" != "amd64" ]]; then
+            ARCH_SUFFIX=-${{ github.event.inputs.ARCH }}
+          fi
           docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}${ARCH_SUFFIX} ruby -v
 
       - name: Login to DockerHub
