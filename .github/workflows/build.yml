@@ -58,7 +58,9 @@ jobs:
       - name: Check image
         run: |
           docker images
-          docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }} ruby -v
+
+          [[ "${{ github.event.inputs.ARCH }}" != "amd64" ]] && ARCH_SUFFIX=-amd64
+          docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}${ARCH_SUFFIX} ruby -v
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
