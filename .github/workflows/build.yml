@@ -9,12 +9,21 @@ on:
         default: master
       UBUNTU_VERSION:
         description: The version of Ubuntu as the base image
-        required: true
+        type: choice
+        options:
+        - jammy
+        - focal
+        - bionic
         default: jammy
+        required: true
       ARCH:
         description: Which architecture amd64 or arm64 do you want to build? (The default is amd64)
-        required: false
+        type: choice
+        options:
+        - amd64
+        - arm64
         default: amd64
+        required: true
 
 jobs:
   build:
