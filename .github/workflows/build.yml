@@ -43,6 +43,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Show parameters
+        run: |
+          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION }}"
+          echo "UBUNTU_VERSION=${{ github.event.inputs.UBUNTU_VERSION }}"
+          echo "ARCH=${{ github.event.inputs.ARCH }}"
+          echo "LATEST=${{ github.event.inputs.LATEST }}"
+          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}"
+
       - name: Build image
         run: |
           rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }} ubuntu_version=${{ github.event.inputs.UBUNTU_VERSION }}
@@ -60,7 +68,7 @@ jobs:
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
-        if: ${{ ! github.inputs.nopush }}
+        if: ${{ ! github.inputs.NOPUSH }}
 
       - name: Renaming images
         run: |
@@ -73,4 +81,4 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
-        if: ${{ ! github.inputs.nopush }}
+        if: ${{ ! github.inputs.NOPUSH }}
