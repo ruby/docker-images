@@ -29,6 +29,11 @@ on:
         type: boolean
         default: false
         required: true
+      NOPUSH:
+        description: Do not push the images (for debugging)
+        type: boolean
+        default: false
+        required: true
 
 jobs:
   build:
@@ -55,6 +60,7 @@ jobs:
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
+        if: ${{ ! github.inputs.nopush }}
 
       - name: Renaming images
         run: |
@@ -67,3 +73,4 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
+        if: ${{ ! github.inputs.nopush }}
