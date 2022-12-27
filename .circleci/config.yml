@@ -193,6 +193,10 @@ jobs:
       - run:
           name: "Create manifest"
           command: |
+            docker manifest create rubylang/ruby:3.2.0-focal \
+                   --amend rubylang/ruby:3.2.0-focal-amd64-${CIRCLE_SHA1} \
+                   --amend rubylang/ruby:3.2.0-focal-arm64-${CIRCLE_SHA1}
+
             rake --trace docker:manifest:create \
                  ruby_version=<< parameters.ruby_version >> \
                  ubuntu_version=<< parameters.ubuntu_version >> \
