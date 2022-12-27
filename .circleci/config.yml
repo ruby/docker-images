@@ -183,7 +183,8 @@ jobs:
         type: string
       ubuntu_version:
         type: string
-    executor: "amd64"
+    docker:
+      - image: ruby:latest
     working_directory: ~/repo
     steps:
       - checkout
