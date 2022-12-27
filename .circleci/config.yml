@@ -179,25 +179,33 @@ jobs:
 
   deploy_multiarch:
     parameters:
-      tag:
+      ruby_version:
         type: string
-        default: "3.1.2-focal"
+      ubuntu_version:
+        type: string
     docker:
       - image: cimg/base:2022.06
     steps:
+      - checkout
       - setup_remote_docker:
           version: 20.10.14
       - run:
           name: "Create manifest"
           command: |
-            docker manifest create rubylang/ruby:<< parameters.tag >>-multi \
-              --amend rubylang/ruby:<< parameters.tag >>-amd64-${CIRCLE_SHA1} \
-              --amend rubylang/ruby:<< parameters.tag >>-arm64-${CIRCLE_SHA1}
+            rake docker:manifest:create \
+                 ruby_version=<< parameters.ruby_version >> \
+                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 architectures="amd64 arm64" \
+                 manifest_suffix=${CIRCLE_SHA1} \
+                 latest_tag=true
       - run:
           name: "Push manifest"
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker manifest push rubylang/ruby:<< parameters.tag >>-multi
+            rake docker:manifest:push \
+                 ruby_version=<< parameters.ruby_version >> \
+                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 latest_tag=true
 
 parameters:
   ruby_version:
@@ -259,4 +267,5 @@ workflows:
           requires:
             - build_master_amd64
             - build_master_arm64
-          tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>
+          ruby_version: << pipeline.parameters.ruby_version >>
+          ubuntu_version: << pipeline.parameters.ubuntu_version >>
