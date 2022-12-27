@@ -188,7 +188,7 @@ namespace :docker do
       }.flatten
 
       tags.each do |tag|
-        sh 'docker', 'manifest', 'create', "#{docker_image_name}:#{tag}", *amend_args
+        sh 'docker', 'manifest', 'create', "#{tag}", *amend_args
       end
     end
 
@@ -198,7 +198,7 @@ namespace :docker do
       tags = make_tags(ruby_version)
 
       tags.each do |tag|
-        sh 'docker', 'manifest', 'push', "#{docker_image_name}:#{tag}"
+        sh 'docker', 'manifest', 'push', "#{tag}"
       end
     end
   end
