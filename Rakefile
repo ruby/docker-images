@@ -133,7 +133,6 @@ namespace :docker do
     end
     env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
     sh 'docker', 'build', '-f', 'Dockerfile', *tag_args, *env_args,
-       '--security-opt', 'seccomp=unconfined',
        '--build-arg', "RUBY_VERSION=#{ruby_version}",
        '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
        '.'
