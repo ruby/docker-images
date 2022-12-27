@@ -1,20 +1,16 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2.1
 
 executors:
   amd64:
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2204:2022.10.2
       docker_layer_caching: true
     resource_class: medium
     environment:
       DOCKER_BUILDKIT: 1
   arm64:
     machine:
-      image: ubuntu-2004:202101-01
+      image: ubuntu-2204:2022.10.2
       docker_layer_caching: true
     resource_class: arm.medium
     environment:
@@ -31,7 +27,7 @@ commands:
           name: Install Docker client
           command: |
             set -x
-            VER="17.03.0-ce"
+            VER="20.10.22"
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -126,6 +122,7 @@ jobs:
             equal: ["", << parameters.tag >>]
           steps:
             - setup_remote_docker
+                version: 20.10.14
             - install_docker_client
       - when:
           condition:
