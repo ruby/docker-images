@@ -193,7 +193,7 @@ jobs:
       - run:
           name: "Create manifest"
           command: |
-            rake docker:manifest:create \
+            rake --trace docker:manifest:create \
                  ruby_version=<< parameters.ruby_version >> \
                  ubuntu_version=<< parameters.ubuntu_version >> \
                  architectures="amd64 arm64" \
@@ -203,7 +203,7 @@ jobs:
           name: "Push manifest"
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            rake docker:manifest:push \
+            rake -trace docker:manifest:push \
                  ruby_version=<< parameters.ruby_version >> \
                  ubuntu_version=<< parameters.ubuntu_version >> \
                  latest_tag=true
