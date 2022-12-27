@@ -183,8 +183,8 @@ jobs:
         type: string
       ubuntu_version:
         type: string
-    docker:
-      - image: cimg/base:2022.06
+    executor: "amd64"
+    working_directory: ~/repo
     steps:
       - checkout
       - setup_remote_docker:
