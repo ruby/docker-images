@@ -65,7 +65,14 @@ fi
 
 (
   cd /usr/src/ruby
-  ./autogen.sh
+
+  if test ! -x ./configure; then
+    if test -x ./autogen.sh; then
+      ./autogen.sh
+    else
+      autoconf
+    fi
+  fi
 
   mkdir -p /tmp/ruby-build
   pushd /tmp/ruby-build
