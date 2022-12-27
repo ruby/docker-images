@@ -1,25 +1,31 @@
+# -*- coding: utf-8; mode: dockerfile -*-
+# vim: ft=dockerfile
+
 ARG BASE_IMAGE_TAG=jammy
-FROM ubuntu:$BASE_IMAGE_TAG
+ARG RUBY_VERSION_MAJOR
+ARG RUBY_VERSION_MINOR
+ARG RUBY_VERSION_TEENY
 
-ENV LANG C.UTF-8
-ENV DEBIAN_FRONTEND noninteractive
+### build ###
+FROM ubuntu:$BASE_IMAGE_TAG AS build
 
-COPY ruby_build_deps.txt /tmp/
+ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION_MAJOR
+ARG RUBY_VERSION_MINOR
+ARG RUBY_VERSION_TEENY
 
-RUN set -ex && \
-    apt-get update && \
-    if [[ "$BASE_IMAGE_TAG" == "bionic" ]]; then \
-        apt-get install -y --no-install-recommends \
-          software-properties-common && \
-        apt-add-repository ppa:git-core/ppa; \
-    fi && \
-    apt-get clean && rm -r /var/lib/apt/lists/*
+ARG LANG=C.UTF-8
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
+            autoconf \
+            bison \
             ca-certificates \
+            dpkg-dev \
             gcc \
+            git \
             g++ \
             libffi-dev \
             libgdbm-dev \
@@ -29,30 +35,20 @@ RUN set -ex && \
             libssl-dev \
             libyaml-dev \
             make \
-            autoconf \
-            bison \
-            git \
+            ruby \
+            rustc \
             tzdata \
-            zlib1g-dev && \
-            apt-get clean && rm -r /var/lib/apt/lists/*
+            wget \
+            xz-utils \
+            zlib1g-dev \
+            && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists/*
 
-RUN set -ex && \
-    useradd -ms /bin/bash ubuntu
-
-COPY tmp/ruby /usr/src/ruby
+RUN mkdir -p /tmp
 COPY install_ruby.sh /tmp/
 
-ARG RUBY_VERSION=2.6.3
-ENV RUBY_VERSION=$RUBY_VERSION
-ENV RUBYGEMS_VERSION=3.2.3
-
-ARG optflags
-ARG debugflags
-ARG cppflags
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $(cat /tmp/ruby_build_deps.txt) && \
-    set -ex && \
+RUN set -ex && \
 # skip installing gem documentation
     mkdir -p /usr/local/etc && \
     { \
@@ -60,13 +56,97 @@ RUN apt-get update && \
       echo 'update: --no-document'; \
     } >> /usr/local/etc/gemrc && \
     \
-    /tmp/install_ruby.sh && \
-    rm /tmp/install_ruby.sh && \
+    /tmp/install_ruby.sh
+
+
+### ruby ###
+FROM ubuntu:$BASE_IMAGE_TAG as ruby
+
+ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION_MAJOR
+ARG RUBY_VERSION_MINOR
+ARG RUBY_VERSION_TEENY
+
+RUN set -ex && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+            ca-certificates \
+            tzdata \
+            && \
+    apt-get clean && rm -r /var/lib/apt/lists/*
+
+RUN set -ex && \
+    useradd -ms /bin/bash ubuntu
+
+COPY --from=build \
+     /usr/local/bin/bundle \
+     /usr/local/bin/bundler \
+     /usr/local/bin/erb \
+     /usr/local/bin/gem \
+     /usr/local/bin/irb \
+     /usr/local/bin/racc \
+     /usr/local/bin/rake \
+     /usr/local/bin/rdoc \
+     /usr/local/bin/ri \
+     /usr/local/bin/ruby \
+     /usr/local/bin/
+
+COPY --from=build \
+     /usr/local/etc/gemrc \
+     /usr/local/etc/
+
+COPY --from=build \
+     /usr/local/include/ruby-${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}.0 \
+     /usr/local/include/
+
+COPY --from=build \
+     /usr/local/lib/libruby.so \
+     /usr/local/lib/libruby.so.* \
+     /usr/local/lib/
+
+COPY --from=build \
+     /usr/local/lib/pkgconfig/ \
+     /usr/local/lib/pkgconfig/
+
+COPY --from=build \
+     /usr/local/lib/ruby/ \
+     /usr/local/lib/ruby/
+
+COPY --from=build \
+     /usr/local/share/man/man1/erb.1 \
+     /usr/local/share/man/man1/irb.1 \
+     /usr/local/share/man/man1/ri.1 \
+     /usr/local/share/man/man1/ruby.1 \
+     /usr/local/share/man/man1/
+
+
+### development ###
+FROM ruby as development
+
+ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION_MAJOR
+ARG RUBY_VERSION_MINOR
+ARG RUBY_VERSION_TEENY
+
+RUN set -ex && \
+    apt-get update && \
     \
-    dpkg-query --show --showformat '${package}\n' \
-      | grep -P '^libreadline\d+$' \
-      | xargs apt-mark manual && \
+    if [[ "$BASE_IMAGE_TAG" == "bionic" ]]; then \
+        apt-get install -y --no-install-recommends \
+                software-properties-common \
+                && \
+        apt-add-repository ppa:git-core/ppa; \
+    fi && \
     \
-    apt-get purge -y --auto-remove $(cat /tmp/ruby_build_deps.txt) && \
-    apt-get clean && rm -r /var/lib/apt/lists/* && \
-    rm /tmp/ruby_build_deps.txt
+    apt-get install -y --no-install-recommends \
+            autoconf \
+            bison \
+            ca-certificates \
+            gcc \
+            gdb \
+            git \
+            g++ \
+            make \
+            wget \
+            && \
+    apt-get clean && rm -r /var/lib/apt/lists/*

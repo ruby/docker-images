@@ -2,8 +2,11 @@
 
 set -ex
 
-RUBY_VERSION=${RUBY_VERSION-2.6.0}
-RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
+RUBY_VERSION_MAJOR=${RUBY_VERSION_MAJOR:-3}
+RUBY_VERSION_MINOR=${RUBY_VERSION_MINOR:-2}
+RUBY_VERSION_TEENY=${RUBY_VERSION_TEENY:-0}
+RUBY_VERSION=${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}.${RUBY_VERSION_TEENY}
+RUBY_VERSION_MM=${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
 
 function get_released_ruby() {
@@ -19,9 +22,9 @@ RUBY
   rm -rf /tmp/www
 }
 
-case $RUBY_VERSION in
-  master:*)
-    RUBY_MASTER_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
+case $RUBY_VERSION_MAJOR in
+  master)
+    RUBY_MASTER_COMMIT=$RUBY_VERSION_MINOR
     RUBY_VERSION=master
     ;;
   *)
@@ -54,7 +57,7 @@ if test -n "$RUBY_MASTER_COMMIT"; then
   git checkout $RUBY_MASTER_COMMIT
 else
   if test -z "$RUBY_DOWNLOAD_URI"; then
-    RUBY_DOWNLOAD_URI="https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR}/ruby-${RUBY_VERSION}.tar.xz"
+    RUBY_DOWNLOAD_URI="https://cache.ruby-lang.org/pub/ruby/${RUBY_VERSION_MM}/ruby-${RUBY_VERSION}.tar.xz"
   fi
   wget -O ruby.tar.xz $RUBY_DOWNLOAD_URI
   echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c -
