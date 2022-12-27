@@ -108,18 +108,17 @@ namespace :docker do
     `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
   end
 
-  def make_tags(ruby_version, suffix=nil, arch=nil)
+  def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
     ruby_version_mm = ruby_version.split('.')[0,2].join('.')
     if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
       commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
       ruby_version = "master:#{commit_hash}"
-      tags = ["master#{suffix}", "master#{suffix}-#{commit_hash}"]
+      tags = ["master#{version_suffix}", "master-#{commit_hash}#{version_suffix}"]
     else
-      tags = ["#{ruby_version}#{suffix}"]
-      tags << "#{ruby_version_mm}#{suffix}" if ruby_latest_full_version?(ruby_version)
+      tags = ["#{ruby_version}#{version_suffix}"]
+      tags << "#{ruby_version_mm}#{version_suffix}" if ruby_latest_full_version?(ruby_version)
     end
-    arch &&= "-#{arch}"
-    tags.collect! {|t| "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{arch}" }
+    tags.collect! {|t| "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{tag_suffix}" }
     if ruby_latest_version?(ruby_version)
       tags.push "#{docker_image_name}:latest"
     else
@@ -127,8 +126,8 @@ namespace :docker do
     end
   end
 
-  def make_tag_args(ruby_version, suffix, arch=nil)
-    tag_args = make_tags(ruby_version, suffix, arch).map {|t| ["-t", t] }.flatten
+  def make_tag_args(ruby_version, version_suffix=nil, tag_suffix=nil)
+    tag_args = make_tags(ruby_version, version_suffix, tag_suffix).map {|t| ["-t", t] }.flatten
     return ruby_version, tag_args
   end
 
@@ -137,19 +136,11 @@ namespace :docker do
     unless ruby_version_exist?(ruby_version)
       abort "unknown ruby version: #{ruby_version}"
     end
-    suffix = ENV["image_name_suffix"]
-    arch = ENV["arch"]
+    version_suffix = ENV["image_version_suffix"]
+    tag_suffix = ENV["tag_suffix"]
     tag = ENV["tag"] || ""
-    # NOTE: the architecture name is based on Debian ports
-    # https://www.debian.org/ports/index.en.html
-    case arch
-    when 'arm64'
-    when 'amd64', nil
-      arch = nil
-    else
-      abort "unknown architecture name: '#{arch}'"
-    end
-    ruby_version, tag_args = make_tag_args(ruby_version, suffix, arch)
+    target = ENV.fetch("target", "ruby")
+    ruby_version, tag_args = make_tag_args(ruby_version, version_suffix, tag_suffix)
     if !tag.empty?
       tag_args = ["-t", "#{docker_image_name}:#{tag}"]
     end
@@ -161,13 +152,18 @@ namespace :docker do
     sh 'docker', 'build', '-f', 'Dockerfile', *tag_args, *env_args,
        '--build-arg', "RUBY_VERSION=#{ruby_version}",
        '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
+       '--target', target,
        '.'
     if ruby_version.start_with? 'master'
-      image_name = tag_args[3]
+      image_name = tag_args[1]
       if ENV['nightly']
         today = Time.now.utc.strftime('%Y%m%d')
-        sh 'docker', 'tag', image_name, image_name.sub(/master#{suffix}-([\da-f]+)/, "master#{suffix}-nightly-#{today}")
-        sh 'docker', 'tag', image_name, image_name.sub(/master#{suffix}-([\da-f]+)/, "master#{suffix}-nightly")
+        ["master"].each do |basename|
+          sh 'docker', 'tag', image_name,
+             image_name.sub(/#{basename}#{suffix}-([\da-f]+)/, "#{basename}#{suffix}-nightly-#{today}")
+          sh 'docker', 'tag', image_name,
+             image_name.sub(/#{basename}#{suffix}-([\da-f]+)/, "#{basename}#{suffix}-nightly")
+        end
       end
     end
   end
@@ -178,8 +174,9 @@ namespace :docker do
       ubuntu_version = ENV.fetch("ubuntu_version")
       architectures = ENV.fetch("architectures").split(' ')
       manifest_suffix = ENV.fetch("manifest_suffix", nil)
+      image_version_suffix = ENV["image_version_suffix"]
 
-      tags = make_tags(ruby_version)
+      tags = make_tags(ruby_version, image_version_suffix)
 
       amend_args = architectures.map {|arch|
         manifest_name = "#{tags[0]}-#{arch}"
@@ -194,8 +191,9 @@ namespace :docker do
 
     task :push do
       ruby_version = ENV["ruby_version"]
+      image_version_suffix = ENV["image_version_suffix"]
 
-      tags = make_tags(ruby_version)
+      tags = make_tags(ruby_version, image_version_suffix)
 
       tags.each do |tag|
         sh 'docker', 'manifest', 'push', "#{tag}"
