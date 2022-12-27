@@ -85,7 +85,7 @@ fi
     --enable-shared \
     --enable-yjit \
     ${cppflags:+cppflags="${cppflags}"} \
-    ${optflags:+optflags="${optflags}"} \
+    ${optflags:+optflags="${optflags}"}${optflags:-optflags="-O3 -fno-fast-math"} \
     ${debugflags:+debugflags="${debugflags}"}
 
   make -j "$(nproc)"
