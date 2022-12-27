@@ -183,13 +183,12 @@ jobs:
         type: string
       ubuntu_version:
         type: string
-    docker:
-      - image: ruby:latest
+      executor:
+        type: executor
+    executor: << parameters.executor >>
     working_directory: ~/repo
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.14
       - run:
           name: "Create manifest"
           command: |
@@ -272,5 +271,6 @@ workflows:
           requires:
             - build_master_amd64
             - build_master_arm64
+          executor: "amd64"
           ruby_version: << pipeline.parameters.ruby_version >>
           ubuntu_version: << pipeline.parameters.ubuntu_version >>
