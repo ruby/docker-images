@@ -52,23 +52,32 @@ commands:
       nightly:
         type: boolean
         default: false
-      image_name_suffix:
+      image_version_suffix:
         type: string
         default: ''
-      arch:
-        type: string
-        default: "amd64"
       ubuntu_version:
         type: string
         default: "focal"
-      tag:
+      tag_suffix:
         type: string
         default: ""
+      target:
+        type: string
+        default: "ruby"
+      latest_tag:
+        type: string
+        default: "false"
     steps:
       - run:
           name: Build docker image
           command: |
-            rake docker:build ruby_version=<< parameters.ruby_version >> ubuntu_version=<< parameters.ubuntu_version >> image_name_suffix=<< parameters.image_name_suffix >><<# parameters.nightly >> nightly=yes<</ parameters.nightly >> arch=<< parameters.arch >> tag=<< parameters.tag >>
+            rake docker:build ruby_version=<< parameters.ruby_version >> \
+                              ubuntu_version=<< parameters.ubuntu_version >> \
+                              image_version_suffix=<< parameters.image_version_suffix >> \
+                              <<# parameters.nightly >>nightly=yes<</ parameters.nightly >> \
+                              tag_suffix=<< parameters.tag_suffix >> \
+                              target=<< parameters.target >> \
+                              latest_tag=<< parameters.latest_tag >>
   push_image:
     description: "Push Docker image"
     steps:
@@ -80,18 +89,20 @@ commands:
   push_image_by_tag:
     description: "Push Docker image"
     parameters:
-      tag:
+      push_tags:
         type: string
-        default: ""
     steps:
       - run:
           name: Push docker image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push rubylang/ruby:<< parameters.tag >>
+            push_tags="<< parameters.push_tags >>"
+            for tag in $push_tags; do
+              docker push rubylang/ruby:$tag
+            done
 
 jobs:
-  build_master:
+  build:
     parameters:
       nightly:
         type: boolean
@@ -99,9 +110,6 @@ jobs:
       push:
         type: boolean
         default: false
-      arch:
-        type: string
-        default: "amd64"
       ubuntu_version:
         type: string
         default: "focal"
@@ -110,7 +118,10 @@ jobs:
         default: "master"
       executor:
         type: executor
-      tag:
+      tag_suffix:
+        type: string
+        default: ""
+      push_tags:
         type: string
         default: ""
     executor: << parameters.executor >>
@@ -119,7 +130,7 @@ jobs:
       - checkout
       - when:
           condition: # if tag is not set, assume it's not multiarch
-            equal: ["", << parameters.tag >>]
+            equal: ["docker", << parameters.executor >>]
           steps:
             - setup_remote_docker:
                 version: 20.10.14
@@ -132,18 +143,25 @@ jobs:
       - build_image:
           ruby_version: << parameters.ruby_version >>
           nightly: << parameters.nightly >>
-          arch: << parameters.arch >>
           ubuntu_version: << parameters.ubuntu_version >>
-          tag: << parameters.tag >>
+          tag_suffix: << parameters.tag_suffix >>
+          latest_tag: "true"
+      - build_image:
+          ruby_version: << parameters.ruby_version >>
+          nightly: << parameters.nightly >>
+          ubuntu_version: << parameters.ubuntu_version >>
+          image_version_suffix: -dev
+          tag_suffix: << parameters.tag_suffix >>
+          target: "development"
       - when:
-          condition: <<parameters.push>>
+          condition: << parameters.push >>
           steps:
             - push_image
       - when:
-          condition: <<parameters.tag>>
+          condition: << parameters.push_tags >>
           steps:
             - push_image_by_tag:
-                tag: <<parameters.tag>>
+                push_tags: << parameters.push_tags >>
 
   build_master_debug:
     parameters:
@@ -171,7 +189,8 @@ jobs:
           ruby_version: "master"
           nightly: << parameters.nightly >>
           ubuntu_version: << parameters.ubuntu_version >>
-          image_name_suffix: -debug
+          image_version_suffix: -debug
+          target: "develpment"
       - when:
           condition: <<parameters.push>>
           steps:
@@ -198,6 +217,12 @@ jobs:
                  architectures="amd64 arm64" \
                  manifest_suffix=${CIRCLE_SHA1} \
                  latest_tag=true
+            rake docker:manifest:create \
+                 ruby_version=<< parameters.ruby_version >> \
+                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 architectures="amd64 arm64" \
+                 image_version_suffix=-dev \
+                 manifest_suffix=${CIRCLE_SHA1} \
       - run:
           name: "Push manifest"
           command: |
@@ -206,6 +231,10 @@ jobs:
                  ruby_version=<< parameters.ruby_version >> \
                  ubuntu_version=<< parameters.ubuntu_version >> \
                  latest_tag=true
+            rake docker:manifest:push \
+                 ruby_version=<< parameters.ruby_version >> \
+                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 image_version_suffix=-dev \
 
 parameters:
   ruby_version:
@@ -228,12 +257,12 @@ workflows:
               only:
                 - master
     jobs:
-      - build_master:
+      - build:
           nightly: true
           push: true
           ubuntu_version: "focal"
           executor: docker
-      - build_master:
+      - build:
           nightly: true
           push: true
           ubuntu_version: "bionic"
@@ -251,22 +280,28 @@ workflows:
             equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
         - << pipeline.parameters.ruby_version >>
     jobs:
-      - build_master:
-          name: "build_master_amd64"
+      - build:
+          name: "build_amd64"
           ruby_version: << pipeline.parameters.ruby_version >>
           ubuntu_version: << pipeline.parameters.ubuntu_version >>
           executor: "amd64"
-          tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-amd64-${CIRCLE_SHA1}
-      - build_master:
-          name: "build_master_arm64"
+          tag_suffix: -amd64-${CIRCLE_SHA1}
+          push_tags: |
+            << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-amd64-${CIRCLE_SHA1}
+            << pipeline.parameters.ruby_version >>-dev-<< pipeline.parameters.ubuntu_version >>-amd64-${CIRCLE_SHA1}
+      - build:
+          name: "build_arm64"
           ruby_version: << pipeline.parameters.ruby_version >>
           ubuntu_version: << pipeline.parameters.ubuntu_version >>
           executor: "arm64"
-          tag: << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
+          tag_suffix: -arm64-${CIRCLE_SHA1}
+          push_tags: |
+            << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
+            << pipeline.parameters.ruby_version >>-dev-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
       - deploy_multiarch:
           requires:
-            - build_master_amd64
-            - build_master_arm64
+            - build_amd64
+            - build_arm64
           executor: "amd64"
           ruby_version: << pipeline.parameters.ruby_version >>
           ubuntu_version: << pipeline.parameters.ubuntu_version >>

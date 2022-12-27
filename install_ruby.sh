@@ -78,8 +78,7 @@ fi
     --enable-shared \
     --enable-yjit \
     ${cppflags:+cppflags="${cppflags}"} \
-    ${optflags:+optflags="${debugflags}"} \
-    optflags="${optflags:--O3}" \
+    ${optflags:+optflags="${optflags}"} \
     ${debugflags:+debugflags="${debugflags}"}
 
   make -j "$(nproc)"
