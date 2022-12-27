@@ -121,7 +121,7 @@ jobs:
           condition: # if tag is not set, assume it's not multiarch
             equal: ["", << parameters.tag >>]
           steps:
-            - setup_remote_docker
+            - setup_remote_docker:
                 version: 20.10.14
             - install_docker_client
       - when:
