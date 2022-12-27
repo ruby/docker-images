@@ -7,12 +7,6 @@ ENV DEBIAN_FRONTEND noninteractive
 COPY ruby_build_deps.txt /tmp/
 
 RUN set -ex && \
-    apt-get install -y --no-install-recommends \
-            gpg \
-            && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4EB27DB2A3B88B8B
-
-RUN set -ex && \
     apt-get update && \
     if [[ "$BASE_IMAGE_TAG" == "bionic" ]]; then \
         apt-get install -y --no-install-recommends \
