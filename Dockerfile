@@ -134,8 +134,8 @@ COPY --from=build \
      /usr/local/etc/
 
 COPY --from=build \
-     /usr/local/include/ruby-*.0 \
-     /usr/local/include/
+     /usr/local/include \
+     /usr/local/include
 
 COPY --from=build \
      /usr/local/lib/libruby.so.${RUBY_VERSION} \
