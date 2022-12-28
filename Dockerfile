@@ -66,6 +66,7 @@ RUN set -ex && \
 FROM ubuntu:$BASE_IMAGE_TAG AS ruby
 
 ARG BASE_IMAGE_TAG
+ARG RUBY_VERSION
 
 RUN set -ex && \
     apt-get update && \
@@ -137,9 +138,13 @@ COPY --from=build \
      /usr/local/include/
 
 COPY --from=build \
-     /usr/local/lib/libruby.so \
-     /usr/local/lib/libruby.so.* \
+     /usr/local/lib/libruby.so.${RUBY_VERSION} \
      /usr/local/lib/
+
+RUN set -ex && \
+    RUBY_VERSION_MM=$(echo $RUBY_VERSION | sed -e 's/\.[^.]\+$//') && \
+    ln -sf libruby.so.${RUBY_VERSION} /usr/local/lib/libruby.so.${RUBY_VERSION_MM} && \
+    ln -sf libruby.so.${RUBY_VERSION} /usr/local/lib/libruby.so
 
 COPY --from=build \
      /usr/local/lib/pkgconfig/ \
@@ -159,9 +164,6 @@ COPY --from=build \
 
 ### development ###
 FROM ruby AS development
-
-ARG BASE_IMAGE_TAG
-ARG RUBY_VERSION
 
 RUN set -ex && \
     apt-get update && \
