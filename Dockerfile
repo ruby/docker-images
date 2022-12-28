@@ -79,8 +79,32 @@ RUN set -ex && \
     \
     apt-get install -y --no-install-recommends \
             ca-certificates \
+            libffi-dev \
+            libgdbm-dev \
+            libgmp-dev \
+            libncurses5-dev \
+            libreadline-dev \
+            libssl-dev \
+            libyaml-dev \
             tzdata \
+            zlib1g-dev \
             && \
+    dpkg-query --show --showformat '${package}\n' \
+      | grep -P '^(lib(ffi|gdbm|gmp|ncurses|readline|ssl|yaml)|zlib)' \
+      | grep -v -P -- '-dev$' \
+      | xargs apt-mark manual \
+      && \
+    apt-get purge -y --auto-remove \
+            libffi-dev \
+            libgdbm-dev \
+            libgmp-dev \
+            libncurses5-dev \
+            libreadline-dev \
+            libssl-dev \
+            libyaml-dev \
+            zlib1g-dev \
+            && \
+    \
     apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
