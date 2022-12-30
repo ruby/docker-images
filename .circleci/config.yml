@@ -84,7 +84,7 @@ commands:
       - run:
           name: Push docker image
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push rubylang/ruby
   push_image_by_tag:
     description: "Push Docker image"
@@ -95,7 +95,7 @@ commands:
       - run:
           name: Push docker image
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             push_tags="<< parameters.push_tags >>"
             for tag in $push_tags; do
               docker push rubylang/ruby:$tag
@@ -226,7 +226,7 @@ jobs:
       - run:
           name: "Push manifest"
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             rake docker:manifest:push \
                  ruby_version=<< parameters.ruby_version >> \
                  ubuntu_version=<< parameters.ubuntu_version >> \
