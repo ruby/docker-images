@@ -82,7 +82,7 @@ commands:
     description: "Push Docker image to DockerHub"
     steps:
       - run:
-          name: Push docker image
+          name: Push docker image to rubylang
           command: |
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push rubylang/ruby
@@ -93,28 +93,22 @@ commands:
         type: string
     steps:
       - run:
-          name: Push docker image
+          name: Push docker image to rubylang
           command: |
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             push_tags="<<parameters.push_tags>>"
             for tag in $push_tags; do
               docker push rubylang/ruby:$tag
             done
-  push_image_by_tag_ghcr:
-    description: "Push specific tags of Docker image to GHCR"
-    parameters:
-      push_tags:
-        type: string
-    steps:
       - run:
-          name: Push docker image to GHCR
+          name: Push docker image to ghcr.io/ruby
           command: |
             echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
             push_tags="<<parameters.push_tags>>"
             for tag in $push_tags; do
               docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
               docker push ghcr.io/ruby/ruby:$tag
-            end
+            done
 
 jobs:
   build:
