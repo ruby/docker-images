@@ -68,6 +68,9 @@ FROM ubuntu:$BASE_IMAGE_TAG AS ruby
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
 
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN set -ex && \
     apt-get update && \
     \
