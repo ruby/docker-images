@@ -96,12 +96,12 @@ namespace :debug do
 end
 
 namespace :docker do
-  def docker_hub_org
-    "rubylang"
+  def registry_name
+    ENV.fetch("registry_name", "rubylang")
   end
 
   def docker_image_name
-    "#{docker_hub_org}/ruby"
+    "#{registry_name}/ruby"
   end
 
   def get_ruby_master_head_hash

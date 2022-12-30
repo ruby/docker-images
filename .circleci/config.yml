@@ -79,7 +79,7 @@ commands:
                               target=<< parameters.target >> \
                               latest_tag=<< parameters.latest_tag >>
   push_image:
-    description: "Push Docker image"
+    description: "Push Docker image to DockerHub"
     steps:
       - run:
           name: Push docker image
@@ -87,7 +87,7 @@ commands:
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push rubylang/ruby
   push_image_by_tag:
-    description: "Push Docker image"
+    description: "Push specific tags of Docker image to DockerHub"
     parameters:
       push_tags:
         type: string
@@ -96,10 +96,25 @@ commands:
           name: Push docker image
           command: |
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            push_tags="<< parameters.push_tags >>"
+            push_tags="<<parameters.push_tags>>"
             for tag in $push_tags; do
               docker push rubylang/ruby:$tag
             done
+  push_image_by_tag_ghcr:
+    description: "Push specific tags of Docker image to GHCR"
+    parameters:
+      push_tags:
+        type: string
+    steps:
+      - run:
+          name: Push docker image to GHCR
+          command: |
+            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+            push_tags="<<parameters.push_tags>>"
+            for tag in $push_tags; do
+              docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+              docker push ghcr.io/ruby/ruby:$tag
+            end
 
 jobs:
   build:
@@ -204,37 +219,57 @@ jobs:
         type: string
       executor:
         type: executor
+      registry_name:
+        type: string
+        default: rubylang
     executor: << parameters.executor >>
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: "Create manifest"
+          name: "Create manifest for DockerHub"
           command: |
             rake docker:manifest:create \
-                 ruby_version=<< parameters.ruby_version >> \
-                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 registry_name="<<parameters.registry_name>>" \
+                 ruby_version="<<parameters.ruby_version>>" \
+                 ubuntu_version="<<parameters.ubuntu_version>>" \
                  architectures="amd64 arm64" \
                  manifest_suffix=${CIRCLE_SHA1} \
                  latest_tag=true
             rake docker:manifest:create \
-                 ruby_version=<< parameters.ruby_version >> \
-                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 registry_name="<<parameters.registry_name>>" \
+                 ruby_version="<<parameters.ruby_version>>" \
+                 ubuntu_version="<<parameters.ubuntu_version>>" \
                  architectures="amd64 arm64" \
                  image_version_suffix=-dev \
-                 manifest_suffix=${CIRCLE_SHA1} \
+                 manifest_suffix=${CIRCLE_SHA1}
       - run:
-          name: "Push manifest"
+          name: "Push manifest to DockerHub"
           command: |
+            case x"<<parameters.registry_name>>" in
+              xghcr.io/ruby)
+                DOCKER_USER=$GITHUB_USER
+                DOCKER_PASS=$GHCR_ACCESS_TOKEN
+                ;;
+              xrubylang)
+                ;;
+              *)
+                echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
+                exit 1
+                ;;
+            esac
+
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             rake docker:manifest:push \
-                 ruby_version=<< parameters.ruby_version >> \
-                 ubuntu_version=<< parameters.ubuntu_version >> \
+                 registry_name="<<parameters.registry_name>>" \
+                 ruby_version="<<parameters.ruby_version>>" \
+                 ubuntu_version="<<parameters.ubuntu_version>>" \
                  latest_tag=true
             rake docker:manifest:push \
-                 ruby_version=<< parameters.ruby_version >> \
-                 ubuntu_version=<< parameters.ubuntu_version >> \
-                 image_version_suffix=-dev \
+                 registry_name="<<parameters.registry_name>>" \
+                 ruby_version="<<parameters.ruby_version>>" \
+                 ubuntu_version="<<parameters.ubuntu_version>>" \
+                 image_version_suffix=-dev
 
 parameters:
   ruby_version:
@@ -299,9 +334,20 @@ workflows:
             << pipeline.parameters.ruby_version >>-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
             << pipeline.parameters.ruby_version >>-dev-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
       - deploy_multiarch:
+          name: "deploy_multiarch_dockerhub"
           requires:
             - build_amd64
             - build_arm64
           executor: "amd64"
+          registry_name: rubylang
+          ruby_version: << pipeline.parameters.ruby_version >>
+          ubuntu_version: << pipeline.parameters.ubuntu_version >>
+      - deploy_multiarch:
+          name: "deploy_multiarch_ghcr"
+          requires:
+            - build_amd64
+            - build_arm64
+          executor: "amd64"
+          registry_name: ghcr.io/ruby
           ruby_version: << pipeline.parameters.ruby_version >>
           ubuntu_version: << pipeline.parameters.ubuntu_version >>
