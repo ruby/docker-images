@@ -303,6 +303,7 @@ workflows:
       and:
         - not:
             equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - << pipeline.parameters.ruby_version >>
         - not:
             equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
