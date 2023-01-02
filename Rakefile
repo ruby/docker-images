@@ -108,26 +108,37 @@ namespace :docker do
     `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
   end
 
+  def get_ruby_version_at_commit(commit_hash)
+    raise ArgumentError, "Invalid commit_hash: #{commit_hash.inspect}" unless commit_hash.match?(/\A[a-z0-9]+\z/)
+    version_h = download("https://raw.githubusercontent.com/ruby/ruby/#{commit_hash}/include/ruby/version.h")
+    version_info = {}
+    version_h.each_line do |line|
+      case line
+      when /\A#define RUBY_[A-Z_]*VERSION_([A-Z][A-Z][A-Z_0-9]*) (\d\d*)$/
+        version_info[$1.to_sym] = $2
+      end
+    end
+    return version_info
+  end
+
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
     ruby_version_mm = ruby_version.split('.')[0,2].join('.')
     if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
       commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
       ruby_version = "master:#{commit_hash}"
-      tags = ["master#{version_suffix}", "master-#{commit_hash}#{version_suffix}"]
+      tags = ["master#{version_suffix}", "master#{version_suffix}-#{commit_hash}"]
     else
       tags = ["#{ruby_version}#{version_suffix}"]
       tags << "#{ruby_version_mm}#{version_suffix}" if ruby_latest_full_version?(ruby_version)
     end
     tags.collect! {|t| "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{tag_suffix}" }
-    if ruby_latest_version?(ruby_version)
-      tags.push "#{docker_image_name}:latest"
-    else
-      tags
-    end
+    tags.push "#{docker_image_name}:latest" if ruby_latest_version?(ruby_version)
+    return ruby_version, tags
   end
 
   def make_tag_args(ruby_version, version_suffix=nil, tag_suffix=nil)
-    tag_args = make_tags(ruby_version, version_suffix, tag_suffix).map {|t| ["-t", t] }.flatten
+    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
+    tag_args = tags.map {|t| ["-t", t] }.flatten
     return ruby_version, tag_args
   end
 
@@ -141,6 +152,16 @@ namespace :docker do
     tag = ENV["tag"] || ""
     target = ENV.fetch("target", "ruby")
     ruby_version, tag_args = make_tag_args(ruby_version, version_suffix, tag_suffix)
+    build_args = [
+      "RUBY_VERSION=#{ruby_version}",
+      "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}"
+    ]
+    if ruby_version.start_with?("master:")
+      commit_hash = ruby_version.split(":")[1]
+      version_info = get_ruby_version_at_commit(commit_hash)
+      ruby_so_suffix = version_info.values_at(:MAJOR, :MINOR, :TEENY).join(".")
+      build_args << "RUBY_SO_SUFFIX=#{ruby_so_suffix}"
+    end
     if !tag.empty?
       tag_args = ["-t", "#{docker_image_name}:#{tag}"]
     end
@@ -148,22 +169,21 @@ namespace :docker do
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')
     end
-    env_args = %w(cppflags optflags).map {|name| ["--build-arg", "#{name}=#{ENV[name]}"] }.flatten
-    sh 'docker', 'build', '-f', 'Dockerfile', *tag_args, *env_args,
-       '--build-arg', "RUBY_VERSION=#{ruby_version}",
-       '--build-arg', "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}",
+    %w(cppflags optflags).each do |name|
+      build_args << %Q(#{name}=#{ENV[name]}) if ENV.key?(name)
+    end
+    sh 'docker', 'build', '-f', 'Dockerfile', *tag_args,
+       *build_args.map {|arg| ["--build-arg", arg] }.flatten,
        '--target', target,
        '.'
-    if ruby_version.start_with? 'master'
-      image_name = tag_args[1]
+    if ruby_version.start_with? 'master:'
+      commit_hash = ruby_version.split(":")[1]
+      commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
+      image_name = tag_args.find {|x| x.match? commit_hash_re }
       if ENV['nightly']
         today = Time.now.utc.strftime('%Y%m%d')
-        ["master"].each do |basename|
-          sh 'docker', 'tag', image_name,
-             image_name.sub(/#{basename}#{suffix}-([\da-f]+)/, "#{basename}#{suffix}-nightly-#{today}")
-          sh 'docker', 'tag', image_name,
-             image_name.sub(/#{basename}#{suffix}-([\da-f]+)/, "#{basename}#{suffix}-nightly")
-        end
+        sh 'docker', 'tag', image_name, image_name.sub(commit_hash_re, "nightly-#{today}")
+        sh 'docker', 'tag', image_name, image_name.sub(commit_hash_re, "nightly")
       end
     end
   end

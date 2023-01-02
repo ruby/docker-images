@@ -20,6 +20,9 @@ RUBY
 }
 
 case $RUBY_VERSION in
+  master)
+    RUBY_MASTER_COMMIT=
+    ;;
   master:*)
     RUBY_MASTER_COMMIT=$(echo $RUBY_VERSION | awk -F: '{print $2}' )
     RUBY_VERSION=master
@@ -78,15 +81,36 @@ fi
   pushd /tmp/ruby-build
 
   gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
-  /usr/src/ruby/configure \
+  configure_args=( \
     --build="$gnuArch" \
     --prefix=/usr/local \
     --disable-install-doc \
     --enable-shared \
-    --enable-yjit \
-    ${cppflags:+cppflags="${cppflags}"} \
-    ${optflags:+optflags="${optflags}"}${optflags:-optflags="-O3 -fno-fast-math"} \
-    ${debugflags:+debugflags="${debugflags}"}
+    --enable-yjit
+  )
+
+  if [ -n "$cppflags" ]; then
+    export cppflags=$cppflags
+  else
+    unset cppflags
+  fi
+
+  if [ -n "$optflags" ]; then
+    export optflags=$optflags
+  else
+    unset optflags
+  fi
+
+  if [ -n "$debugflags" ]; then
+    export debugflags=$debugflags
+  else
+    unset debugflags
+  fi
+
+  /usr/src/ruby/configure "${configure_args[@]}" || {
+    cat config.log | grep flags=
+    exit 1
+  }
 
   make -j "$(nproc)"
   make install

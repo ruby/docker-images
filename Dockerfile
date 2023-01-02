@@ -1,14 +1,12 @@
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
+ARG RUBY_SO_SUFFIX
 
 ### build ###
 FROM ubuntu:$BASE_IMAGE_TAG AS build
 
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
-ARG optflags
-ARG debugflags
-ARG cppflags
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -51,6 +49,10 @@ RUN set -ex && \
 COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
 
+ARG optflags
+ARG debugflags
+ARG cppflags
+
 RUN set -ex && \
 # skip installing gem documentation
     mkdir -p /usr/local/etc && \
@@ -67,6 +69,7 @@ FROM ubuntu:$BASE_IMAGE_TAG AS ruby
 
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
+ARG RUBY_SO_SUFFIX
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -141,13 +144,13 @@ COPY --from=build \
      /usr/local/include
 
 COPY --from=build \
-     /usr/local/lib/libruby.so.${RUBY_VERSION} \
+     /usr/local/lib/libruby.so.${RUBY_SO_SUFFIX:-$RUBY_VERSION} \
      /usr/local/lib/
 
 RUN set -ex && \
-    RUBY_VERSION_MM=$(echo $RUBY_VERSION | sed -e 's/\.[^.]\+$//') && \
-    ln -sf libruby.so.${RUBY_VERSION} /usr/local/lib/libruby.so.${RUBY_VERSION_MM} && \
-    ln -sf libruby.so.${RUBY_VERSION} /usr/local/lib/libruby.so
+    RUBY_SO_SUFFIX_MM=$(echo ${RUBY_SO_SUFFIX:-$RUBY_VERSION} | sed -e 's/\.[^.]\+$//') && \
+    ln -sf libruby.so.${RUBY_SO_SUFFIX:-RUBY_VERSION} /usr/local/lib/libruby.so.${RUBY_VERSION_MM} && \
+    ln -sf libruby.so.${RUBY_SO_SUFFIX:-RUBY_VERSION} /usr/local/lib/libruby.so
 
 COPY --from=build \
      /usr/local/lib/pkgconfig/ \
