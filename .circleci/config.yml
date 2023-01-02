@@ -288,16 +288,18 @@ workflows:
       - build:
           nightly: true
           push: true
-          ubuntu_version: "focal"
+          ubuntu_version: "jammy"
           executor: docker
       - build:
           nightly: true
           push: true
-          ubuntu_version: "bionic"
+          ubuntu_version: "focal"
           executor: docker
       - build_master_debug:
           nightly: true
           push: true
+          ubuntu_version: "jammy"
+          executor: docker
 
   # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
   # only triggered when pipeline is kicked over API
