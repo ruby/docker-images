@@ -278,8 +278,7 @@ workflows:
 
   nightly:
     when:
-      and:
-        - equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
+      equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
           nightly: true
