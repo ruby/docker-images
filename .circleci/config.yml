@@ -1,5 +1,14 @@
 version: 2.1
 
+parameters:
+  ruby_version:
+    type: string
+    description: '"master" or version nunmber ("3.1.2")'
+    default: ""
+  ubuntu_version:
+    type: string
+    default: "jammy"
+
 executors:
   amd64:
     machine:
@@ -264,26 +273,13 @@ jobs:
                  ubuntu_version="<<parameters.ubuntu_version>>" \
                  image_version_suffix=-dev
 
-parameters:
-  ruby_version:
-    type: string
-    description: '"master" or version nunmber ("3.1.2")'
-    default: ""
-  ubuntu_version:
-    type: string
-    default: "focal"
-
 workflows:
   version: 2
 
   nightly:
-    triggers:
-      - schedule:
-          cron: "0 17 * * *"
-          filters:
-            branches:
-              only:
-                - master
+    when:
+      and:
+        - equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
           nightly: true
@@ -307,7 +303,8 @@ workflows:
       and:
         - not:
             equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
-        - << pipeline.parameters.ruby_version >>
+        - not:
+            equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
           name: "build_amd64"
