@@ -87,6 +87,10 @@ commands:
                               tag_suffix=<< parameters.tag_suffix >> \
                               target=<< parameters.target >> \
                               latest_tag=<< parameters.latest_tag >>
+      - run:
+          name: List images
+          command: |
+            docker images
   push_image:
     description: "Push Docker image to DockerHub"
     steps:
@@ -136,39 +140,53 @@ jobs:
         default: "master"
       executor:
         type: executor
+        default: "amd64"
+      image_version_suffix:
+        type: string
+        default: ""
       tag_suffix:
         type: string
         default: ""
       push_tags:
         type: string
         default: ""
+      dev_suffix:
+        type: string
+        default: "-dev"
+      only_development:
+        type: boolean
+        default: false
+      optflags:
+        type: string
+        default: ""
+      cppflags:
+        type: string
+        default: ""
+      debugflags:
+        type: string
+        default: ""
     executor: << parameters.executor >>
     working_directory: ~/repo
+    environment:
+      cppflags: "<<parameters.cppflags>>"
+      optflags: "<<parameters.optflags>>"
     steps:
       - checkout
       - when:
-          condition: # if tag is not set, assume it's not multiarch
-            equal: ["docker", << parameters.executor >>]
+          condition: <<parameters.only_development>>
           steps:
-            - setup_remote_docker:
-                version: 20.10.14
-            - install_docker_client
-      - when:
-          condition:
-            equal: ["master", << parameters.ruby_version >>]
-          steps:
-            - checkout_ruby_master
+            - build_image:
+                ruby_version: << parameters.ruby_version >>
+                nightly: << parameters.nightly >>
+                ubuntu_version: << parameters.ubuntu_version >>
+                image_version_suffix: <<parameters.image_version_suffix>>
+                tag_suffix: << parameters.tag_suffix >>
+                latest_tag: "true"
       - build_image:
           ruby_version: << parameters.ruby_version >>
           nightly: << parameters.nightly >>
           ubuntu_version: << parameters.ubuntu_version >>
-          tag_suffix: << parameters.tag_suffix >>
-          latest_tag: "true"
-      - build_image:
-          ruby_version: << parameters.ruby_version >>
-          nightly: << parameters.nightly >>
-          ubuntu_version: << parameters.ubuntu_version >>
-          image_version_suffix: -dev
+          image_version_suffix: <<parameters.image_version_suffix>><<parameters.dev_suffix>>
           tag_suffix: << parameters.tag_suffix >>
           target: "development"
       - when:
@@ -180,39 +198,6 @@ jobs:
           steps:
             - push_image_by_tag:
                 push_tags: << parameters.push_tags >>
-
-  build_master_debug:
-    parameters:
-      nightly:
-        type: boolean
-        default: false
-      push:
-        type: boolean
-        default: false
-      ubuntu_version:
-        type: string
-        default: "focal"
-    docker:
-      - image: ruby:latest
-    working_directory: ~/repo
-    environment:
-      cppflags: -DRUBY_DEBUG=1
-      optflags: -O3 -fno-inline
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_docker_client
-      - checkout_ruby_master
-      - build_image:
-          ruby_version: "master"
-          nightly: << parameters.nightly >>
-          ubuntu_version: << parameters.ubuntu_version >>
-          image_version_suffix: -debug
-          target: "develpment"
-      - when:
-          condition: <<parameters.push>>
-          steps:
-            - push_image
 
   deploy_multiarch:
     parameters:
@@ -281,19 +266,27 @@ workflows:
       equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
+          name: "build_jammy"
           nightly: true
-          push: true
+          push: false
           ubuntu_version: "jammy"
-          executor: docker
+          only_development: true
+          dev_suffix: ""
       - build:
+          name: "build_focal"
           nightly: true
-          push: true
+          push: false
           ubuntu_version: "focal"
-          executor: docker
-      - build_master_debug:
+          only_development: true
+          dev_suffix: ""
+      - build:
+          name: "build_master_debug"
           nightly: true
-          push: true
+          push: false
           ubuntu_version: "jammy"
+          only_development: true
+          dev_suffix: ""
+          image_version_suffix: "-debug"
 
   # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
   # only triggered when pipeline is kicked over API
