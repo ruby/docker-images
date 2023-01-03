@@ -93,6 +93,25 @@ commands:
             docker images
   push_image:
     description: "Push Docker image to DockerHub"
+    parameters:
+      ruby_version:
+        type: string
+        default: "master"
+      nightly:
+        type: boolean
+        default: false
+      image_version_suffix:
+        type: string
+        default: ''
+      ubuntu_version:
+        type: string
+        default: "focal"
+      tag_suffix:
+        type: string
+        default: ""
+      latest_tag:
+        type: string
+        default: "false"
     steps:
       - run:
           name: Push docker image to rubylang
