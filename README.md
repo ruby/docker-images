@@ -15,15 +15,16 @@ You can specify the specific revision in the master branch like:
 rake docker:build ruby_version=master:ce798d08de
 ```
 
-## How to build images of 64bit ARM architecture
+## Build and push for the specific ruby and ubuntu versions
 
-If you specify `arch=arm64` option to the rake task, you can build images of 64bit ARM architecture:
+Trigger CircleCI workflow with `ruby_version` and `ubuntu_version` pipeline parameters.
+Nightly build workflow is triggered if the workflow triggered with `ruby_version` of `"nightly"`.
+The nightly build workflow only builds images of linux/amd64 platform.
 
-```
-rake docker:build arch=arm64 ruby_version=<Ruby version you want to build>
-```
+## Nightly build workflow
 
-The default value of the `arch` option is `amd64`.
+Nightly build workflow is performed by CircleCI's scheduled pipeline system.
+The build is triggered at 16:00 UTC (01:00 JST) every night.
 
 ## Author
 
