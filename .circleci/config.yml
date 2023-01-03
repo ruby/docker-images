@@ -279,21 +279,21 @@ workflows:
       - build:
           name: "build_jammy"
           nightly: true
-          push: false
+          push: true
           ubuntu_version: "jammy"
           only_development: true
           dev_suffix: ""
       - build:
           name: "build_focal"
           nightly: true
-          push: false
+          push: true
           ubuntu_version: "focal"
           only_development: true
           dev_suffix: ""
       - build:
           name: "build_master_debug"
           nightly: true
-          push: false
+          push: true
           ubuntu_version: "jammy"
           only_development: true
           dev_suffix: ""
