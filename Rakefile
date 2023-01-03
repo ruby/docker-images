@@ -136,10 +136,14 @@ namespace :docker do
     return ruby_version, tags
   end
 
-  def make_tag_args(ruby_version, version_suffix=nil, tag_suffix=nil)
-    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
-    tag_args = tags.map {|t| ["-t", t] }.flatten
-    return ruby_version, tag_args
+  def each_nightly_tag(ruby_version, tags)
+    return [] unless ENV.key?('nightly') && ruby_version.start_with?('master:')
+    commit_hash = ruby_version.split(":")[1]
+    commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
+    image_name = tags.find {|x| x.match? commit_hash_re }
+    today = Time.now.utc.strftime('%Y%m%d')
+    yield image_name, image_name.sub(commit_hash_re, "nightly-#{today}")
+    yield image_name, image_name.sub(commit_hash_re, "nightly")
   end
 
   task :build do
@@ -151,7 +155,10 @@ namespace :docker do
     tag_suffix = ENV["tag_suffix"]
     tag = ENV["tag"] || ""
     target = ENV.fetch("target", "ruby")
-    ruby_version, tag_args = make_tag_args(ruby_version, version_suffix, tag_suffix)
+
+    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
+    tags << "#{docker_image_name}:#{tag}" if !tag.empty?
+
     build_args = [
       "RUBY_VERSION=#{ruby_version}",
       "BASE_IMAGE_TAG=#{ubuntu_version(ruby_version)}"
@@ -162,29 +169,43 @@ namespace :docker do
       ruby_so_suffix = version_info.values_at(:MAJOR, :MINOR, :TEENY).join(".")
       build_args << "RUBY_SO_SUFFIX=#{ruby_so_suffix}"
     end
-    if !tag.empty?
-      tag_args = ["-t", "#{docker_image_name}:#{tag}"]
+    %w(cppflags optflags).each do |name|
+      build_args << %Q(#{name}=#{ENV[name]}) if ENV.key?(name)
     end
+
     unless File.directory?("tmp/ruby")
       FileUtils.mkdir_p("tmp/ruby")
       IO.write('tmp/ruby/.keep', '')
     end
-    %w(cppflags optflags).each do |name|
-      build_args << %Q(#{name}=#{ENV[name]}) if ENV.key?(name)
-    end
-    sh 'docker', 'build', '-f', 'Dockerfile', *tag_args,
+
+    sh 'docker', 'build', '-f', 'Dockerfile',
+       *tags.map {|tag| ["-t", tag] }.flatten,
        *build_args.map {|arg| ["--build-arg", arg] }.flatten,
        '--target', target,
        '.'
-    if ruby_version.start_with? 'master:'
-      commit_hash = ruby_version.split(":")[1]
-      commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
-      image_name = tag_args.find {|x| x.match? commit_hash_re }
-      if ENV['nightly']
-        today = Time.now.utc.strftime('%Y%m%d')
-        sh 'docker', 'tag', image_name, image_name.sub(commit_hash_re, "nightly-#{today}")
-        sh 'docker', 'tag', image_name, image_name.sub(commit_hash_re, "nightly")
-      end
+
+    each_nightly_tag(ruby_version, tags) do |image_name, tag|
+      sh 'docker', 'tag', image_name, tag
+    end
+  end
+
+  task :push do
+    ruby_version = ENV['ruby_version'] || '2.6.1'
+    unless ruby_version_exist?(ruby_version)
+      abort "unknown ruby version: #{ruby_version}"
+    end
+    version_suffix = ENV["image_version_suffix"]
+    tag_suffix = ENV["tag_suffix"]
+    tag = ENV["tag"] || ""
+    target = ENV.fetch("target", "ruby")
+    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
+
+    tags.each do |tag|
+      sh 'docker', 'push', tag
+    end
+
+    each_nightly_tag(ruby_version, tags) do |_, tag|
+      sh 'docker', 'push', tag
     end
   end
 
