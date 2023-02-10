@@ -245,6 +245,21 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Login to <<parameters.registry_name>>"
+          command: |
+            case x"<<parameters.registry_name>>" in
+              xrubylang)
+                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                ;;
+              xghcr.io/ruby)
+                echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+                ;;
+              *)
+                echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
+                exit 1
+                ;;
+            esac
+      - run:
           name: "Create manifest for <<parameters.registry_name>>"
           command: |
             rake docker:manifest:create \
@@ -264,19 +279,6 @@ jobs:
       - run:
           name: "Push manifest to <<parameters.registry_name>>"
           command: |
-            case x"<<parameters.registry_name>>" in
-              xrubylang)
-                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                ;;
-              xghcr.io/ruby)
-                echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
-                ;;
-              *)
-                echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
-                exit 1
-                ;;
-            esac
-
             rake docker:manifest:push \
                  registry_name="<<parameters.registry_name>>" \
                  ruby_version="<<parameters.ruby_version>>" \
