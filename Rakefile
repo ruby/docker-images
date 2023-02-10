@@ -217,7 +217,7 @@ namespace :docker do
       manifest_suffix = ENV.fetch("manifest_suffix", nil)
       image_version_suffix = ENV["image_version_suffix"]
 
-      tags = make_tags(ruby_version, image_version_suffix)
+      _, tags = make_tags(ruby_version, image_version_suffix)
 
       amend_args = architectures.map {|arch|
         manifest_name = "#{tags[0]}-#{arch}"
@@ -234,7 +234,7 @@ namespace :docker do
       ruby_version = ENV["ruby_version"]
       image_version_suffix = ENV["image_version_suffix"]
 
-      tags = make_tags(ruby_version, image_version_suffix)
+      _, tags = make_tags(ruby_version, image_version_suffix)
 
       tags.each do |tag|
         sh 'docker', 'manifest', 'push', "#{tag}"
