@@ -149,7 +149,7 @@ COPY --from=build \
 
 RUN set -ex && \
     RUBY_SO_SUFFIX_MM=$(echo ${RUBY_SO_SUFFIX:-$RUBY_VERSION} | sed -e 's/\.[^.]\+$//') && \
-    ln -sf libruby.so.${RUBY_SO_SUFFIX:-RUBY_VERSION} /usr/local/lib/libruby.so.${RUBY_VERSION_MM} && \
+    ln -sf libruby.so.${RUBY_SO_SUFFIX:-RUBY_VERSION} /usr/local/lib/libruby.so.${RUBY_SO_SUFFIX_MM} && \
     ln -sf libruby.so.${RUBY_SO_SUFFIX:-RUBY_VERSION} /usr/local/lib/libruby.so
 
 COPY --from=build \
