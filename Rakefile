@@ -105,7 +105,16 @@ namespace :docker do
   end
 
   def get_ruby_master_head_hash
-    `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
+    # Use the same hash throughout the same CircleCI job
+    if ENV.key?('CIRCLE_BUILD_NUM') && File.exist?(cache_path = "/tmp/ruby-docker-images.#{ENV['CIRCLE_BUILD_NUM']}")
+      return File.read(cache_path)
+    end
+
+    head_hash = `curl -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
+    if cache_path
+      File.write(cache_path, head_hash)
+    end
+    head_hash
   end
 
   def get_ruby_version_at_commit(commit_hash)
