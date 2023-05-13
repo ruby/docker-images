@@ -55,6 +55,17 @@ def ruby_versions
   @ruby_versions
 end
 
+def ruby_latest_stable_version
+  ruby_versions.keys.sort.reverse.each do |ver2|
+    ruby_versions[ver2].sort.reverse.each do |ver|
+      if ver.match?(/\A\d+\.\d+\.\d+\z/)
+        return ver
+      end
+    end
+  end
+  nil
+end
+
 def ruby_latest_version?(version)
   if ENV.fetch("latest_tag", "false") == "false"
     false
@@ -62,8 +73,7 @@ def ruby_latest_version?(version)
     if not ubuntu_latest_version?(ubuntu_version(version))
       false
     else
-      latest_ver2 = ruby_versions.keys.max
-      ruby_versions[latest_ver2][0] == version
+      version == ruby_latest_stable_version
     end
   end
 end
@@ -82,6 +92,16 @@ end
 namespace :debug do
   task :versions do
     pp ruby_versions
+  end
+
+  task :latest_stable_version do
+    p latest_stable_version: ruby_latest_stable_version
+  end
+
+  task :latest_version do
+    ENV["latest_tag"] = "true"
+    ruby_version = ENV["ruby_version"]
+    p latest_version: ruby_latest_version?(ruby_version)
   end
 
   task :latest_full_version do
