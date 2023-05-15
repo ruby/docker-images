@@ -22,7 +22,6 @@ RUN set -ex && \
     \
     apt-get install -y --no-install-recommends \
             autoconf \
-            bison \
             ca-certificates \
             dpkg-dev \
             gcc \
