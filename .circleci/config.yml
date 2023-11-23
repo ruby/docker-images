@@ -303,8 +303,6 @@ workflows:
   version: 2
 
   nightly:
-    when:
-      equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
           name: "build_jammy"
@@ -332,13 +330,6 @@ workflows:
   # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
   # only triggered when pipeline is kicked over API
   build_multiarch:
-    when:
-      and:
-        - not:
-            equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
-        - << pipeline.parameters.ruby_version >>
-        - not:
-            equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
     jobs:
       - build:
           name: "build_amd64"
