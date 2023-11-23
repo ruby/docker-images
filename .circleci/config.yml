@@ -17,6 +17,8 @@ executors:
     resource_class: medium
     environment:
       DOCKER_BUILDKIT: 1
+      cppflags: "<<parameters.cppflags>>"
+      optflags: "<<parameters.optflags>>"
   arm64:
     machine:
       image: ubuntu-2204:2022.10.2
@@ -24,6 +26,8 @@ executors:
     resource_class: arm.medium
     environment:
       DOCKER_BUILDKIT: 1
+      cppflags: "<<parameters.cppflags>>"
+      optflags: "<<parameters.optflags>>"
   docker: &docker-executor
     docker:
       - image: ruby:latest
