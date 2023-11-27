@@ -1,7 +1,9 @@
 # ruby/ruby-docker-images
 
 Built images are available here:
-https://hub.docker.com/r/rubylang/ruby/
+
+* https://hub.docker.com/r/rubylang/ruby/
+* https://github.com/ruby/ruby-docker-images/pkgs/container/ruby
 
 ## How to build images
 
