@@ -53,7 +53,7 @@ jobs:
 
       - name: Build image
         run: |
-          rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }} ubuntu_version=${{ github.event.inputs.UBUNTU_VERSION }}
+          rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }} ubuntu_version=${{ github.event.inputs.UBUNTU_VERSION }} latest_tag=${{ github.event.inputs.LATEST }}
 
       - name: Check image
         run: |
