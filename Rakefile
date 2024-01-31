@@ -28,6 +28,10 @@ def default_ubuntu_version(ruby_version)
   end
 end
 
+def default_ruby_version
+  ENV['ruby_version'] || '3.3.0'
+end
+
 def ubuntu_version(ruby_version)
   ENV.fetch("ubuntu_version", default_ubuntu_version(ruby_version))
 end
@@ -176,7 +180,7 @@ namespace :docker do
   end
 
   task :build do
-    ruby_version = ENV['ruby_version'] || '2.6.1'
+    ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
       abort "unknown ruby version: #{ruby_version}"
     end
