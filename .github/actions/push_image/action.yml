@@ -1,0 +1,33 @@
+name: push_image
+inputs:
+  ruby_version:
+    required: false
+    default: master
+  nightly:
+    required: false
+    default: false
+  image_version_suffix:
+    required: false
+    default: ''
+  ubuntu_version:
+    required: false
+    default: focal
+  tag_suffix:
+    required: false
+    default: ''
+  latest_tag:
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+  - name: Push docker image to rubylang
+    run: |-
+      echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+      rake docker:push ruby_version=${{ inputs.ruby_version }} \
+                       ubuntu_version=${{ inputs.ubuntu_version }} \
+                       image_version_suffix=${{ inputs.image_version_suffix }} \
+                       ${{ inputs.nightly }}nightly=yes${{ inputs.nightly }} \
+                       tag_suffix=${{ inputs.tag_suffix }} \
+                       latest_tag=${{ inputs.latest_tag }}
+    shell: bash
