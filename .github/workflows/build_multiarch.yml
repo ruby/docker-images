@@ -30,8 +30,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      cppflags: "${{ env.cppflags }}"
-      optflags: "${{ env.optflags }}"
       nightly: false
       push: false
       ubuntu_version: "${{ inputs.ubuntu_version }}"
@@ -94,8 +92,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      cppflags: "${{ env.cppflags }}"
-      optflags: "${{ env.optflags }}"
       nightly: false
       push: false
       ubuntu_version: "${{ inputs.ubuntu_version }}"
