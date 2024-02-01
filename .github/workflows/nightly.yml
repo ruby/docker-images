@@ -21,7 +21,7 @@ env:
 
 jobs:
   build_jammy:
-    if: 'nightly' == ${{ inputs.ruby_version }}
+    if: "'nightly' == '${{ inputs.ruby_version }}'"
 
     defaults:
       run:
@@ -30,8 +30,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      cppflags: "${{ env.cppflags }}"
-      optflags: "${{ env.optflags }}"
       nightly: true
       push: true
       ubuntu_version: jammy
@@ -83,7 +81,7 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_1:
-    if: 'nightly' == ${{ inputs.ruby_version }}
+    if: "'nightly' == '${{ inputs.ruby_version }}'"
 
     defaults:
       run:
@@ -92,8 +90,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      cppflags: "${{ env.cppflags }}"
-      optflags: "${{ env.optflags }}"
       nightly: true
       push: true
       ubuntu_version: focal
@@ -145,7 +141,7 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_focal:
-    if: 'nightly' == ${{ inputs.ruby_version }}
+    if: "'nightly' == '${{ inputs.ruby_version }}'"
 
     defaults:
       run:
@@ -154,8 +150,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      cppflags: "${{ env.cppflags }}"
-      optflags: "${{ env.optflags }}"
       nightly: true
       push: true
       ubuntu_version: jammy
