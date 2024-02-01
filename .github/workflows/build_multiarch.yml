@@ -21,7 +21,7 @@ env:
 
 jobs:
   build_amd64:
-    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     defaults:
       run:
@@ -83,7 +83,7 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_arm64:
-    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     defaults:
       run:
@@ -145,7 +145,7 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   deploy_multiarch:
-    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     defaults:
       run:
@@ -212,7 +212,7 @@ jobs:
              image_version_suffix=-dev
 
   deploy_multiarch_ghcr:
-    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     defaults:
       run:
