@@ -1,0 +1,283 @@
+name: ruby/ruby-docker-images/build_multiarch
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+
+  workflow_dispatch:
+    inputs:
+      ruby_version:
+        required: true
+        description: '"master" or version nunmber ("3.1.2")'
+      ubuntu_version:
+        required: false
+        default: jammy
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+  GHCR_USER: ${{ secrets.GHCR_USER }}
+  GHCR_ACCESS_TOKEN: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+jobs:
+  build_amd64:
+    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+
+    defaults:
+      run:
+        working-directory: "~/repo"
+
+    runs-on: ubuntu-latest
+
+    env:
+      cppflags: "${{ env.cppflags }}"
+      optflags: "${{ env.optflags }}"
+      nightly: false
+      push: false
+      ubuntu_version: "${{ inputs.ubuntu_version }}"
+      ruby_version: "${{ inputs.ruby_version }}"
+      executor: amd64
+      image_version_suffix: ''
+      tag_suffix: "-amd64-${{ github.sha }}"
+      push_tags: |
+        ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
+        ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
+      dev_suffix: "-dev"
+      only_development: false
+      optflags: ''
+      cppflags: ''
+      debugflags: ''
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - uses: "./.github/actions/build_image"
+      if: "!${{ env.only_development }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+        latest_tag: 'true'
+
+    - uses: "./.github/actions/build_image"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+        target: development
+
+    - uses: "./.github/actions/push_image"
+      if: "${{ env.push }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+
+    - uses: "./.github/actions/push_image_by_tag"
+      if: "${{ env.push_tags }}"
+      with:
+        push_tags: "${{ env.push_tags }}"
+
+  build_arm64:
+    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+
+    defaults:
+      run:
+        working-directory: "~/repo"
+
+    runs-on: ubuntu-latest
+
+    env:
+      cppflags: "${{ env.cppflags }}"
+      optflags: "${{ env.optflags }}"
+      nightly: false
+      push: false
+      ubuntu_version: "${{ inputs.ubuntu_version }}"
+      ruby_version: "${{ inputs.ruby_version }}"
+      executor: arm64
+      image_version_suffix: ''
+      tag_suffix: "-arm64-${{ github.sha }}"
+      push_tags: |
+        ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
+        ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
+      dev_suffix: "-dev"
+      only_development: false
+      optflags: ''
+      cppflags: ''
+      debugflags: ''
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - uses: "./.github/actions/build_image"
+      if: "!${{ env.only_development }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+        latest_tag: 'true'
+
+    - uses: "./.github/actions/build_image"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+        target: development
+
+    - uses: "./.github/actions/push_image"
+      if: "${{ env.push }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
+
+    - uses: "./.github/actions/push_image_by_tag"
+      if: "${{ env.push_tags }}"
+      with:
+        push_tags: "${{ env.push_tags }}"
+
+  deploy_multiarch:
+    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+
+    defaults:
+      run:
+        working-directory: "~/repo"
+
+    runs-on: ubuntu-latest
+
+    needs:
+    - build_amd64
+    - build_arm64
+
+    env:
+      ruby_version: "${{ inputs.ruby_version }}"
+      ubuntu_version: "${{ inputs.ubuntu_version }}"
+      executor: amd64
+      registry_name: rubylang
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - name: Login to ${{ env.registry_name }}
+      run: |-
+        case x"${{ env.registry_name }}" in
+          xrubylang)
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            ;;
+          xghcr.io/ruby)
+            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
+            ;;
+          *)
+            echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
+            exit 1
+            ;;
+        esac
+
+    - name: Create manifest for ${{ env.registry_name }}
+      run: |-
+        rake docker:manifest:create \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             architectures="amd64 arm64" \
+             manifest_suffix=${{ github.sha }} \
+             latest_tag=true
+        rake docker:manifest:create \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             architectures="amd64 arm64" \
+             image_version_suffix=-dev \
+             manifest_suffix=${{ github.sha }}
+
+    - name: Push manifest to ${{ env.registry_name }}
+      run: |-
+        rake docker:manifest:push \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             latest_tag=true
+        rake docker:manifest:push \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             image_version_suffix=-dev
+
+  deploy_multiarch_ghcr:
+    if: !'scheduled_pipeline' == << pipeline.trigger_source >> && ${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}
+
+    defaults:
+      run:
+        working-directory: "~/repo"
+
+    runs-on: ubuntu-latest
+
+    needs:
+    - build_amd64
+    - build_arm64
+
+    env:
+      ruby_version: "${{ inputs.ruby_version }}"
+      ubuntu_version: "${{ inputs.ubuntu_version }}"
+      executor: amd64
+      registry_name: ghcr.io/ruby
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - name: Login to ${{ env.registry_name }}
+      run: |-
+        case x"${{ env.registry_name }}" in
+          xrubylang)
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            ;;
+          xghcr.io/ruby)
+            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
+            ;;
+          *)
+            echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
+            exit 1
+            ;;
+        esac
+
+    - name: Create manifest for ${{ env.registry_name }}
+      run: |-
+        rake docker:manifest:create \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             architectures="amd64 arm64" \
+             manifest_suffix=${{ github.sha }} \
+             latest_tag=true
+        rake docker:manifest:create \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             architectures="amd64 arm64" \
+             image_version_suffix=-dev \
+             manifest_suffix=${{ github.sha }}
+
+    - name: Push manifest to ${{ env.registry_name }}
+      run: |-
+        rake docker:manifest:push \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             latest_tag=true
+        rake docker:manifest:push \
+             registry_name="${{ env.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             image_version_suffix=-dev
