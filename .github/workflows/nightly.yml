@@ -6,9 +6,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      ruby_version:
-        required: true
-        description: '"master" or version nunmber ("3.1.2")'
       ubuntu_version:
         required: false
         default: jammy
@@ -21,8 +18,6 @@ env:
 
 jobs:
   build_jammy:
-    if: "'nightly' == '${{ inputs.ruby_version }}'"
-
     defaults:
       run:
         working-directory: "~/repo"
@@ -81,8 +76,6 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_focal:
-    if: "'nightly' == '${{ inputs.ruby_version }}'"
-
     defaults:
       run:
         working-directory: "~/repo"
