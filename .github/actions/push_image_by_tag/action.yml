@@ -1,0 +1,24 @@
+name: push_image_by_tag
+inputs:
+  push_tags:
+    required: false
+runs:
+  using: composite
+  steps:
+  - name: Push docker image to rubylang
+    run: |-
+      echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+      push_tags="${{ inputs.push_tags }}"
+      for tag in $push_tags; do
+        docker push rubylang/ruby:$tag
+      done
+    shell: bash
+  - name: Push docker image to ghcr.io/ruby
+    run: |-
+      echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+      push_tags="${{ inputs.push_tags }}"
+      for tag in $push_tags; do
+        docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+        docker push ghcr.io/ruby/ruby:$tag
+      done
+    shell: bash
