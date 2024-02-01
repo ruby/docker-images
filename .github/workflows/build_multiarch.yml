@@ -11,10 +11,10 @@ on:
         default: jammy
 
 env:
-  DOCKER_PASS: xxxxCD0o
-  DOCKER_USER: xxxxkn
-  GHCR_ACCESS_TOKEN: xxxxnzJy
-  GITHUB_USER: xxxxkn
+  DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+  GITHUB_USER: ${{ secrets.GITHUB_USER }}
+  GHCR_ACCESS_TOKEN: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
 jobs:
   build_amd64:
