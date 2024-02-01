@@ -21,13 +21,23 @@ inputs:
   latest_tag:
     required: false
     default: 'false'
+  arch:
+    required: false
+    default: linux/amd64
 runs:
   using: composite
   steps:
+  - name: Set up QEMU
+    uses: docker/setup-qemu-action@v1
+
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v1
+
   - name: Build docker image
     run: |-
       rake docker:build ruby_version=${{ inputs.ruby_version }} \
                         ubuntu_version=${{ inputs.ubuntu_version }} \
+                        arch=${{ inputs.arch }} \
                         image_version_suffix=${{ inputs.image_version_suffix }} \
                         ${{ inputs.nightly }}nightly=yes${{ inputs.nightly }} \
                         tag_suffix=${{ inputs.tag_suffix }} \
