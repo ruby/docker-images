@@ -34,7 +34,6 @@ jobs:
       push: false
       ubuntu_version: "${{ inputs.ubuntu_version }}"
       ruby_version: "${{ inputs.ruby_version }}"
-      executor: amd64
       image_version_suffix: ''
       tag_suffix: "-amd64-${{ github.sha }}"
       push_tags: |
@@ -89,14 +88,13 @@ jobs:
       run:
         working-directory: "~/repo"
 
-    runs-on: ubuntu-latest
+    runs-on: macos-arm-oss
 
     env:
       nightly: false
       push: false
       ubuntu_version: "${{ inputs.ubuntu_version }}"
       ruby_version: "${{ inputs.ruby_version }}"
-      executor: arm64
       image_version_suffix: ''
       tag_suffix: "-arm64-${{ github.sha }}"
       push_tags: |
@@ -160,7 +158,6 @@ jobs:
     env:
       ruby_version: "${{ inputs.ruby_version }}"
       ubuntu_version: "${{ inputs.ubuntu_version }}"
-      executor: amd64
       registry_name: rubylang
 
     steps:
@@ -227,7 +224,6 @@ jobs:
     env:
       ruby_version: "${{ inputs.ruby_version }}"
       ubuntu_version: "${{ inputs.ubuntu_version }}"
-      executor: amd64
       registry_name: ghcr.io/ruby
 
     steps:
