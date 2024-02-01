@@ -188,6 +188,7 @@ namespace :docker do
     tag_suffix = ENV["tag_suffix"]
     tag = ENV["tag"] || ""
     target = ENV.fetch("target", "ruby")
+    arch = ENV.fetch("arch", "linux/amd64")
 
     ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
     tags << "#{docker_image_name}:#{tag}" if !tag.empty?
@@ -211,7 +212,9 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
 
-    sh 'docker', 'build', '-f', 'Dockerfile',
+    build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch] : ['build']
+
+    sh 'docker', *build_cmd_args, '-f', 'Dockerfile',
        *tags.map {|tag| ["-t", tag] }.flatten,
        *build_args.map {|arg| ["--build-arg", arg] }.flatten,
        '--target', target,
