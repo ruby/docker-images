@@ -293,33 +293,6 @@ jobs:
 workflows:
   version: 2
 
-  nightly:
-    when:
-      equal: [ "nightly", << pipeline.parameters.ruby_version >> ]
-    jobs:
-      - build:
-          name: "build_jammy"
-          nightly: true
-          push: true
-          ubuntu_version: "jammy"
-          only_development: true
-          dev_suffix: ""
-      - build:
-          name: "build_focal"
-          nightly: true
-          push: true
-          ubuntu_version: "focal"
-          only_development: true
-          dev_suffix: ""
-      - build:
-          name: "build_master_debug"
-          nightly: true
-          push: true
-          ubuntu_version: "jammy"
-          only_development: true
-          dev_suffix: ""
-          image_version_suffix: "-debug"
-
   # Build amd64/arm64 multiarch docker image as "focal-3.1.2-multi"
   # only triggered when pipeline is kicked over API
   build_multiarch:
