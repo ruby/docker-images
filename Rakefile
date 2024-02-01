@@ -220,6 +220,8 @@ namespace :docker do
        '--target', target,
        '.'
 
+    sh 'docker', 'images'
+
     each_nightly_tag(ruby_version, tags) do |image_name, tag|
       sh 'docker', 'tag', image_name, tag
     end
