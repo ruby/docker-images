@@ -1,6 +1,9 @@
 name: ruby/ruby-docker-images/build_multiarch
 
 on:
+  schedule:
+    - cron: '0 */12 * * *'
+
   workflow_dispatch:
     inputs:
       ruby_version:
