@@ -117,8 +117,8 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: 'true'
         arch: 'linux/arm64'
+        latest_tag: 'true'
 
     - uses: "./.github/actions/build_image"
       with:
@@ -127,6 +127,7 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
+        arch: 'linux/arm64'
         target: development
 
     - uses: "./.github/actions/push_image"
