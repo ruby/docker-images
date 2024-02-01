@@ -23,10 +23,6 @@ jobs:
   build_amd64:
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
-    defaults:
-      run:
-        working-directory: "~/repo"
-
     runs-on: ubuntu-latest
 
     env:
@@ -83,10 +79,6 @@ jobs:
 
   build_arm64:
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
-    defaults:
-      run:
-        working-directory: "~/repo"
 
     runs-on: ubuntu-latest
 
@@ -146,10 +138,6 @@ jobs:
 
   deploy_multiarch:
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
-    defaults:
-      run:
-        working-directory: "~/repo"
 
     runs-on: ubuntu-latest
 
@@ -212,10 +200,6 @@ jobs:
 
   deploy_multiarch_ghcr:
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
-    defaults:
-      run:
-        working-directory: "~/repo"
 
     runs-on: ubuntu-latest
 
