@@ -80,7 +80,7 @@ jobs:
       with:
         push_tags: "${{ env.push_tags }}"
 
-  build_1:
+  build_focal:
     if: "'nightly' == '${{ inputs.ruby_version }}'"
 
     defaults:
@@ -140,7 +140,7 @@ jobs:
       with:
         push_tags: "${{ env.push_tags }}"
 
-  build_focal:
+  build_debug_jammy:
     if: "'nightly' == '${{ inputs.ruby_version }}'"
 
     defaults:
