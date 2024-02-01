@@ -36,7 +36,7 @@ The list of image names in this repository is below:
 - 3.2
   - rubylang/ruby:3.2-focal
   - rubylang/ruby:3.2-dev-focal
-  - rubylang/ruby:3.2.2-focal
+  - rubylang/ruby:3.2.3-focal
   - rubylang/ruby:3.2.2-dev-focal
 - 3.1
   - rubylang/ruby:3.1-focal
