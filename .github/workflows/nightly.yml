@@ -1,4 +1,5 @@
 name: ruby/ruby-docker-images/nightly
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,18 +9,23 @@ on:
       ubuntu_version:
         required: false
         default: jammy
+
 env:
   DOCKER_PASS: xxxxCD0o
   DOCKER_USER: xxxxkn
   GHCR_ACCESS_TOKEN: xxxxnzJy
   GITHUB_USER: xxxxkn
+
 jobs:
-  build:
+  build_jammy:
     if: 'nightly' == ${{ inputs.ruby_version }}
+
     defaults:
       run:
         working-directory: "~/repo"
+
     runs-on: ubuntu-latest
+
     env:
       cppflags: "${{ env.cppflags }}"
       optflags: "${{ env.optflags }}"
@@ -36,8 +42,10 @@ jobs:
       optflags: ''
       cppflags: ''
       debugflags: ''
+
     steps:
     - uses: actions/checkout@v4.1.0
+
     - uses: "./.github/actions/build_image"
       if: "!${{ env.only_development }}"
       with:
@@ -47,6 +55,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         latest_tag: 'true'
+
     - uses: "./.github/actions/build_image"
       with:
         ruby_version: "${{ env.ruby_version }}"
@@ -55,6 +64,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         target: development
+
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
       with:
@@ -63,16 +73,21 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
+
     - uses: "./.github/actions/push_image_by_tag"
       if: "${{ env.push_tags }}"
       with:
         push_tags: "${{ env.push_tags }}"
+
   build_1:
     if: 'nightly' == ${{ inputs.ruby_version }}
+
     defaults:
       run:
         working-directory: "~/repo"
+
     runs-on: ubuntu-latest
+
     env:
       cppflags: "${{ env.cppflags }}"
       optflags: "${{ env.optflags }}"
@@ -89,8 +104,10 @@ jobs:
       optflags: ''
       cppflags: ''
       debugflags: ''
+
     steps:
     - uses: actions/checkout@v4.1.0
+
     - uses: "./.github/actions/build_image"
       if: "!${{ env.only_development }}"
       with:
@@ -100,6 +117,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         latest_tag: 'true'
+
     - uses: "./.github/actions/build_image"
       with:
         ruby_version: "${{ env.ruby_version }}"
@@ -108,6 +126,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         target: development
+
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
       with:
@@ -116,16 +135,21 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
+
     - uses: "./.github/actions/push_image_by_tag"
       if: "${{ env.push_tags }}"
       with:
         push_tags: "${{ env.push_tags }}"
-  build_2:
+
+  build_focal:
     if: 'nightly' == ${{ inputs.ruby_version }}
+
     defaults:
       run:
         working-directory: "~/repo"
+
     runs-on: ubuntu-latest
+
     env:
       cppflags: "${{ env.cppflags }}"
       optflags: "${{ env.optflags }}"
@@ -142,8 +166,10 @@ jobs:
       optflags: ''
       cppflags: ''
       debugflags: ''
+
     steps:
     - uses: actions/checkout@v4.1.0
+
     - uses: "./.github/actions/build_image"
       if: "!${{ env.only_development }}"
       with:
@@ -153,6 +179,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         latest_tag: 'true'
+
     - uses: "./.github/actions/build_image"
       with:
         ruby_version: "${{ env.ruby_version }}"
@@ -161,6 +188,7 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         target: development
+
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
       with:
@@ -169,6 +197,7 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
+
     - uses: "./.github/actions/push_image_by_tag"
       if: "${{ env.push_tags }}"
       with:
