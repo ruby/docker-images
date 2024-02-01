@@ -212,7 +212,7 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
 
-    build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch] : ['build']
+    build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch, '--load'] : ['build']
 
     sh 'docker', *build_cmd_args, '-f', 'Dockerfile',
        *tags.map {|tag| ["-t", tag] }.flatten,
