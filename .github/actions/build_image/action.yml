@@ -39,7 +39,7 @@ runs:
                         ubuntu_version=${{ inputs.ubuntu_version }} \
                         arch=${{ inputs.arch }} \
                         image_version_suffix=${{ inputs.image_version_suffix }} \
-                        ${{ inputs.nightly }}nightly=yes${{ inputs.nightly }} \
+                        nightly=${{ inputs.nightly }} \
                         tag_suffix=${{ inputs.tag_suffix }} \
                         target=${{ inputs.target }} \
                         latest_tag=${{ inputs.latest_tag }}

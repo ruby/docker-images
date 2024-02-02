@@ -27,7 +27,7 @@ runs:
       rake docker:push ruby_version=${{ inputs.ruby_version }} \
                        ubuntu_version=${{ inputs.ubuntu_version }} \
                        image_version_suffix=${{ inputs.image_version_suffix }} \
-                       ${{ inputs.nightly }}nightly=yes${{ inputs.nightly }} \
+                       nightly=${{ inputs.nightly }} \
                        tag_suffix=${{ inputs.tag_suffix }} \
                        latest_tag=${{ inputs.latest_tag }}
     shell: bash
