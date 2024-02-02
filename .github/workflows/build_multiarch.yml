@@ -26,8 +26,6 @@ jobs:
       matrix:
         dev_suffix: [ '', '-dev' ]
 
-    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
     runs-on: ubuntu-latest
 
     env:
@@ -88,8 +86,6 @@ jobs:
       matrix:
         dev_suffix: [ '', '-dev' ]
 
-    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
     runs-on: ubuntu-latest
 
     env:
@@ -147,8 +143,6 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   deploy_multiarch:
-    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
     runs-on: ubuntu-latest
 
     needs:
@@ -209,8 +203,6 @@ jobs:
              image_version_suffix=-dev
 
   deploy_multiarch_ghcr:
-    if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
-
     runs-on: ubuntu-latest
 
     needs:
