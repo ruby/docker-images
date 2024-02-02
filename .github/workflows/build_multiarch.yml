@@ -22,6 +22,10 @@ env:
 
 jobs:
   build_amd64:
+    strategy:
+      matrix:
+        dev_suffix: [ '', '-dev' ]
+
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     runs-on: ubuntu-latest
@@ -36,7 +40,7 @@ jobs:
       push_tags: |
         ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
         ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
-      dev_suffix: "-dev"
+      dev_suffix: ${{ matrix.dev_suffix }}
       only_development: false
       optflags: ''
       cppflags: ''
@@ -45,24 +49,25 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.0
 
-    - uses: "./.github/actions/build_image"
-      if: "!${{ env.only_development }}"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: 'true'
+    - run: |
+        if [ "${{ env.dev_suffix }}" = "-dev" ]; then
+          echo "target=development" >> $GITHUB_ENV
+          echo "latest_tag=false" >> $GITHUB_ENV
+        else
+          echo "target=ruby" >> $GITHUB_ENV
+          echo "latest_tag=true" >> $GITHUB_ENV
+        fi
 
     - uses: "./.github/actions/build_image"
+      if: "!${{ env.only_development }}"
       with:
         ruby_version: "${{ env.ruby_version }}"
         nightly: "${{ env.nightly }}"
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        target: development
+        latest_tag: ${{ env.latest_tag }}
+        target: ${{ env.target }}
 
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
@@ -79,6 +84,10 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_arm64:
+    strategy:
+      matrix:
+        dev_suffix: [ '', '-dev' ]
+
     if: "${{ inputs.ruby_version }} && !'nightly' == ${{ inputs.ruby_version }}"
 
     runs-on: ubuntu-latest
@@ -93,7 +102,7 @@ jobs:
       push_tags: |
         ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
         ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
-      dev_suffix: "-dev"
+      dev_suffix: ${{ matrix.dev_suffix }}
       only_development: false
       optflags: ''
       cppflags: ''
@@ -102,18 +111,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.0
 
-    - uses: "./.github/actions/build_image"
-      if: "!${{ env.only_development }}"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
-        arch: 'linux/arm64'
-        latest_tag: 'true'
+    - run: |
+        if [ "${{ env.dev_suffix }}" = "-dev" ]; then
+          echo "target=development" >> $GITHUB_ENV
+          echo "latest_tag=false" >> $GITHUB_ENV
+        else
+          echo "target=ruby" >> $GITHUB_ENV
+          echo "latest_tag=true" >> $GITHUB_ENV
+        fi
 
     - uses: "./.github/actions/build_image"
+      if: "!${{ env.only_development }}"
       with:
         ruby_version: "${{ env.ruby_version }}"
         nightly: "${{ env.nightly }}"
@@ -121,7 +129,8 @@ jobs:
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
         arch: 'linux/arm64'
-        target: development
+        latest_tag: ${{ env.latest_tag }}
+        target: ${{ env.target }}
 
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
