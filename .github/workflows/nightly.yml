@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: '0 */12 * * *'
 
-  workflow_dispatch:
-    inputs:
-      ubuntu_version:
-        required: false
-        default: jammy
-
 env:
   DOCKER_USER: ${{ secrets.DOCKER_USER }}
   DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
