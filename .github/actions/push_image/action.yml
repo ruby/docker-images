@@ -24,6 +24,7 @@ runs:
   - name: Push docker image to rubylang
     run: |-
       echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+      echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
       rake docker:push ruby_version=${{ inputs.ruby_version }} \
                        ubuntu_version=${{ inputs.ubuntu_version }} \
                        image_version_suffix=${{ inputs.image_version_suffix }} \
