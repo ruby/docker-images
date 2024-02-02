@@ -35,6 +35,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.0
 
+    - run: |
+        if [ ${{ env.tag_suffix }} = "-dev" ]; then
+          echo "target=development" >> $GITHUB_ENV
+        else
+          echo "target=ruby" >> $GITHUB_ENV
+        fi
+
     - uses: "./.github/actions/build_image"
       with:
         ruby_version: "${{ env.ruby_version }}"
@@ -42,7 +49,7 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}${{ env.tag_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        target: development
+        target: ${{ env.target }}
 
     - uses: "./.github/actions/push_image"
       if: "${{ env.push }}"
