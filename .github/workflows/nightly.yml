@@ -109,8 +109,6 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_debug:
-    if: "'nightly' == '${{ inputs.ruby_version }}'"
-
     strategy:
       matrix:
         os: [jammy]
@@ -155,8 +153,6 @@ jobs:
         push_tags: "${{ env.push_tags }}"
 
   build_debug_dev:
-    if: "'nightly' == '${{ inputs.ruby_version }}'"
-
     strategy:
       matrix:
         os: [jammy]
