@@ -29,8 +29,8 @@ jobs:
     env:
       nightly: false
       push: false
-      ubuntu_version: "${{ inputs.ubuntu_version }}"
-      ruby_version: "${{ inputs.ruby_version }}"
+      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
+      ruby_version: "${{ inputs.ruby_version || 'master' }}"
       image_version_suffix: ''
       tag_suffix: "-amd64-${{ github.sha }}"
       push_tags: |
@@ -86,8 +86,8 @@ jobs:
     env:
       nightly: false
       push: false
-      ubuntu_version: "${{ inputs.ubuntu_version }}"
-      ruby_version: "${{ inputs.ruby_version }}"
+      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
+      ruby_version: "${{ inputs.ruby_version || 'master' }}"
       image_version_suffix: ''
       tag_suffix: "-arm64-${{ github.sha }}"
       push_tags: |
