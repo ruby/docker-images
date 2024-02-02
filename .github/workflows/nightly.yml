@@ -47,7 +47,15 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: 'true'
+
+    - uses: "./.github/actions/push_image"
+      if: "${{ env.push }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
 
     - uses: "./.github/actions/build_image"
       with:
@@ -102,7 +110,15 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: 'true'
+
+    - uses: "./.github/actions/push_image"
+      if: "${{ env.push }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
 
     - uses: "./.github/actions/build_image"
       with:
@@ -158,7 +174,15 @@ jobs:
         image_version_suffix: "${{ env.image_version_suffix }}"
         ubuntu_version: "${{ env.ubuntu_version }}"
         tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: 'true'
+
+    - uses: "./.github/actions/push_image"
+      if: "${{ env.push }}"
+      with:
+        ruby_version: "${{ env.ruby_version }}"
+        nightly: "${{ env.nightly }}"
+        image_version_suffix: "${{ env.image_version_suffix }}"
+        ubuntu_version: "${{ env.ubuntu_version }}"
+        tag_suffix: "${{ env.tag_suffix }}"
 
     - uses: "./.github/actions/build_image"
       with:
