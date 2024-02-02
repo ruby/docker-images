@@ -39,7 +39,6 @@ jobs:
         ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
         ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-amd64-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
-      only_development: false
       optflags: ''
       cppflags: ''
       debugflags: ''
@@ -57,7 +56,6 @@ jobs:
         fi
 
     - uses: "./.github/actions/build_image"
-      if: "!${{ env.only_development }}"
       with:
         ruby_version: "${{ env.ruby_version }}"
         nightly: "${{ env.nightly }}"
@@ -99,7 +97,6 @@ jobs:
         ${{ inputs.ruby_version }}-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
         ${{ inputs.ruby_version }}-dev-${{ inputs.ubuntu_version }}-arm64-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
-      only_development: false
       optflags: ''
       cppflags: ''
       debugflags: ''
@@ -117,7 +114,6 @@ jobs:
         fi
 
     - uses: "./.github/actions/build_image"
-      if: "!${{ env.only_development }}"
       with:
         ruby_version: "${{ env.ruby_version }}"
         nightly: "${{ env.nightly }}"
