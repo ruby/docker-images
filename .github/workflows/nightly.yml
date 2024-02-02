@@ -3,6 +3,7 @@ name: ruby/ruby-docker-images/nightly
 on:
   schedule:
     - cron: '0 */12 * * *'
+  workflow_dispatch:
 
 env:
   DOCKER_USER: ${{ secrets.DOCKER_USER }}
