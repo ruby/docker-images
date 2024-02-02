@@ -26,7 +26,6 @@ jobs:
       push: true
       ubuntu_version: jammy
       ruby_version: master
-      executor: amd64
       image_version_suffix: ''
       tag_suffix: ''
       push_tags: ''
@@ -68,7 +67,6 @@ jobs:
       push: true
       ubuntu_version: jammy
       ruby_version: master
-      executor: amd64
       image_version_suffix: ''
       tag_suffix: ''
       push_tags: ''
@@ -111,7 +109,6 @@ jobs:
       push: true
       ubuntu_version: focal
       ruby_version: master
-      executor: amd64
       image_version_suffix: ''
       tag_suffix: ''
       push_tags: ''
@@ -153,7 +150,6 @@ jobs:
       push: true
       ubuntu_version: focal
       ruby_version: master
-      executor: amd64
       image_version_suffix: ''
       tag_suffix: ''
       push_tags: ''
@@ -197,7 +193,6 @@ jobs:
       push: true
       ubuntu_version: jammy
       ruby_version: master
-      executor: amd64
       image_version_suffix: "-debug"
       tag_suffix: ''
       push_tags: ''
@@ -240,7 +235,6 @@ jobs:
       push: true
       ubuntu_version: jammy
       ruby_version: master
-      executor: amd64
       image_version_suffix: "-debug"
       tag_suffix: ''
       push_tags: ''
