@@ -170,7 +170,7 @@ namespace :docker do
   end
 
   def each_nightly_tag(ruby_version, tags)
-    return [] unless (ENV('nightly') == 'true') && ruby_version.start_with?('master:')
+    return [] unless (ENV['nightly'] == 'true') && ruby_version.start_with?('master:')
     commit_hash = ruby_version.split(":")[1]
     commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
     image_name = tags.find {|x| x.match? commit_hash_re }
