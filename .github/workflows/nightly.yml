@@ -38,7 +38,7 @@ jobs:
     - uses: actions/checkout@v4.1.0
 
     - run: |
-        if [ ${{ env.tag_suffix }} = "-dev" ]; then
+        if [ ${{ env.dev_suffix }} = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
         else
           echo "target=ruby" >> $GITHUB_ENV
