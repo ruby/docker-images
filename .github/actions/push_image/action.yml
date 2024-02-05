@@ -1,5 +1,8 @@
 name: push_image
 inputs:
+  registry_name:
+    required: false
+    default: rubylang
   ruby_version:
     required: false
     default: master
@@ -30,5 +33,6 @@ runs:
                        image_version_suffix=${{ inputs.image_version_suffix }} \
                        nightly=${{ inputs.nightly }} \
                        tag_suffix=${{ inputs.tag_suffix }} \
-                       latest_tag=${{ inputs.latest_tag }}
+                       latest_tag=${{ inputs.latest_tag }} \
+                       registry_name=${{ inputs.registry_name }}
     shell: bash
