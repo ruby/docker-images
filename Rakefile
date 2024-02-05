@@ -239,10 +239,18 @@ namespace :docker do
     ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
 
     tags.each do |tag|
+      if ENV['registry_name'].start_with?('ghcr.io')
+        docker_tag = "rubylang/#{tag.split("/").last}"
+        sh 'docker', 'tag', docker_tag, tag
+      end
       sh 'docker', 'push', tag
     end
 
     each_nightly_tag(ruby_version, tags) do |_, tag|
+      if ENV['registry_name'].start_with?('ghcr.io')
+        docker_tag = "rubylang/#{tag.split("/").last}"
+        sh 'docker', 'tag', docker_tag, tag
+      end
       sh 'docker', 'push', tag
     end
   end
