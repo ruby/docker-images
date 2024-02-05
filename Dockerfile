@@ -175,6 +175,7 @@ RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
             build-essential \
+            pkg-config \
             curl \
             gdb \
             git \
