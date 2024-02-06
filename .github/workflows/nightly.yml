@@ -5,12 +5,6 @@ on:
     - cron: '0 */12 * * *'
   workflow_dispatch:
 
-env:
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
-  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-  GHCR_USER: ${{ secrets.GHCR_USER }}
-  GHCR_ACCESS_TOKEN: ${{ secrets.GHCR_ACCESS_TOKEN }}
-
 jobs:
   build:
     strategy:
@@ -37,6 +31,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.0
 
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
@@ -44,35 +49,61 @@ jobs:
           echo "target=ruby" >> $GITHUB_ENV
         fi
 
-    - uses: "./.github/actions/build_image"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
-        target: ${{ env.target }}
+    - name: Build docker image
+      run: |-
+        rake docker:build ruby_version=${{ env.ruby_version }} \
+                          ubuntu_version=${{ env.ubuntu_version }} \
+                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                          nightly=${{ env.nightly }} \
+                          tag_suffix=${{ env.tag_suffix }} \
+                          target=${{ env.target }} \
+                          latest_tag=${{ env.latest_tag }} \
+                          arch=linux/amd64
+      shell: bash
 
-    - uses: "./.github/actions/push_image"
-      if: "${{ env.push }}"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
+    - name: List images
+      run: docker images
+      shell: bash
 
-    - uses: "./.github/actions/push_image"
-      if: "${{ env.push }}"
-      with:
-        registry_name: 'ghcr.io/ruby'
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
+    - name: Push docker image to rubylang
+      if: ${{ env.push }}
+      run: |-
+        rake docker:push ruby_version=${{ env.ruby_version }} \
+                         ubuntu_version=${{ env.ubuntu_version }} \
+                         image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                         nightly=${{ env.nightly }} \
+                         tag_suffix=${{ env.tag_suffix }} \
+                         latest_tag=false \
+                         registry_name=rubylang
+        shell: bash
 
-    - uses: "./.github/actions/push_image_by_tag"
+    - name: Push docker image to ghcr.io/ruby
+      if: ${{ env.push }}
+      run: |-
+        rake docker:push ruby_version=${{ env.ruby_version }} \
+                         ubuntu_version=${{ env.ubuntu_version }} \
+                         image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                         nightly=${{ env.nightly }} \
+                         tag_suffix=${{ env.tag_suffix }} \
+                         latest_tag=false \
+                         registry_name=ghcr.io/ruby
+      shell: bash
+
+    - name: Push docker image to rubylang
       if: "${{ env.push_tags }}"
-      with:
-        push_tags: "${{ env.push_tags }}"
+      run: |-
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker push rubylang/ruby:$tag
+        done
+      shell: bash
+
+    - name: Push docker image to ghcr.io/ruby
+      if: "${{ env.push_tags }}"
+      run: |-
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+          docker push ghcr.io/ruby/ruby:$tag
+        done
+      shell: bash

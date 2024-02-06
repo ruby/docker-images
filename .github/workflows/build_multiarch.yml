@@ -14,12 +14,6 @@ on:
         required: false
         default: jammy
 
-env:
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
-  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-  GHCR_USER: ${{ secrets.GHCR_USER }}
-  GHCR_ACCESS_TOKEN: ${{ secrets.GHCR_ACCESS_TOKEN }}
-
 jobs:
   build:
     strategy:
@@ -45,6 +39,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.0
 
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
@@ -54,30 +53,60 @@ jobs:
           echo "latest_tag=true" >> $GITHUB_ENV
         fi
 
-    - uses: "./.github/actions/build_image"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
-        latest_tag: ${{ env.latest_tag }}
-        target: ${{ env.target }}
-        arch: "linux/${{ matrix.arch }}"
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-    - uses: "./.github/actions/push_image"
-      if: "${{ env.push }}"
-      with:
-        ruby_version: "${{ env.ruby_version }}"
-        nightly: "${{ env.nightly }}"
-        image_version_suffix: "${{ env.image_version_suffix }}${{ env.dev_suffix }}"
-        ubuntu_version: "${{ env.ubuntu_version }}"
-        tag_suffix: "${{ env.tag_suffix }}"
+    - name: Build docker image
+      run: |-
+        rake docker:build ruby_version=${{ env.ruby_version }} \
+                          ubuntu_version=${{ env.ubuntu_version }} \
+                          arch=linux/${{ matrix.arch }} \
+                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                          nightly=${{ env.nightly }} \
+                          tag_suffix=${{ env.tag_suffix }} \
+                          target=${{ env.target }} \
+                          latest_tag=${{ env.latest_tag }}
+      shell: bash
 
-    - uses: "./.github/actions/push_image_by_tag"
+    - name: List images
+      run: docker images
+      shell: bash
+
+    - name: Push docker image to rubylang
+      if: ${{ env.push }}
+      run: |-
+        rake docker:push ruby_version=${{ env.ruby_version }} \
+                         ubuntu_version=${{ env.ubuntu_version }} \
+                         image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                         nightly=${{ env.nightly }} \
+                         tag_suffix=${{ env.tag_suffix }} \
+                         latest_tag=false \
+                         registry_name=rubylang
+      shell: bash
+
+    - name: Push docker image to rubylang
       if: "${{ env.push_tags }}"
-      with:
-        push_tags: "${{ env.push_tags }}"
+      run: |-
+        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker push rubylang/ruby:$tag
+        done
+      shell: bash
+
+    - name: Push docker image to ghcr.io/ruby
+      if: "${{ env.push_tags }}"
+      run: |-
+        echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+          docker push ghcr.io/ruby/ruby:$tag
+        done
+      shell: bash
 
   deploy_multiarch:
     strategy:
@@ -91,47 +120,42 @@ jobs:
     env:
       ruby_version: "${{ inputs.ruby_version }}"
       ubuntu_version: "${{ inputs.ubuntu_version }}"
-      registry_name: "${{ matrix.registry_name }}"
 
     steps:
     - uses: actions/checkout@v4.1.0
 
-    - name: Login to ${{ env.registry_name }}
-      run: |-
-        case x"${{ env.registry_name }}" in
-          xrubylang)
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            ;;
-          xghcr.io/ruby)
-            echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
-            ;;
-          *)
-            echo "ERROR: Unknown registry_name parameter: $registry_name" >&2
-            exit 1
-            ;;
-        esac
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
 
-    - name: Create manifest for ${{ env.registry_name }}
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+    - name: Create manifest for ${{ matrix.registry_name }}
       run: |-
         rake docker:manifest:create \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              architectures="amd64 arm64" \
              manifest_suffix=${{ github.sha }} \
              latest_tag=true
         rake docker:manifest:create \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              architectures="amd64 arm64" \
              image_version_suffix=-dev \
              manifest_suffix=${{ github.sha }}
 
-    - name: Push manifest to ${{ env.registry_name }}
+    - name: Push manifest to ${{ matrix.registry_name }}
       run: |-
         rake docker:manifest:push \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              latest_tag=true
