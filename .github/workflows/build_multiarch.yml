@@ -164,7 +164,7 @@ jobs:
              ubuntu_version="${{ env.ubuntu_version }}" \
              latest_tag=true
         rake docker:manifest:push \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              image_version_suffix=-dev
