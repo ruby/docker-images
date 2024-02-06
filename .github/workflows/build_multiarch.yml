@@ -120,7 +120,6 @@ jobs:
     env:
       ruby_version: "${{ inputs.ruby_version }}"
       ubuntu_version: "${{ inputs.ubuntu_version }}"
-      registry_name: "${{ matrix.registry_name }}"
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -136,27 +135,27 @@ jobs:
         username: ${{ secrets.GHCR_USER }}
         password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
-    - name: Create manifest for ${{ env.registry_name }}
+    - name: Create manifest for ${{ matrix.registry_name }}
       run: |-
         rake docker:manifest:create \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              architectures="amd64 arm64" \
              manifest_suffix=${{ github.sha }} \
              latest_tag=true
         rake docker:manifest:create \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              architectures="amd64 arm64" \
              image_version_suffix=-dev \
              manifest_suffix=${{ github.sha }}
 
-    - name: Push manifest to ${{ env.registry_name }}
+    - name: Push manifest to ${{ matrix.registry_name }}
       run: |-
         rake docker:manifest:push \
-             registry_name="${{ env.registry_name }}" \
+             registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ env.ubuntu_version }}" \
              latest_tag=true
