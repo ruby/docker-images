@@ -5,12 +5,6 @@ on:
     - cron: '0 */12 * * *'
   workflow_dispatch:
 
-env:
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
-  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-  GHCR_USER: ${{ secrets.GHCR_USER }}
-  GHCR_ACCESS_TOKEN: ${{ secrets.GHCR_ACCESS_TOKEN }}
-
 jobs:
   build:
     strategy:
@@ -36,6 +30,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4.1.0
+
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
@@ -63,7 +68,6 @@ jobs:
     - name: Push docker image to rubylang
       if: ${{ env.push }}
       run: |-
-        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
         rake docker:push ruby_version=${{ env.ruby_version }} \
                          ubuntu_version=${{ env.ubuntu_version }} \
                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
@@ -76,7 +80,6 @@ jobs:
     - name: Push docker image to ghcr.io/ruby
       if: ${{ env.push }}
       run: |-
-        echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
         rake docker:push ruby_version=${{ env.ruby_version }} \
                          ubuntu_version=${{ env.ubuntu_version }} \
                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
@@ -89,7 +92,6 @@ jobs:
     - name: Push docker image to rubylang
       if: "${{ env.push_tags }}"
       run: |-
-        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
         push_tags="${{ env.push_tags }}"
         for tag in $push_tags; do
           docker push rubylang/ruby:$tag
@@ -99,7 +101,6 @@ jobs:
     - name: Push docker image to ghcr.io/ruby
       if: "${{ env.push_tags }}"
       run: |-
-        echo $GHCR_ACCESS_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
         push_tags="${{ env.push_tags }}"
         for tag in $push_tags; do
           docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
