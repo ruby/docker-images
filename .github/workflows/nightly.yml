@@ -75,7 +75,7 @@ jobs:
                          tag_suffix=${{ env.tag_suffix }} \
                          latest_tag=false \
                          registry_name=rubylang
-        shell: bash
+      shell: bash
 
     - name: Push docker image to ghcr.io/ruby
       if: ${{ env.push }}
