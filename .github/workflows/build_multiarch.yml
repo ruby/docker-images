@@ -118,8 +118,8 @@ jobs:
     needs: build
 
     env:
-      ruby_version: "${{ inputs.ruby_version }}"
-      ubuntu_version: "${{ inputs.ubuntu_version }}"
+      ruby_version: "${{ inputs.ruby_version || 'master' }}"
+      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
 
     steps:
     - uses: actions/checkout@v4.1.0
