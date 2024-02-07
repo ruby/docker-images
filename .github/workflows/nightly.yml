@@ -49,6 +49,12 @@ jobs:
           echo "target=ruby" >> $GITHUB_ENV
         fi
 
+    - run: |
+        if [ "${{ env.image_version_suffix }}" = "-debug" ]; then
+          echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
+          echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
+        fi
+
     - name: Build docker image
       run: |-
         rake docker:build ruby_version=${{ env.ruby_version }} \
