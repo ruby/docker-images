@@ -5,6 +5,7 @@ set -ex
 RUBY_VERSION=${RUBY_VERSION-2.6.0}
 RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
+PREFIX=${PREFIX-/usr/local}
 
 function get_released_ruby() {
   git clone --depth 1 https://github.com/ruby/www.ruby-lang.org.git /tmp/www
@@ -83,7 +84,7 @@ fi
   gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
   configure_args=( \
     --build="$gnuArch" \
-    --prefix=/usr/local \
+    --prefix="$PREFIX" \
     --disable-install-doc \
     --enable-shared \
     --enable-yjit
@@ -122,4 +123,5 @@ fi
 rm -fr /usr/src/ruby /root/.gem/
 
 # rough smoke test
+export PATH=$PREFIX/bin:$PATH
 (cd && ruby --version && gem --version && bundle --version)

@@ -50,7 +50,7 @@ COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
 
 RUN set -ex && \
-    RUBY_VERSION=3.2.3 /tmp/install_ruby.sh
+    RUBY_VERSION=3.2.3 PREFIX=/root /tmp/install_ruby.sh
 RUN apt purge -y --auto-remove ruby
 COPY tmp/ruby /usr/src/ruby
 
@@ -66,8 +66,7 @@ RUN set -ex && \
       echo 'update: --no-document'; \
     } >> /usr/local/etc/gemrc && \
     \
-    /tmp/install_ruby.sh
-
+    PATH=/root/bin:$PATH /tmp/install_ruby.sh
 
 ### ruby ###
 FROM ubuntu:$BASE_IMAGE_TAG AS ruby
