@@ -49,6 +49,11 @@ RUN set -ex && \
 COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
 
+RUN set -ex && \
+    RUBY_VERSION=3.2.3 /tmp/install_ruby.sh
+RUN apt purge -y --auto-remove ruby
+COPY tmp/ruby /usr/src/ruby
+
 ARG optflags
 ARG debugflags
 ARG cppflags
