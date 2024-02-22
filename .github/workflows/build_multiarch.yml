@@ -112,6 +112,19 @@ jobs:
         done
       shell: bash
 
+    - uses: ruby/action-slack@v3.2.1
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
+
   deploy_multiarch:
     strategy:
       matrix:
@@ -163,3 +176,16 @@ jobs:
              ubuntu_version="${{ env.ubuntu_version }}" \
              latest_tag=${{ matrix.latest_tag }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
+
+    - uses: ruby/action-slack@v3.2.1
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: ${{ matrix.registry_name }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()

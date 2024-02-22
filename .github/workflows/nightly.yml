@@ -113,3 +113,16 @@ jobs:
           docker push ghcr.io/ruby/ruby:$tag
         done
       shell: bash
+
+    - uses: ruby/action-slack@v3.2.1
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: ${{ matrix.os }} ${{ matrix.debug }} ${{ matrix.dev }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
