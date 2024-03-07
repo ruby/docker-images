@@ -19,40 +19,44 @@ The list of image names in this repository is below:
 
 ### Ubuntu 22.04 (jammy)
 
+- master
+  - rubylang/ruby:master-jammy
+  - rubylang/ruby:master-dev-jammy
+  - rubylang/ruby:master-debug-jammy
+  - rubylang/ruby:master-debug-dev-jammy
 - 3.3
   - rubylang/ruby:latest
   - rubylang/ruby:3.3-jammy
-  - rubylang/ruby:3.3-dev-jammy
   - rubylang/ruby:3.3.0-jammy
-  - rubylang/ruby:3.3.0-dev-jammy
 - 3.2
   - rubylang/ruby:3.2-jammy
-  - rubylang/ruby:3.2-dev-jammy
   - rubylang/ruby:3.2.3-jammy
-  - rubylang/ruby:3.2.3-dev-jammy
+- 3.1
+  - rubylang/ruby:3.1-jammy
+  - rubylang/ruby:3.1.4-jammy
+- 3.0
+  - rubylang/ruby:3.0-jammy
+  - rubylang/ruby:3.0.6-jammy
 
 ### Ubuntu 20.04 (focal)
 
+- master
+  - rubylang/ruby:master-focal
+  - rubylang/ruby:master-dev-focal
+  - rubylang/ruby:master-debug-focal
+  - rubylang/ruby:master-debug-dev-focal
 - 3.3
   - rubylang/ruby:3.3-focal
-  - rubylang/ruby:3.3-dev-focal
   - rubylang/ruby:3.3.0-focal
-  - rubylang/ruby:3.3.0-dev-focal
 - 3.2
   - rubylang/ruby:3.2-focal
-  - rubylang/ruby:3.2-dev-focal
   - rubylang/ruby:3.2.3-focal
-  - rubylang/ruby:3.2.2-dev-focal
 - 3.1
   - rubylang/ruby:3.1-focal
-  - rubylang/ruby:3.1-dev-focal
   - rubylang/ruby:3.1.4-focal
-  - rubylang/ruby:3.1.4-dev-focal
 - 3.0
   - rubylang/ruby:3.0-focal
-  - rubylang/ruby:3.0-dev-focal
   - rubylang/ruby:3.0.6-focal
-  - rubylang/ruby:3.0.6-dev-focal
 
 ### Misc
 
