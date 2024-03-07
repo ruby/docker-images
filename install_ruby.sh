@@ -12,9 +12,13 @@ function get_released_ruby() {
 
   cat << RUBY | ruby - $1 /tmp/www/_data/releases.yml
 require "psych"
-require "date"
 version = ARGV[0]
-releases = Psych.load_file(ARGV[1], permitted_classes: [Symbol, Date])
+if Psych.respond_to?(:safe_load_file)
+  require "date"
+  releases = Psych.safe_load_file(ARGV[1], permitted_classes: [Symbol, Date])
+else
+  releases = Psych.load_file(ARGV[1])
+end
 release = releases.find {|x| x["version"] == version }
 puts "#{release["url"]["xz"]} #{release["sha256"]["xz"]}"
 RUBY
