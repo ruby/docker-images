@@ -12,6 +12,7 @@ function get_released_ruby() {
 
   cat << RUBY | ruby - $1 /tmp/www/_data/releases.yml
 require "psych"
+require "date"
 version = ARGV[0]
 releases = Psych.load_file(ARGV[1], permitted_classes: [Symbol, Date])
 release = releases.find {|x| x["version"] == version }
