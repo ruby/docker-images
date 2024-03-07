@@ -63,8 +63,8 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
@@ -75,9 +75,11 @@ jobs:
           docker images rubylang/ruby --format='docker tag {{.Repository}}:{{.Tag}} ghcr.io/ruby/ruby:{{.Tag}}' | sh -ex
 
       - name: Login GitHub Container Registry
-        run: |
-          GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
-          echo $GHCR_TOKEN | docker login ghcr.io -u owner --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
