@@ -27,16 +27,16 @@ The list of image names in this repository is below:
 - 3.3
   - rubylang/ruby:latest
   - rubylang/ruby:3.3-jammy
-  - rubylang/ruby:3.3.0-jammy
+  - rubylang/ruby:3.3.1-jammy
 - 3.2
   - rubylang/ruby:3.2-jammy
-  - rubylang/ruby:3.2.3-jammy
+  - rubylang/ruby:3.2.4-jammy
 - 3.1
   - rubylang/ruby:3.1-jammy
-  - rubylang/ruby:3.1.4-jammy
+  - rubylang/ruby:3.1.5-jammy
 - 3.0
   - rubylang/ruby:3.0-jammy
-  - rubylang/ruby:3.0.6-jammy
+  - rubylang/ruby:3.0.7-jammy
 
 ### Ubuntu 20.04 (focal)
 
@@ -47,16 +47,16 @@ The list of image names in this repository is below:
   - rubylang/ruby:master-debug-dev-focal
 - 3.3
   - rubylang/ruby:3.3-focal
-  - rubylang/ruby:3.3.0-focal
+  - rubylang/ruby:3.3.1-focal
 - 3.2
   - rubylang/ruby:3.2-focal
-  - rubylang/ruby:3.2.3-focal
+  - rubylang/ruby:3.2.4-focal
 - 3.1
   - rubylang/ruby:3.1-focal
-  - rubylang/ruby:3.1.4-focal
+  - rubylang/ruby:3.1.5-focal
 - 3.0
   - rubylang/ruby:3.0-focal
-  - rubylang/ruby:3.0.6-focal
+  - rubylang/ruby:3.0.7-focal
 
 ### Misc
 
