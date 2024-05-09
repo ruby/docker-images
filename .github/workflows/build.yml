@@ -31,6 +31,7 @@ jobs:
     name: ${{ github.event.inputs.RUBY_VERSION }}-${{ matrix.ubuntu_version }}-${{ github.event.inputs.ARCH }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         ubuntu_version:
           - jammy
