@@ -101,7 +101,7 @@ jobs:
         done
       shell: bash
 
-    - uses: ruby/action-slack@v3.2.1
+    - uses: ruby/action-slack@v3.2.2
       with:
         payload: |
           {
@@ -166,7 +166,7 @@ jobs:
              latest_tag=${{ matrix.latest_tag }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
-    - uses: ruby/action-slack@v3.2.1
+    - uses: ruby/action-slack@v3.2.2
       with:
         payload: |
           {
