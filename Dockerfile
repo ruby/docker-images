@@ -119,7 +119,9 @@ RUN set -ex && \
     apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
-    useradd -ms /bin/bash ubuntu
+    if ! (id ubuntu &>/dev/null); then \
+        useradd -ms /bin/bash ubuntu; \
+    fi
 
 RUN mkdir -p /usr/local/etc
 
