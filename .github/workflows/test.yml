@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         ubuntu_version:
+          - noble
           - jammy
           - focal
           - bionic
