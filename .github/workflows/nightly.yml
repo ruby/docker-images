@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [jammy, focal]
+        os: [noble, jammy, focal]
         debug: ['', '-debug']
         dev: ['', '-dev']
 
