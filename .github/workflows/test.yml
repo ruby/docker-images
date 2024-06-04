@@ -15,7 +15,6 @@ jobs:
           - noble
           - jammy
           - focal
-          - bionic
         ruby_version:
           - 3.0.7
           - 3.1.6
