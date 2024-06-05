@@ -56,12 +56,12 @@ The list of image names in this repository is below:
 
 We have some other images for special purposes.
 
-- Preview or Release-candidate versions (e.g. `rubylang/ruby:2.7.0-preview1-bionic`)
-- Nightly built master (e.g. `rubylang/ruby:master-nightly-bionic`)
-- Nightly debug built master (e.g. `rubylang/ruby:master-debug-nightly-bionic`)
-- EOL versions (e.g. `rubylang/ruby:2.4.10-bionic`)
+- Preview or Release-candidate versions (e.g. `rubylang/ruby:2.7.0-preview1-jammy`)
+- Nightly built master (e.g. `rubylang/ruby:master-nightly-jammy`)
+- Nightly debug built master (e.g. `rubylang/ruby:master-debug-nightly-jammy`)
+- EOL versions (e.g. `rubylang/ruby:2.4.10-jammy`)
 
-All the images are based on `ubuntu:bionic`, and made from just doing `make install` and installing bundler.
+All the images are based on `ubuntu:jammy`, and made from just doing `make install` and installing bundler.
 
 ## How to build images
 

@@ -13,13 +13,6 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -ex && \
     apt-get update && \
-    \
-    if test "x$BASE_IMAGE_TAG" = "xbionic"; then \
-        apt-get install -y --no-install-recommends \
-          software-properties-common && \
-        apt-add-repository ppa:git-core/ppa; \
-    fi && \
-    \
     apt-get install -y --no-install-recommends \
             autoconf \
             bison \
@@ -80,14 +73,6 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -ex && \
     apt-get update && \
-    \
-    if test "x$BASE_IMAGE_TAG" = "xbionic"; then \
-        apt-get install -y --no-install-recommends \
-                software-properties-common \
-                && \
-        apt-add-repository ppa:git-core/ppa; \
-    fi && \
-    \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             libffi-dev \

@@ -37,7 +37,6 @@ jobs:
           - noble
           - jammy
           - focal
-          - bionic
 
     steps:
       - uses: actions/checkout@v4

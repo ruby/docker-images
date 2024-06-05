@@ -19,9 +19,7 @@ def download(url)
 end
 
 def default_ubuntu_version(ruby_version)
-  if ruby_version < "3.0"
-    "bionic"
-  elsif ruby_version < "3.1"
+  if ruby_version < "3.1"
     "focal"
   else
     "jammy"
