@@ -99,7 +99,7 @@ jobs:
     - name: Push the same image without the ubuntu version
       if: matrix.os == 'noble'
       run: |-
-        docker tag rubylang/ruby:${{ env.ruby_version }}-${{ env.ubuntu_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }} rubylang/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}
+        docker tag rubylang/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}-${{ env.ubuntu_version }} rubylang/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}
         docker push rubylang/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}
         docker tag rubylang/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }} ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}
         docker push ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ env.image_version_suffix }}${{ env.dev_suffix }}
