@@ -2,6 +2,8 @@ name: Build Docker image
 
 on:
   repository_dispatch:
+    types: [release]
+
   workflow_dispatch:
     inputs:
       RUBY_VERSION:
