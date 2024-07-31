@@ -1,6 +1,7 @@
 name: Build Docker image
 
 on:
+  repository_dispatch:
   workflow_dispatch:
     inputs:
       RUBY_VERSION:
@@ -28,7 +29,7 @@ on:
 
 jobs:
   build:
-    name: ${{ github.event.inputs.RUBY_VERSION }}-${{ matrix.ubuntu_version }}-${{ github.event.inputs.ARCH }}
+    name: ${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}-${{ matrix.ubuntu_version }}-${{ github.event.inputs.ARCH || github.event.client_payload.arch }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -43,9 +44,9 @@ jobs:
 
       - name: Show parameters
         run: |
-          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION }}"
-          echo "ARCH=${{ github.event.inputs.ARCH }}"
-          echo "LATEST=${{ github.event.inputs.LATEST }}"
+          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}"
+          echo "ARCH=${{ github.event.inputs.ARCH || github.event.client_payload.arch }}"
+          echo "LATEST=${{ github.event.inputs.LATEST || github.event.client_payload.latest }}"
           echo "NOPUSH=${{ github.event.inputs.NOPUSH }}"
 
       - name: Build image
