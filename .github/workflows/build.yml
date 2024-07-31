@@ -45,25 +45,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Store parameters to environmental variables
+        run: |
+          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}" >> $GITHUB_ENV
+          echo "ARCH=${{ github.event.inputs.ARCH || github.event.client_payload.arch }}" >> $GITHUB_ENV
+          echo "LATEST=${{ github.event.inputs.LATEST || github.event.client_payload.latest }}" >> $GITHUB_ENV
+          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}" >> $GITHUB_ENV
+
       - name: Show parameters
         run: |
-          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}"
-          echo "ARCH=${{ github.event.inputs.ARCH || github.event.client_payload.arch }}"
-          echo "LATEST=${{ github.event.inputs.LATEST || github.event.client_payload.latest }}"
-          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}"
+          echo $RUBY_VERSION
+          echo $ARCH
+          echo $LATEST
+          echo $NOPUSH
 
       - name: Build image
         run: |
-          rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }} ubuntu_version=${{ matrix.ubuntu_version }}
+          rake docker:build arch=${{ env.ARCH }} ruby_version=${{ env.RUBY_VERSION }} ubuntu_version=${{ matrix.ubuntu_version }}
 
       - name: Check image
         run: |
           docker images
 
-          if [[ "${{ github.event.inputs.ARCH }}" != "amd64" ]]; then
-            ARCH_SUFFIX=-${{ github.event.inputs.ARCH }}
+          if [[ "${{ env.ARCH }}" != "amd64" ]]; then
+            ARCH_SUFFIX=-${{ env.ARCH }}
           fi
-          docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-${{ matrix.ubuntu_version }}${ARCH_SUFFIX} ruby -v
+          docker run rubylang/ruby:${{ env.RUBY_VERSION }}-${{ matrix.ubuntu_version }}${ARCH_SUFFIX} ruby -v
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -73,7 +80,7 @@ jobs:
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
-        if: ${{ github.event.inputs.NOPUSH == 'false' }}
+        if: ${{ env.NOPUSH == 'false' }}
 
       - name: Renaming images
         run: |
@@ -88,4 +95,4 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
-        if: ${{ github.event.inputs.NOPUSH == 'false' }}
+        if: ${{ env.NOPUSH == 'false' }}
