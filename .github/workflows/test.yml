@@ -1,0 +1,33 @@
+name: Test to build Docker image
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.ruby_version }}-${{ matrix.ubuntu_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ubuntu_version:
+          - noble
+          - jammy
+          - focal
+        ruby_version:
+          - 3.1.6
+          - 3.2.4
+          - 3.3.3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          rake docker:build arch=amd64 ruby_version=${{ matrix.ruby_version }} ubuntu_version=${{ matrix.ubuntu_version }}
+
+      - name: Check image
+        run: |
+          docker images
+          docker run rubylang/ruby:${{ matrix.ruby_version }}-${{ matrix.ubuntu_version }} ruby -v

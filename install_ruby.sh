@@ -5,6 +5,7 @@ set -ex
 RUBY_VERSION=${RUBY_VERSION-2.6.0}
 RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
+PREFIX=${PREFIX-/usr/local}
 
 function get_released_ruby() {
   git clone --depth 1 https://github.com/ruby/www.ruby-lang.org.git /tmp/www
@@ -12,7 +13,12 @@ function get_released_ruby() {
   cat << RUBY | ruby - $1 /tmp/www/_data/releases.yml
 require "psych"
 version = ARGV[0]
-releases = Psych.load_file(ARGV[1])
+if Psych.respond_to?(:safe_load_file)
+  require "date"
+  releases = Psych.safe_load_file(ARGV[1], permitted_classes: [Symbol, Date])
+else
+  releases = Psych.load_file(ARGV[1])
+end
 release = releases.find {|x| x["version"] == version }
 puts "#{release["url"]["xz"]} #{release["sha256"]["xz"]}"
 RUBY
@@ -83,7 +89,7 @@ fi
   gnuArch=$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)
   configure_args=( \
     --build="$gnuArch" \
-    --prefix=/usr/local \
+    --prefix="$PREFIX" \
     --disable-install-doc \
     --enable-shared \
     --enable-yjit
@@ -122,4 +128,5 @@ fi
 rm -fr /usr/src/ruby /root/.gem/
 
 # rough smoke test
+export PATH=$PREFIX/bin:$PATH
 (cd && ruby --version && gem --version && bundle --version)

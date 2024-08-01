@@ -19,13 +19,15 @@ def download(url)
 end
 
 def default_ubuntu_version(ruby_version)
-  if ruby_version < "3.0"
-    "bionic"
-  elsif ruby_version < "3.1"
+  if ruby_version < "3.1"
     "focal"
   else
     "jammy"
   end
+end
+
+def default_ruby_version
+  ENV['ruby_version'] || '3.3.0'
 end
 
 def ubuntu_version(ruby_version)
@@ -166,7 +168,7 @@ namespace :docker do
   end
 
   def each_nightly_tag(ruby_version, tags)
-    return [] unless ENV.key?('nightly') && ruby_version.start_with?('master:')
+    return [] unless (ENV['nightly'] == 'true') && ruby_version.start_with?('master:')
     commit_hash = ruby_version.split(":")[1]
     commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
     image_name = tags.find {|x| x.match? commit_hash_re }
@@ -176,7 +178,7 @@ namespace :docker do
   end
 
   task :build do
-    ruby_version = ENV['ruby_version'] || '2.6.1'
+    ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
       abort "unknown ruby version: #{ruby_version}"
     end
@@ -184,6 +186,7 @@ namespace :docker do
     tag_suffix = ENV["tag_suffix"]
     tag = ENV["tag"] || ""
     target = ENV.fetch("target", "ruby")
+    arch = ENV.fetch("arch", "linux/amd64")
 
     ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
     tags << "#{docker_image_name}:#{tag}" if !tag.empty?
@@ -207,11 +210,15 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
 
-    sh 'docker', 'build', '-f', 'Dockerfile',
+    build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch, '--load'] : ['build']
+
+    sh 'docker', *build_cmd_args, '-f', 'Dockerfile',
        *tags.map {|tag| ["-t", tag] }.flatten,
        *build_args.map {|arg| ["--build-arg", arg] }.flatten,
        '--target', target,
        '.'
+
+    sh 'docker', 'images'
 
     each_nightly_tag(ruby_version, tags) do |image_name, tag|
       sh 'docker', 'tag', image_name, tag
@@ -230,10 +237,18 @@ namespace :docker do
     ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
 
     tags.each do |tag|
+      if ENV['registry_name'].start_with?('ghcr.io')
+        docker_tag = "rubylang/#{tag.split("/").last}"
+        sh 'docker', 'tag', docker_tag, tag
+      end
       sh 'docker', 'push', tag
     end
 
     each_nightly_tag(ruby_version, tags) do |_, tag|
+      if ENV['registry_name'].start_with?('ghcr.io')
+        docker_tag = "rubylang/#{tag.split("/").last}"
+        sh 'docker', 'tag', docker_tag, tag
+      end
       sh 'docker', 'push', tag
     end
   end

@@ -1,21 +1,16 @@
 name: Build Docker image
 
 on:
+  repository_dispatch:
+    types: 
+      - build
+
   workflow_dispatch:
     inputs:
       RUBY_VERSION:
         description: The version of Ruby to be build
         required: true
         default: master
-      UBUNTU_VERSION:
-        description: The version of Ubuntu as the base image
-        type: choice
-        options:
-        - jammy
-        - focal
-        - bionic
-        default: jammy
-        required: true
       ARCH:
         description: Which architecture amd64 or arm64 do you want to build? (The default is amd64)
         type: choice
@@ -37,52 +32,67 @@ on:
 
 jobs:
   build:
-    name: ${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}-${{ github.event.inputs.ARCH }}
+    name: ${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}-${{ matrix.ubuntu_version }}-${{ github.event.inputs.ARCH || github.event.client_payload.arch }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu_version:
+          - noble
+          - jammy
+          - focal
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Store parameters to environmental variables
+        run: |
+          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}" >> $GITHUB_ENV
+          echo "ARCH=${{ github.event.inputs.ARCH || github.event.client_payload.arch }}" >> $GITHUB_ENV
+          echo "LATEST=${{ github.event.inputs.LATEST || github.event.client_payload.latest }}" >> $GITHUB_ENV
+          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}" >> $GITHUB_ENV
+
       - name: Show parameters
         run: |
-          echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION }}"
-          echo "UBUNTU_VERSION=${{ github.event.inputs.UBUNTU_VERSION }}"
-          echo "ARCH=${{ github.event.inputs.ARCH }}"
-          echo "LATEST=${{ github.event.inputs.LATEST }}"
-          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}"
+          echo $RUBY_VERSION
+          echo $ARCH
+          echo $LATEST
+          echo $NOPUSH
 
       - name: Build image
         run: |
-          rake docker:build arch=${{ github.event.inputs.arch }} ruby_version=${{ github.event.inputs.RUBY_VERSION }} ubuntu_version=${{ github.event.inputs.UBUNTU_VERSION }} latest_tag=${{ github.event.inputs.LATEST }}
+          rake docker:build arch=${{ env.ARCH }} ruby_version=${{ env.RUBY_VERSION }} ubuntu_version=${{ matrix.ubuntu_version }} latest_tag=${{ env.LATEST }}
 
       - name: Check image
         run: |
           docker images
 
-          if [[ "${{ github.event.inputs.ARCH }}" != "amd64" ]]; then
-            ARCH_SUFFIX=-${{ github.event.inputs.ARCH }}
+          if [[ "${{ env.ARCH }}" != "amd64" ]]; then
+            ARCH_SUFFIX=-${{ env.ARCH }}
           fi
-          docker run rubylang/ruby:${{ github.event.inputs.RUBY_VERSION }}-${{ github.event.inputs.UBUNTU_VERSION }}${ARCH_SUFFIX} ruby -v
+          docker run rubylang/ruby:${{ env.RUBY_VERSION }}-${{ matrix.ubuntu_version }}${ARCH_SUFFIX} ruby -v
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
-        if: ${{ github.event.inputs.NOPUSH == 'false' }}
+        if: ${{ env.NOPUSH == 'false' }}
 
       - name: Renaming images
         run: |
           docker images rubylang/ruby --format='docker tag {{.Repository}}:{{.Tag}} ghcr.io/ruby/ruby:{{.Tag}}' | sh -ex
 
       - name: Login GitHub Container Registry
-        run: |
-          GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
-          echo $GHCR_TOKEN | docker login ghcr.io -u owner --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
-        if: ${{ github.event.inputs.NOPUSH == 'false' }}
+        if: ${{ env.NOPUSH == 'false' }}

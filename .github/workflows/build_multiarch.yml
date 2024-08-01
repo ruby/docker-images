@@ -1,0 +1,180 @@
+name: ruby/ruby-docker-images/build_multiarch
+
+on:
+  schedule:
+    - cron: '30 */12 * * *'
+
+  workflow_dispatch:
+    inputs:
+      ruby_version:
+        required: true
+        default: master
+        description: '"master" or version nunmber ("3.1.2")'
+      ubuntu_version:
+        required: false
+        default: jammy
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        dev_suffix: [ '', '-dev' ]
+        arch: ['amd64', 'arm64']
+
+    runs-on: ubuntu-latest
+
+    env:
+      nightly: false
+      push: false
+      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
+      ruby_version: "${{ inputs.ruby_version || 'master' }}"
+      image_version_suffix: ''
+      tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
+      push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ inputs.ubuntu_version || 'jammy' }}-${{ matrix.arch }}-${{ github.sha }}
+      dev_suffix: ${{ matrix.dev_suffix }}
+      optflags: ''
+      cppflags: ''
+      debugflags: ''
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+    - run: |
+        if [ "${{ env.dev_suffix }}" = "-dev" ]; then
+          echo "target=development" >> $GITHUB_ENV
+          echo "latest_tag=false" >> $GITHUB_ENV
+        else
+          echo "target=ruby" >> $GITHUB_ENV
+          echo "latest_tag=true" >> $GITHUB_ENV
+        fi
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build docker image
+      run: |-
+        rake docker:build ruby_version=${{ env.ruby_version }} \
+                          ubuntu_version=${{ env.ubuntu_version }} \
+                          arch=linux/${{ matrix.arch }} \
+                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                          nightly=${{ env.nightly }} \
+                          tag_suffix=${{ env.tag_suffix }} \
+                          target=${{ env.target }} \
+                          latest_tag=${{ env.latest_tag }}
+      shell: bash
+
+    - name: List images
+      run: docker images
+      shell: bash
+
+    - name: Push docker image to rubylang
+      if: "${{ env.push_tags }}"
+      run: |-
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker push rubylang/ruby:$tag
+        done
+      shell: bash
+
+    - name: Push docker image to ghcr.io/ruby
+      if: "${{ env.push_tags }}"
+      run: |-
+        push_tags="${{ env.push_tags }}"
+        for tag in $push_tags; do
+          docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
+          docker push ghcr.io/ruby/ruby:$tag
+        done
+      shell: bash
+
+    - uses: ruby/action-slack@v3.2.2
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
+
+  deploy_multiarch:
+    strategy:
+      matrix:
+        registry_name: [ rubylang, ghcr.io/ruby ]
+        include:
+          - latest_tag: true
+            image_version_suffix: ''
+          - latest_tag: false
+            image_version_suffix: '-dev'
+
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    env:
+      ruby_version: "${{ inputs.ruby_version || 'master' }}"
+      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
+
+    steps:
+    - uses: actions/checkout@v4.1.0
+
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+    - name: Create manifest for ${{ matrix.registry_name }}
+      run: |-
+        rake docker:manifest:create \
+             registry_name="${{ matrix.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             architectures="amd64 arm64" \
+             manifest_suffix=${{ github.sha }} \
+             latest_tag=${{ matrix.latest_tag }} \
+             image_version_suffix=${{ matrix.image_version_suffix }}
+
+    - name: Push manifest to ${{ matrix.registry_name }}
+      run: |-
+        rake docker:manifest:push \
+             registry_name="${{ matrix.registry_name }}" \
+             ruby_version="${{ env.ruby_version }}" \
+             ubuntu_version="${{ env.ubuntu_version }}" \
+             latest_tag=${{ matrix.latest_tag }} \
+             image_version_suffix=${{ matrix.image_version_suffix }}
+
+    - uses: ruby/action-slack@v3.2.2
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: ${{ matrix.registry_name }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()

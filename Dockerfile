@@ -13,13 +13,6 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -ex && \
     apt-get update && \
-    \
-    if test "x$BASE_IMAGE_TAG" = "xbionic"; then \
-        apt-get install -y --no-install-recommends \
-          software-properties-common && \
-        apt-add-repository ppa:git-core/ppa; \
-    fi && \
-    \
     apt-get install -y --no-install-recommends \
             autoconf \
             bison \
@@ -49,6 +42,11 @@ RUN set -ex && \
 COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
 
+RUN set -ex && \
+    RUBY_VERSION=3.2.3 PREFIX=/root /tmp/install_ruby.sh
+RUN apt purge -y --auto-remove ruby
+COPY tmp/ruby /usr/src/ruby
+
 ARG optflags
 ARG debugflags
 ARG cppflags
@@ -61,8 +59,7 @@ RUN set -ex && \
       echo 'update: --no-document'; \
     } >> /usr/local/etc/gemrc && \
     \
-    /tmp/install_ruby.sh
-
+    PATH=/root/bin:$PATH /tmp/install_ruby.sh
 
 ### ruby ###
 FROM ubuntu:$BASE_IMAGE_TAG AS ruby
@@ -76,14 +73,6 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -ex && \
     apt-get update && \
-    \
-    if test "x$BASE_IMAGE_TAG" = "xbionic"; then \
-        apt-get install -y --no-install-recommends \
-                software-properties-common \
-                && \
-        apt-add-repository ppa:git-core/ppa; \
-    fi && \
-    \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             libffi-dev \
@@ -115,7 +104,9 @@ RUN set -ex && \
     apt-get clean && rm -r /var/lib/apt/lists/*
 
 RUN set -ex && \
-    useradd -ms /bin/bash ubuntu
+    if ! (id ubuntu &>/dev/null); then \
+        useradd -ms /bin/bash ubuntu; \
+    fi
 
 RUN mkdir -p /usr/local/etc
 
@@ -175,6 +166,7 @@ RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
             build-essential \
+            pkg-config \
             curl \
             gdb \
             git \

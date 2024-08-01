@@ -1,9 +1,67 @@
 # ruby/ruby-docker-images
 
+The Dockerfile is available in [this repository](https://github.com/ruby/ruby-docker-images/blob/master/Dockerfile).
+
 Built images are available here:
 
 * https://hub.docker.com/r/rubylang/ruby/
 * https://github.com/ruby/ruby-docker-images/pkgs/container/ruby
+
+## What is this?
+
+This repository consists of two kinds of images. One is for production use, and the other is for development.
+
+An image for development is based on the image for production of the same ruby and ubuntu versions and installed development tools such as build-essential and gdb, in addition. It has `-dev` suffix after the version number, like `rubylang/ruby:3.3.0-dev-jammy`.
+
+The list of image names in this repository is below:
+
+## Images
+
+### Ubuntu 22.04 (jammy)
+
+- master
+  - rubylang/ruby:master-jammy
+  - rubylang/ruby:master-dev-jammy
+  - rubylang/ruby:master-debug-jammy
+  - rubylang/ruby:master-debug-dev-jammy
+- 3.3
+  - rubylang/ruby:latest
+  - rubylang/ruby:3.3-jammy
+  - rubylang/ruby:3.3.1-jammy
+- 3.2
+  - rubylang/ruby:3.2-jammy
+  - rubylang/ruby:3.2.4-jammy
+- 3.1
+  - rubylang/ruby:3.1-jammy
+  - rubylang/ruby:3.1.5-jammy
+
+### Ubuntu 20.04 (focal)
+
+- master
+  - rubylang/ruby:master-focal
+  - rubylang/ruby:master-dev-focal
+  - rubylang/ruby:master-debug-focal
+  - rubylang/ruby:master-debug-dev-focal
+- 3.3
+  - rubylang/ruby:3.3-focal
+  - rubylang/ruby:3.3.1-focal
+- 3.2
+  - rubylang/ruby:3.2-focal
+  - rubylang/ruby:3.2.4-focal
+- 3.1
+  - rubylang/ruby:3.1-focal
+  - rubylang/ruby:3.1.5-focal
+
+### Misc
+
+We have some other images for special purposes.
+
+- Preview or Release-candidate versions (e.g. `rubylang/ruby:2.7.0-preview1-jammy`)
+- Nightly built master (e.g. `rubylang/ruby:master-nightly-jammy`)
+- Nightly debug built master (e.g. `rubylang/ruby:master-debug-nightly-jammy`)
+- EOL versions (e.g. `rubylang/ruby:2.4.10-jammy`)
+
+All the images are based on `ubuntu:jammy`, and made from just doing `make install` and installing bundler.
 
 ## How to build images
 
