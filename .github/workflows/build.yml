@@ -61,7 +61,7 @@ jobs:
 
       - name: Build image
         run: |
-          rake docker:build arch=${{ env.ARCH }} ruby_version=${{ env.RUBY_VERSION }} ubuntu_version=${{ matrix.ubuntu_version }}
+          rake docker:build arch=${{ env.ARCH }} ruby_version=${{ env.RUBY_VERSION }} ubuntu_version=${{ matrix.ubuntu_version }} latest_tag=${{ env.LATEST }}
 
       - name: Check image
         run: |
