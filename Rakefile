@@ -87,8 +87,11 @@ end
 
 def ruby_version_exist?(version)
   return true if version.start_with?("master")
+
+  require "net/http"
+  require "uri"
   ver2 = version.split('.')[0,2].join('.')
-  ruby_versions[ver2]&.include?(version)
+  Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{version}.tar.gz")).code == "200"
 end
 
 namespace :debug do
