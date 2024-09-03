@@ -24,11 +24,6 @@ on:
         type: boolean
         default: false
         required: true
-      NOPUSH:
-        description: Do not push the images (for debugging)
-        type: boolean
-        default: false
-        required: true
 
 jobs:
   build:
@@ -50,14 +45,12 @@ jobs:
           echo "RUBY_VERSION=${{ github.event.inputs.RUBY_VERSION || github.event.client_payload.ruby_version }}" >> $GITHUB_ENV
           echo "ARCH=${{ github.event.inputs.ARCH || github.event.client_payload.arch }}" >> $GITHUB_ENV
           echo "LATEST=${{ github.event.inputs.LATEST || github.event.client_payload.latest }}" >> $GITHUB_ENV
-          echo "NOPUSH=${{ github.event.inputs.NOPUSH }}" >> $GITHUB_ENV
 
       - name: Show parameters
         run: |
           echo $RUBY_VERSION
           echo $ARCH
           echo $LATEST
-          echo $NOPUSH
 
       - name: Build image
         run: |
@@ -80,7 +73,6 @@ jobs:
 
       - name: Push images to DockerHub
         run: docker push rubylang/ruby --all-tags
-        if: ${{ env.NOPUSH == 'false' }}
 
       - name: Renaming images
         run: |
@@ -95,4 +87,3 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/ruby --all-tags
-        if: ${{ env.NOPUSH == 'false' }}
