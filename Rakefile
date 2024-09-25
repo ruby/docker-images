@@ -130,8 +130,7 @@ namespace :docker do
   end
 
   def get_ruby_master_head_hash
-    # Use the same hash throughout the same CircleCI job
-    if ENV.key?('CIRCLE_BUILD_NUM') && File.exist?(cache_path = "/tmp/ruby-docker-images.#{ENV['CIRCLE_BUILD_NUM']}")
+    if File.exist?(cache_path = "/tmp/ruby-docker-images")
       return File.read(cache_path)
     end
 
