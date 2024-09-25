@@ -235,8 +235,6 @@ namespace :docker do
     end
     version_suffix = ENV["image_version_suffix"]
     tag_suffix = ENV["tag_suffix"]
-    tag = ENV["tag"] || ""
-    target = ENV.fetch("target", "ruby")
     ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
 
     tags.each do |tag|
@@ -259,7 +257,6 @@ namespace :docker do
   namespace :manifest do
     task :create do
       ruby_version = ENV.fetch("ruby_version")
-      ubuntu_version = ENV.fetch("ubuntu_version")
       architectures = ENV.fetch("architectures").split(' ')
       manifest_suffix = ENV.fetch("manifest_suffix", nil)
       image_version_suffix = ENV["image_version_suffix"]
