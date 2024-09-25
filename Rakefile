@@ -130,7 +130,7 @@ namespace :docker do
   end
 
   def get_ruby_master_head_hash
-    if File.exist?(cache_path = "/tmp/ruby-docker-images")
+    if ENV.key?("GITHUB_ACTION") && File.exist?(cache_path = "/tmp/ruby-docker-images")
       return File.read(cache_path)
     end
 
