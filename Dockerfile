@@ -70,6 +70,7 @@ ARG RUBY_SO_SUFFIX
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
+ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
 
 RUN set -ex && \
     apt-get update && \
