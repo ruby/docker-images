@@ -129,5 +129,4 @@ rm -fr /usr/src/ruby /root/.gem/
 
 # rough smoke test
 export PATH=$PREFIX/bin:$PATH
-export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
 (cd && ruby --version && gem --version && bundle --version)
