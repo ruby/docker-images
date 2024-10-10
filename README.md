@@ -11,11 +11,29 @@ Built images are available here:
 
 This repository consists of two kinds of images. One is for production use, and the other is for development.
 
-An image for development is based on the image for production of the same ruby and ubuntu versions and installed development tools such as build-essential and gdb, in addition. It has `-dev` suffix after the version number, like `rubylang/ruby:3.3.0-dev-jammy`.
+An image for development is based on the image for production of the same ruby and ubuntu versions and installed development tools such as build-essential and gdb, in addition. It has `-dev` suffix after the version number, like `rubylang/ruby:3.3.0-dev-noble`.
 
 The list of image names in this repository is below:
 
 ## Images
+
+### Ubuntu 24.04 (noble)
+
+- master
+  - rubylang/ruby:master-noble
+  - rubylang/ruby:master-dev-noble
+  - rubylang/ruby:master-debug-noble
+  - rubylang/ruby:master-debug-dev-noble
+- 3.3
+  - rubylang/ruby:latest
+  - rubylang/ruby:3.3-noble
+  - rubylang/ruby:3.3.5-noble
+- 3.2
+  - rubylang/ruby:3.2-noble
+  - rubylang/ruby:3.2.5-noble
+- 3.1
+  - rubylang/ruby:3.1-noble
+  - rubylang/ruby:3.1.6-noble
 
 ### Ubuntu 22.04 (jammy)
 
@@ -27,13 +45,13 @@ The list of image names in this repository is below:
 - 3.3
   - rubylang/ruby:latest
   - rubylang/ruby:3.3-jammy
-  - rubylang/ruby:3.3.1-jammy
+  - rubylang/ruby:3.3.5-jammy
 - 3.2
   - rubylang/ruby:3.2-jammy
-  - rubylang/ruby:3.2.4-jammy
+  - rubylang/ruby:3.2.5-jammy
 - 3.1
   - rubylang/ruby:3.1-jammy
-  - rubylang/ruby:3.1.5-jammy
+  - rubylang/ruby:3.1.6-jammy
 
 ### Ubuntu 20.04 (focal)
 
@@ -44,13 +62,13 @@ The list of image names in this repository is below:
   - rubylang/ruby:master-debug-dev-focal
 - 3.3
   - rubylang/ruby:3.3-focal
-  - rubylang/ruby:3.3.1-focal
+  - rubylang/ruby:3.3.5-focal
 - 3.2
   - rubylang/ruby:3.2-focal
-  - rubylang/ruby:3.2.4-focal
+  - rubylang/ruby:3.2.5-focal
 - 3.1
   - rubylang/ruby:3.1-focal
-  - rubylang/ruby:3.1.5-focal
+  - rubylang/ruby:3.1.6-focal
 
 ### Misc
 
