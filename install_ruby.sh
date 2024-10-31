@@ -14,8 +14,8 @@ require "uri"
 require "open-uri"
 require "digest"
 ver2 = ARGV[0].split('.')[0,2].join('.')
-if Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz")).code == "200"
-  url = "https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz"
+if Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.xz")).code == "200"
+  url = "https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.xz"
   URI.open(url) do |f|
     sha256 = Digest::SHA256.hexdigest(f.read)
     puts "#{url} #{sha256}"
