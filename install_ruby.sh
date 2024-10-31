@@ -11,13 +11,18 @@ function get_released_ruby() {
   cat << RUBY | ruby - $1
 require "net/http"
 require "uri"
+require "open-uri"
+require "digest"
 ver2 = ARGV[0].split('.')[0,2].join('.')
 if Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz")).code == "200"
   url = "https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz"
-  sha256 = `curl -sSL #{url} | sha256sum`.split(' ')[0]
-  puts "#{url} #{sha256}"
+  URI.open(url) do |f|
+    sha256 = Digest::SHA256.hexdigest(f.read)
+    puts "#{url} #{sha256}"
+  end
 else
   exit 1
+end
 RUBY
 }
 
