@@ -8,21 +8,17 @@ RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
 PREFIX=${PREFIX-/usr/local}
 
 function get_released_ruby() {
-  git clone --depth 1 https://github.com/ruby/www.ruby-lang.org.git /tmp/www
-
-  cat << RUBY | ruby - $1 /tmp/www/_data/releases.yml
-require "psych"
-version = ARGV[0]
-if Psych.respond_to?(:safe_load_file)
-  require "date"
-  releases = Psych.safe_load_file(ARGV[1], permitted_classes: [Symbol, Date])
+  cat << RUBY | ruby - $1
+require "net/http"
+require "uri"
+ver2 = ARGV[0].split('.')[0,2].join('.')
+if Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz")).code == "200"
+  url = "https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{ARGV[0]}.tar.gz"
+  sha256 = `curl -sSL #{url} | sha256sum`.split(' ')[0]
+  puts "#{url} #{sha256}"
 else
-  releases = Psych.load_file(ARGV[1])
-end
-release = releases.find {|x| x["version"] == version }
-puts "#{release["url"]["xz"]} #{release["sha256"]["xz"]}"
+  exit 1
 RUBY
-  rm -rf /tmp/www
 }
 
 case $RUBY_VERSION in
