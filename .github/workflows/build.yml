@@ -75,8 +75,8 @@ jobs:
                           image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
                           nightly=${{ env.nightly }} \
                           tag_suffix=${{ env.tag_suffix }} \
-                          optflags=${{ env.optflags }} \
-                          cppflags=${{ env.cppflags }} \
+                          optflags="${{ env.optflags }}" \
+                          cppflags="${{ env.cppflags }}" \
                           target=${{ env.target }} \
 
     - name: List images
