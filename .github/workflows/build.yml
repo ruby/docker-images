@@ -146,15 +146,3 @@ jobs:
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ matrix.ubuntu_version }}" \
              image_version_suffix=${{ matrix.image_version_suffix }}
-
-    - name: Push the same image without the ubuntu version
-      if: matrix.ubuntu_version == 'noble'
-      run: |-
-        docker tag ${{ matrix.registry_name }}/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }} ${{ matrix.registry_name }}/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
-        docker push ${{ matrix.registry_name }}/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
-
-    - name: Push the latest image
-      if: matrix.ubuntu_version == 'noble' && contains(${{ env.ruby_version }}, '3.4.') && matrix.image_version_suffix == ''
-      run: |-
-        docker tag ${{ matrix.registry_name }}/ruby:${{ env.ruby_version }} ${{ matrix.registry_name }}/ruby:latest
-        docker push ${{ matrix.registry_name }}/ruby:latest
