@@ -10,15 +10,16 @@ on:
         required: true
         default: master
         description: '"master" or version nunmber ("3.1.2")'
-      ubuntu_version:
-        required: false
-        default: jammy
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
+        ubuntu_version:
+          - noble
+          - jammy
+          - focal
         dev_suffix: [ '', '-dev' ]
         arch: ['amd64', 'arm64']
 
@@ -27,11 +28,11 @@ jobs:
     env:
       nightly: false
       push: false
-      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
+      ubuntu_version: "${{ matrix.ubuntu_version }}"
       ruby_version: "${{ inputs.ruby_version || 'master' }}"
       image_version_suffix: ''
       tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
-      push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ inputs.ubuntu_version || 'jammy' }}-${{ matrix.arch }}-${{ github.sha }}
+      push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
       optflags: ''
       cppflags: ''
@@ -112,6 +113,10 @@ jobs:
     strategy:
       matrix:
         registry_name: [ rubylang, ghcr.io/ruby ]
+        ubuntu_version:
+          - noble
+          - jammy
+          - focal
         include:
           - latest_tag: true
             image_version_suffix: ''
@@ -124,7 +129,6 @@ jobs:
 
     env:
       ruby_version: "${{ inputs.ruby_version || 'master' }}"
-      ubuntu_version: "${{ inputs.ubuntu_version || 'jammy' }}"
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -145,7 +149,7 @@ jobs:
         rake docker:manifest:create \
              registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
-             ubuntu_version="${{ env.ubuntu_version }}" \
+             ubuntu_version="${{ matrix.ubuntu_version }}" \
              architectures="amd64 arm64" \
              manifest_suffix=${{ github.sha }} \
              latest_tag=${{ matrix.latest_tag }} \
@@ -156,7 +160,7 @@ jobs:
         rake docker:manifest:push \
              registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
-             ubuntu_version="${{ env.ubuntu_version }}" \
+             ubuntu_version="${{ matrix.ubuntu_version }}" \
              latest_tag=${{ matrix.latest_tag }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
