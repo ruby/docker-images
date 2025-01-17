@@ -1,4 +1,4 @@
-name: ruby/ruby-docker-images/build_multiarch
+name: Build Docker image with multi-arch
 
 on:
   schedule:
