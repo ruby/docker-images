@@ -38,7 +38,7 @@ jobs:
       push: false
       ubuntu_version: "${{ matrix.ubuntu_version }}"
       tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
-      push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
+      push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
       debug_suffix: ${{ matrix.debug_suffix }}
 
