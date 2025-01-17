@@ -59,10 +59,8 @@ jobs:
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
-          echo "latest_tag=false" >> $GITHUB_ENV
         else
           echo "target=ruby" >> $GITHUB_ENV
-          echo "latest_tag=true" >> $GITHUB_ENV
         fi
         if [ "${{ env.debug_suffix }}" = "-debug" ]; then
           echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
@@ -80,7 +78,6 @@ jobs:
                           optflags=${{ env.optflags }} \
                           cppflags=${{ env.cppflags }} \
                           target=${{ env.target }} \
-                          latest_tag=${{ env.latest_tag }}
       shell: bash
 
     - name: List images
