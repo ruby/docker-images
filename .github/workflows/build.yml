@@ -2,7 +2,7 @@ name: Build Docker image with multi-arch
 
 on:
   schedule:
-    - cron: '30 */12 * * *'
+    - cron: '15 */8 * * *'
 
   repository_dispatch:
     types:
