@@ -25,7 +25,9 @@ jobs:
           - jammy
           - focal
         dev_suffix: [ '', '-dev' ]
+        debug_suffix: ['', '-debug']
         arch: ['amd64', 'arm64']
+
 
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
@@ -37,6 +39,7 @@ jobs:
       tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
       push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
+      debug_suffix: ${{ matrix.debug_suffix }}
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -60,15 +63,21 @@ jobs:
           echo "target=ruby" >> $GITHUB_ENV
           echo "latest_tag=true" >> $GITHUB_ENV
         fi
+        if [ "${{ env.debug_suffix }}" = "-debug" ]; then
+          echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
+          echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
+        fi
 
     - name: Build docker image
       run: |-
         rake docker:build ruby_version=${{ env.ruby_version }} \
                           ubuntu_version=${{ env.ubuntu_version }} \
                           arch=linux/${{ matrix.arch }} \
-                          image_version_suffix=${{ env.dev_suffix }} \
+                          image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
                           nightly=${{ env.nightly }} \
                           tag_suffix=${{ env.tag_suffix }} \
+                          optflags=${{ env.optflags }} \
+                          cppflags=${{ env.cppflags }} \
                           target=${{ env.target }} \
                           latest_tag=${{ env.latest_tag }}
       shell: bash
@@ -101,7 +110,7 @@ jobs:
         payload: |
           {
             "attachments": [{
-              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.debug_suffix }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
@@ -117,7 +126,7 @@ jobs:
           - noble
           - jammy
           - focal
-        image_version_suffix: [ '', '-dev' ]
+        image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
 
     runs-on: ubuntu-latest
 
