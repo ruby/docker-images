@@ -78,11 +78,9 @@ jobs:
                           optflags=${{ env.optflags }} \
                           cppflags=${{ env.cppflags }} \
                           target=${{ env.target }} \
-      shell: bash
 
     - name: List images
       run: docker images
-      shell: bash
 
     - name: Push docker image to rubylang
       if: "${{ env.push_tags }}"
@@ -91,7 +89,6 @@ jobs:
         for tag in $push_tags; do
           docker push rubylang/ruby:$tag
         done
-      shell: bash
 
     - name: Push docker image to ghcr.io/ruby
       if: "${{ env.push_tags }}"
@@ -101,7 +98,6 @@ jobs:
           docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
           docker push ghcr.io/ruby/ruby:$tag
         done
-      shell: bash
 
     - uses: ruby/action-slack@v3.2.2
       with:
@@ -171,7 +167,6 @@ jobs:
         docker push rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
         docker tag rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }} ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
         docker push ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
-      shell: bash
 
     - name: Push the latest image
       if: matrix.ubuntu_version == 'nobel' && env.ruby_version == '3.4.1' && matrix.image_version_suffix == ''
@@ -180,7 +175,6 @@ jobs:
         docker push rubylang/ruby:latest
         docker tag rubylang/ruby:${{ env.ruby_version }} ghcr.io/ruby/ruby:latest
         docker push ghcr.io/ruby/ruby:latest
-      shell: bash
 
     - uses: ruby/action-slack@v3.2.2
       with:
