@@ -169,7 +169,7 @@ jobs:
         docker push ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
 
     - name: Push the latest image
-      if: matrix.ubuntu_version == 'nobel' && env.ruby_version == '3.4.1' && matrix.image_version_suffix == ''
+      if: matrix.ubuntu_version == 'nobel' && contains(${{ env.ruby_version }}, '3.4.') && matrix.image_version_suffix == ''
       run: |-
         docker tag rubylang/ruby:${{ env.ruby_version }} rubylang/ruby:latest
         docker push rubylang/ruby:latest
