@@ -117,11 +117,7 @@ jobs:
           - noble
           - jammy
           - focal
-        include:
-          - latest_tag: true
-            image_version_suffix: ''
-          - latest_tag: false
-            image_version_suffix: '-dev'
+        image_version_suffix: [ '', '-dev' ]
 
     runs-on: ubuntu-latest
 
@@ -152,7 +148,6 @@ jobs:
              ubuntu_version="${{ matrix.ubuntu_version }}" \
              architectures="amd64 arm64" \
              manifest_suffix=${{ github.sha }} \
-             latest_tag=${{ matrix.latest_tag }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
     - name: Push manifest to ${{ matrix.registry_name }}
@@ -161,7 +156,6 @@ jobs:
              registry_name="${{ matrix.registry_name }}" \
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ matrix.ubuntu_version }}" \
-             latest_tag=${{ matrix.latest_tag }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
     - uses: ruby/action-slack@v3.2.2
