@@ -104,7 +104,7 @@ jobs:
         payload: |
           {
             "attachments": [{
-              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.debug_suffix }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.arch }} ${{ matrix.debug_suffix }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
@@ -181,7 +181,7 @@ jobs:
         payload: |
           {
             "attachments": [{
-              "text": "${{ job.status }}: ${{ matrix.registry_name }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "${{ job.status }}: ${{ matrix.registry_name }} ${{ matrix.ubuntu_version }} ${{ matrix.image_version_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
