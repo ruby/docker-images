@@ -15,6 +15,9 @@ on:
         default: master
         description: '"master" or version nunmber ("3.1.2")'
 
+env:
+  ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
+
 jobs:
   build:
     strategy:
@@ -25,6 +28,7 @@ jobs:
           - jammy
           - focal
         dev_suffix: [ '', '-dev' ]
+        debug_suffix: ['', '-debug']
         arch: ['amd64', 'arm64']
 
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
@@ -33,10 +37,10 @@ jobs:
       nightly: false
       push: false
       ubuntu_version: "${{ matrix.ubuntu_version }}"
-      ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
       tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
       push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
+      debug_suffix: ${{ matrix.debug_suffix }}
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -55,10 +59,12 @@ jobs:
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
-          echo "latest_tag=false" >> $GITHUB_ENV
         else
           echo "target=ruby" >> $GITHUB_ENV
-          echo "latest_tag=true" >> $GITHUB_ENV
+        fi
+        if [ "${{ env.debug_suffix }}" = "-debug" ]; then
+          echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
+          echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
         fi
 
     - name: Build docker image
@@ -66,16 +72,15 @@ jobs:
         rake docker:build ruby_version=${{ env.ruby_version }} \
                           ubuntu_version=${{ env.ubuntu_version }} \
                           arch=linux/${{ matrix.arch }} \
-                          image_version_suffix=${{ env.dev_suffix }} \
+                          image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
                           nightly=${{ env.nightly }} \
                           tag_suffix=${{ env.tag_suffix }} \
+                          optflags=${{ env.optflags }} \
+                          cppflags=${{ env.cppflags }} \
                           target=${{ env.target }} \
-                          latest_tag=${{ env.latest_tag }}
-      shell: bash
 
     - name: List images
       run: docker images
-      shell: bash
 
     - name: Push docker image to rubylang
       if: "${{ env.push_tags }}"
@@ -84,7 +89,6 @@ jobs:
         for tag in $push_tags; do
           docker push rubylang/ruby:$tag
         done
-      shell: bash
 
     - name: Push docker image to ghcr.io/ruby
       if: "${{ env.push_tags }}"
@@ -94,14 +98,13 @@ jobs:
           docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
           docker push ghcr.io/ruby/ruby:$tag
         done
-      shell: bash
 
     - uses: ruby/action-slack@v3.2.2
       with:
         payload: |
           {
             "attachments": [{
-              "text": "${{ job.status }}: ${{ matrix.arch }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.arch }} ${{ matrix.debug_suffix }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
@@ -117,14 +120,11 @@ jobs:
           - noble
           - jammy
           - focal
-        image_version_suffix: [ '', '-dev' ]
+        image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
 
     runs-on: ubuntu-latest
 
     needs: build
-
-    env:
-      ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -160,12 +160,28 @@ jobs:
              ubuntu_version="${{ matrix.ubuntu_version }}" \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
+    - name: Push the same image without the ubuntu version
+      if: matrix.ubuntu_version == 'noble'
+      run: |-
+        docker tag rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }} rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
+        docker push rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
+        docker tag rubylang/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }} ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
+        docker push ghcr.io/ruby/ruby:${{ env.ruby_version }}${{ matrix.image_version_suffix }}
+
+    - name: Push the latest image
+      if: matrix.ubuntu_version == 'nobel' && env.ruby_version == '3.4.1' && matrix.image_version_suffix == ''
+      run: |-
+        docker tag rubylang/ruby:${{ env.ruby_version }} rubylang/ruby:latest
+        docker push rubylang/ruby:latest
+        docker tag rubylang/ruby:${{ env.ruby_version }} ghcr.io/ruby/ruby:latest
+        docker push ghcr.io/ruby/ruby:latest
+
     - uses: ruby/action-slack@v3.2.2
       with:
         payload: |
           {
             "attachments": [{
-              "text": "${{ job.status }}: ${{ matrix.registry_name }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "${{ job.status }}: ${{ matrix.registry_name }} ${{ matrix.ubuntu_version }} ${{ matrix.image_version_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
