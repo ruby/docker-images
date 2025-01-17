@@ -30,13 +30,9 @@ jobs:
       push: false
       ubuntu_version: "${{ matrix.ubuntu_version }}"
       ruby_version: "${{ inputs.ruby_version || 'master' }}"
-      image_version_suffix: ''
       tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
       push_tags: ${{ inputs.ruby_version || 'master' }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
-      optflags: ''
-      cppflags: ''
-      debugflags: ''
 
     steps:
     - uses: actions/checkout@v4.1.0
@@ -66,7 +62,7 @@ jobs:
         rake docker:build ruby_version=${{ env.ruby_version }} \
                           ubuntu_version=${{ env.ubuntu_version }} \
                           arch=linux/${{ matrix.arch }} \
-                          image_version_suffix=${{ env.image_version_suffix }}${{ env.dev_suffix }} \
+                          image_version_suffix=${{ env.dev_suffix }} \
                           nightly=${{ env.nightly }} \
                           tag_suffix=${{ env.tag_suffix }} \
                           target=${{ env.target }} \
