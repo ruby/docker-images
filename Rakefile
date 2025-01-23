@@ -135,10 +135,20 @@ namespace :docker do
       return File.read(cache_path)
     end
 
-    head_hash = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
-    unless $?.success?
-      raise "get_ruby_master_head_hash failed: #{head_hash.inspect}"
+    count = 5
+    head_hash = nil
+
+    loop do
+      head_hash = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
+      if $?.success? || count.zero?
+        break
+      else
+        p "get_ruby_master_head_hash failed: #{head_hash.inspect}"
+        count -= 1
+        sleep 5
+      end
     end
+
     if cache_path
       File.write(cache_path, head_hash)
     end
