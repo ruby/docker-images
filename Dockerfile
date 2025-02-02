@@ -152,10 +152,10 @@ COPY --from=build \
      /usr/local/lib/ruby/
 
 COPY --from=build \
-     /usr/local/share/man/man1/erb.1 \
-     /usr/local/share/man/man1/irb.1 \
-     /usr/local/share/man/man1/ri.1 \
-     /usr/local/share/man/man1/ruby.1 \
+     /usr/local/share/man/man1/erb* \
+     /usr/local/share/man/man1/irb* \
+     /usr/local/share/man/man1/ri* \
+     /usr/local/share/man/man1/ruby* \
      /usr/local/share/man/man1/
 
 
