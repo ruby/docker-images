@@ -17,8 +17,10 @@ jobs:
           - focal
         ruby_version:
           - 3.1.6
-          - 3.2.4
-          - 3.3.3
+          - 3.2.6
+          - 3.3.7
+          - 3.4.1
+          - master
         arch:
           - amd64
           - arm64
