@@ -99,6 +99,24 @@ jobs:
           docker push ghcr.io/ruby/ruby:$tag
         done
 
+  notify-deploy-slack:
+    needs: build
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+    - uses: ruby/action-slack@54175162371f1f7c8eb94d7c8644ee2479fcd375 # v3.2.2
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "text": "${{ job.status }}: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "color": "danger"
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: failure()
+
   deploy_multiarch:
     strategy:
       matrix:
@@ -147,8 +165,8 @@ jobs:
              ubuntu_version="${{ matrix.ubuntu_version }}" \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
-  notify-slack:
-    needs: [ build, deploy_multiarch ]
+  notify-deploy-slack:
+    needs: deploy_multiarch
     runs-on: ubuntu-latest
     if: failure()
     steps:
