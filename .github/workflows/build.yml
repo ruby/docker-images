@@ -99,7 +99,7 @@ jobs:
           docker push ghcr.io/ruby/ruby:$tag
         done
 
-  notify-deploy-slack:
+  notify-build-slack:
     needs: build
     runs-on: ubuntu-latest
     if: failure()
