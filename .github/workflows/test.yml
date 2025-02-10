@@ -33,8 +33,10 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: >-
-            rake docker:build arch=${{ matrix.arch }} ruby_version=${{ matrix.ruby_version }} ubuntu_version=${{ matrix.ubuntu_version }}
+          command: |-
+            rake docker:build ruby_version=${{ matrix.ruby_version }} \
+                              ubuntu_version=${{ matrix.ubuntu_version }} \
+                              arch=${{ matrix.arch }}
           on_retry_command: sudo systemctl start docker
 
       - name: Check image

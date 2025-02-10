@@ -73,7 +73,7 @@ jobs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: >-
+        command: |-
           rake docker:build ruby_version=${{ env.ruby_version }} \
                             ubuntu_version=${{ env.ubuntu_version }} \
                             arch=linux/${{ matrix.arch }} \
@@ -82,7 +82,7 @@ jobs:
                             tag_suffix=${{ env.tag_suffix }} \
                             optflags="${{ env.optflags }}" \
                             cppflags="${{ env.cppflags }}" \
-                            target=${{ env.target }} \
+                            target=${{ env.target }}
         on_retry_command: sudo systemctl start docker
 
     - name: List images
