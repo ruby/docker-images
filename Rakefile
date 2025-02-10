@@ -145,7 +145,7 @@ namespace :docker do
       else
         p "get_ruby_master_head_hash failed: #{head_hash.inspect}"
         count -= 1
-        sleep 5
+        sleep 30
       end
     end
 
