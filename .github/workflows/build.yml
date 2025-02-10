@@ -83,7 +83,7 @@ jobs:
                             optflags="${{ env.optflags }}" \
                             cppflags="${{ env.cppflags }}" \
                             target=${{ env.target }}
-        on_retry_command: sudo systemctl start docker
+        on_retry_command: sudo systemctl restart docker
 
     - name: List images
       run: docker images

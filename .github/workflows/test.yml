@@ -37,7 +37,7 @@ jobs:
             rake docker:build ruby_version=${{ matrix.ruby_version }} \
                               ubuntu_version=${{ matrix.ubuntu_version }} \
                               arch=${{ matrix.arch }}
-          on_retry_command: sudo systemctl start docker
+          on_retry_command: sudo systemctl restart docker
 
       - name: Check image
         uses: nick-fields/retry@v3
