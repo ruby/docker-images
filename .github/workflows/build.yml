@@ -67,23 +67,17 @@ jobs:
           echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
         fi
 
-    # native arm runner failed to boot docker daemon sometimes
     - name: Build docker image
-      uses: nick-fields/retry@v3
-      with:
-        timeout_minutes: 10
-        max_attempts: 3
-        command: >-
-          rake docker:build ruby_version=${{ env.ruby_version }} \
-                            ubuntu_version=${{ env.ubuntu_version }} \
-                            arch=linux/${{ matrix.arch }} \
-                            image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
-                            nightly=${{ env.nightly }} \
-                            tag_suffix=${{ env.tag_suffix }} \
-                            optflags="${{ env.optflags }}" \
-                            cppflags="${{ env.cppflags }}" \
-                            target=${{ env.target }} \
-        on_retry_command: sudo systemctl start docker
+      run: |-
+        rake docker:build ruby_version=${{ env.ruby_version }} \
+                          ubuntu_version=${{ env.ubuntu_version }} \
+                          arch=linux/${{ matrix.arch }} \
+                          image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
+                          nightly=${{ env.nightly }} \
+                          tag_suffix=${{ env.tag_suffix }} \
+                          optflags="${{ env.optflags }}" \
+                          cppflags="${{ env.cppflags }}" \
+                          target=${{ env.target }} \
 
     - name: List images
       run: docker images
