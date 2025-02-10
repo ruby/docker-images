@@ -38,6 +38,11 @@ jobs:
           on_retry_command: sudo systemctl start docker
 
       - name: Check image
-        run: |
-          docker images
-          docker run rubylang/ruby:${{ matrix.ruby_version }}-${{ matrix.ubuntu_version }} ruby -v
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            docker images
+            docker run rubylang/ruby:${{ matrix.ruby_version }}-${{ matrix.ubuntu_version }} ruby -v
+          on_retry_command: sudo systemctl restart docker
