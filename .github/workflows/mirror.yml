@@ -1,0 +1,40 @@
+name: Mirror docker images to ghcr.io
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 */2 * *'
+
+jobs:
+  mirror:
+    name: Mirror images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ubuntu
+            tag: noble
+          - image: ubuntu
+            tag: jammy
+          - image: ubuntu
+            tag: focal
+
+    steps:
+      - uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+      - uses: actions/setup-go@v5
+
+      - run: go install github.com/google/go-containerregistry/cmd/crane@latest
+
+      - name: Mirror
+        run: crane copy docker.io/${{ matrix.image }}:${{ matrix.tag }} ghcr.io/ruby/${{ matrix.image }}:${{ matrix.tag }}
