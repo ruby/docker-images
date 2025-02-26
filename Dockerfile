@@ -3,7 +3,7 @@ ARG RUBY_VERSION
 ARG RUBY_SO_SUFFIX
 
 ### build ###
-FROM ubuntu:$BASE_IMAGE_TAG AS build
+FROM ghcr.io/ruby/ubuntu:$BASE_IMAGE_TAG AS build
 
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
@@ -62,7 +62,7 @@ RUN set -ex && \
     PATH=/root/bin:$PATH /tmp/install_ruby.sh
 
 ### ruby ###
-FROM ubuntu:$BASE_IMAGE_TAG AS ruby
+FROM ghcr.io/ruby/ubuntu:$BASE_IMAGE_TAG AS ruby
 
 ARG BASE_IMAGE_TAG
 ARG RUBY_VERSION
