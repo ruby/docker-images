@@ -130,28 +130,72 @@ namespace :docker do
     "#{registry_name}/ruby"
   end
 
+  # Define a helper method to try different approaches with consistent error handling
+  def try_fetch_hash(method_name, &block)
+    begin
+      result = yield
+      if result && !result.empty?
+        p "Retrieved master head hash using #{method_name}"
+        return result
+      else
+        p "get_ruby_master_head_hash with #{method_name} failed"
+        return nil
+      end
+    rescue => e
+      p "get_ruby_master_head_hash with #{method_name} failed: #{e.message}"
+      return nil
+    end
+  end
+
   def get_ruby_master_head_hash
     if ENV.key?("GITHUB_ACTION") && File.exist?(cache_path = "/tmp/ruby-docker-images")
       return File.read(cache_path)
     end
 
-    count = 5
     head_hash = nil
 
-    loop do
-      head_hash = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
-      if $?.success? || count.zero?
-        break
-      else
-        p "get_ruby_master_head_hash failed: #{head_hash.inspect}"
-        count -= 1
-        sleep 30
+    # First attempt: Using curl
+    head_hash = try_fetch_hash("curl") do
+      result = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
+      $?.success? && !result.empty? ? result : nil
+    end
+
+    # Second attempt: Using Net::HTTP
+    if head_hash.nil?
+      sleep 30
+
+      head_hash = try_fetch_hash("Net::HTTP") do
+        require "net/http"
+        uri = URI.parse("https://api.github.com/repos/ruby/ruby/commits/master")
+        request = Net::HTTP::Get.new(uri)
+        request["accept"] = "application/vnd.github.v3.sha"
+        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
+          http.request(request)
+        end
+
+        response.is_a?(Net::HTTPSuccess) ? response.body.chomp : nil
       end
     end
 
-    if cache_path
+    # Third attempt: Using GitHub CLI if available
+    if head_hash.nil? && system("which gh > /dev/null 2>&1")
+      sleep 30
+      head_hash = try_fetch_hash("GitHub CLI") do
+        result = `gh api repos/ruby/ruby/commits/master --jq '.sha'`.chomp
+        $?.success? ? result : nil
+      end
+    end
+
+    # If all methods failed, provide a meaningful error
+    if head_hash.nil?
+      p "Failed to retrieve Ruby master head hash using curl, Net::HTTP, and GitHub CLI"
+      head_hash = "unknown"
+    end
+
+    if defined?(cache_path) && cache_path
       File.write(cache_path, head_hash)
     end
+
     head_hash
   end
 
