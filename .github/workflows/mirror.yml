@@ -14,11 +14,15 @@ jobs:
       matrix:
         include:
           - image: ubuntu
+            tag: latest
+          - image: ubuntu
             tag: noble
           - image: ubuntu
             tag: jammy
           - image: ubuntu
             tag: focal
+          - image: debian
+            tag: latest
           - image: fedora # For tool/annocheck of ruby/ruby
             tag: latest
 
