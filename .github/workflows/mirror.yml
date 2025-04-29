@@ -16,6 +16,8 @@ jobs:
           - image: ubuntu
             tag: latest
           - image: ubuntu
+            tag: plucky
+          - image: ubuntu
             tag: noble
           - image: ubuntu
             tag: jammy
