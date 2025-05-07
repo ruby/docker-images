@@ -14,7 +14,6 @@ jobs:
         ubuntu_version:
           - noble
           - jammy
-          - focal
         ruby_version:
           - 3.2.8
           - 3.3.7

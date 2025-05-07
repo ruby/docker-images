@@ -26,7 +26,6 @@ jobs:
         ubuntu_version:
           - noble
           - jammy
-          - focal
         dev_suffix: [ '', '-dev' ]
         debug_suffix: ['', '-debug']
         arch: ['amd64', 'arm64']
@@ -121,7 +120,6 @@ jobs:
         ubuntu_version:
           - noble
           - jammy
-          - focal
         image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
 
     runs-on: ubuntu-latest
