@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.GHCR_USER }}
           password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
 
       - run: go install github.com/google/go-containerregistry/cmd/crane@latest
 
