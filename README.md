@@ -1,4 +1,4 @@
-# ruby/ruby-docker-images
+# ruby/docker-images
 
 The Dockerfile is available in [this repository](https://github.com/ruby/ruby-docker-images/blob/master/Dockerfile).
 
