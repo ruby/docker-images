@@ -231,13 +231,13 @@ namespace :docker do
   end
 
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
-    ruby_version_mm = ruby_version.split('.')[0,2].join('.')
-    if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
-      commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
+    if ruby_version == "master"
+      commit_hash = get_ruby_master_head_hash
       commit_date = get_date_at_commit(commit_hash).then { |t| "%04d%02d%02d" % [t.year, t.month, t.day] }
       ruby_version = "master:#{commit_hash}"
       tags = ["master#{version_suffix}", "master#{version_suffix}-#{commit_hash}", "master#{version_suffix}-#{commit_date}"]
     else
+      ruby_version_mm = ruby_version.split('.')[0,2].join('.')
       tags = ["#{ruby_version}#{version_suffix}"]
       tags << "#{ruby_version_mm}#{version_suffix}" if ruby_latest_full_version?(ruby_version)
     end
