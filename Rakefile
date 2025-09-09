@@ -154,26 +154,22 @@ namespace :docker do
 
     head_hash = nil
 
-    # First attempt: Using curl
-    head_hash = try_fetch_hash("curl") do
-      result = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
-      $?.success? && !result.empty? ? result : nil
+    # First attempt: Using Net::HTTP
+    head_hash = try_fetch_hash("Net::HTTP") do
+      github_api_get(
+        "/repos/ruby/ruby/commits/master",
+        accept: "application/vnd.github.v3.sha",
+        token: ENV["GITHUB_TOKEN"],
+      )
     end
 
-    # Second attempt: Using Net::HTTP
+    # Second attempt: Using curl
     if head_hash.nil?
       sleep 30
 
-      head_hash = try_fetch_hash("Net::HTTP") do
-        require "net/http"
-        uri = URI.parse("https://api.github.com/repos/ruby/ruby/commits/master")
-        request = Net::HTTP::Get.new(uri)
-        request["accept"] = "application/vnd.github.v3.sha"
-        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
-          http.request(request)
-        end
-
-        response.is_a?(Net::HTTPSuccess) ? response.body.chomp : nil
+      head_hash = try_fetch_hash("curl") do
+        result = `curl -fs -H 'accept: application/vnd.github.v3.sha' https://api.github.com/repos/ruby/ruby/commits/master`.chomp
+        $?.success? && !result.empty? ? result : nil
       end
     end
 
@@ -188,7 +184,7 @@ namespace :docker do
 
     # If all methods failed, provide a meaningful error
     if head_hash.nil?
-      p "Failed to retrieve Ruby master head hash using curl, Net::HTTP, and GitHub CLI"
+      p "Failed to retrieve Ruby master head hash using Net::HTTP, curl, or GitHub CLI"
       head_hash = "unknown"
     end
 
@@ -221,13 +217,13 @@ namespace :docker do
     Time.iso8601(date)
   end
 
-  def github_api_get(path)
+  def github_api_get(path, accept: "application/vnd.github+json", token: ENV.fetch("GITHUB_TOKEN"))
     require "net/http"
     require "uri"
     Net::HTTP.get_response(URI.join("https://api.github.com", path), {
-      "Accept" => "application/vnd.github+json",
-      "Authorization" => "Bearer #{ENV.fetch("GITHUB_TOKEN")}",
-    }).tap(&:value).then(&:body)
+      "Accept" => accept,
+      "Authorization" => token&.then { "Bearer #{token}" },
+    }.compact).tap(&:value).then(&:body)
   end
 
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
