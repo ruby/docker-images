@@ -30,7 +30,6 @@ RUN set -ex && \
             libyaml-dev \
             make \
             ruby \
-            rustc \
             tzdata \
             wget \
             xz-utils \
@@ -38,6 +37,9 @@ RUN set -ex && \
             && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
+RUN wget https://sh.rustup.rs -O /tmp/rustup.sh && \
+    sh /tmp/rustup.sh -y && \
+    rm -f /tmp/rustup.sh
 
 COPY tmp/ruby /usr/src/ruby
 COPY install_ruby.sh /tmp/
