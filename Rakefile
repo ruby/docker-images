@@ -227,16 +227,6 @@ namespace :docker do
     return ruby_version, tags
   end
 
-  def each_nightly_tag(ruby_version, tags)
-    return [] unless (ENV['nightly'] == 'true') && ruby_version.start_with?('master:')
-    commit_hash = ruby_version.split(":")[1]
-    commit_hash_re = /\b#{Regexp.escape(commit_hash)}\b/
-    image_name = tags.find {|x| x.match? commit_hash_re }
-    today = Time.now.utc.strftime('%Y%m%d')
-    yield image_name, image_name.sub(commit_hash_re, "nightly-#{today}")
-    yield image_name, image_name.sub(commit_hash_re, "nightly")
-  end
-
   task :build do
     ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
@@ -279,36 +269,6 @@ namespace :docker do
        '.'
 
     sh 'docker', 'images'
-
-    each_nightly_tag(ruby_version, tags) do |image_name, tag|
-      sh 'docker', 'tag', image_name, tag
-    end
-  end
-
-  task :push do
-    ruby_version = ENV['ruby_version'] || '2.6.1'
-    unless ruby_version_exist?(ruby_version)
-      abort "unknown ruby version: #{ruby_version}"
-    end
-    version_suffix = ENV["image_version_suffix"]
-    tag_suffix = ENV["tag_suffix"]
-    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
-
-    tags.each do |tag|
-      if ENV['registry_name'].start_with?('ghcr.io')
-        docker_tag = "rubylang/#{tag.split("/").last}"
-        sh 'docker', 'tag', docker_tag, tag
-      end
-      sh 'docker', 'push', tag
-    end
-
-    each_nightly_tag(ruby_version, tags) do |_, tag|
-      if ENV['registry_name'].start_with?('ghcr.io')
-        docker_tag = "rubylang/#{tag.split("/").last}"
-        sh 'docker', 'tag', docker_tag, tag
-      end
-      sh 'docker', 'push', tag
-    end
   end
 
   namespace :manifest do
