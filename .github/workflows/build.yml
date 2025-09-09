@@ -17,6 +17,7 @@ on:
 
 env:
   ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:

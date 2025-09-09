@@ -212,12 +212,31 @@ namespace :docker do
     return version_info
   end
 
+  def get_date_at_commit(commit_hash)
+    require "json"
+    require "time"
+    raise ArgumentError, "Invalid commit_hash: #{commit_hash.inspect}" unless commit_hash.match?(/\A[a-z0-9]+\z/)
+    json = github_api_get("/repos/ruby/ruby/commits/#{commit_hash}")
+    date = JSON.parse(json).fetch("commit").fetch("committer").fetch("date")
+    Time.iso8601(date)
+  end
+
+  def github_api_get(path)
+    require "net/http"
+    require "uri"
+    Net::HTTP.get_response(URI.join("https://api.github.com", path), {
+      "Accept" => "application/vnd.github+json",
+      "Authorization" => "Bearer #{ENV.fetch("GITHUB_TOKEN")}",
+    }).tap(&:value).then(&:body)
+  end
+
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
     ruby_version_mm = ruby_version.split('.')[0,2].join('.')
     if /\Amaster(?::([\da-f]+))?\z/ =~ ruby_version
       commit_hash = Regexp.last_match[1] || get_ruby_master_head_hash
+      commit_date = get_date_at_commit(commit_hash).then { |t| "%04d%02d%02d" % [t.year, t.month, t.day] }
       ruby_version = "master:#{commit_hash}"
-      tags = ["master#{version_suffix}", "master#{version_suffix}-#{commit_hash}"]
+      tags = ["master#{version_suffix}", "master#{version_suffix}-#{commit_hash}", "master#{version_suffix}-#{commit_date}"]
     else
       tags = ["#{ruby_version}#{version_suffix}"]
       tags << "#{ruby_version_mm}#{version_suffix}" if ruby_latest_full_version?(ruby_version)

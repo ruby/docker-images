@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
     name: ${{ matrix.ruby_version }}-${{ matrix.ubuntu_version }} ${{ matrix.arch }}
