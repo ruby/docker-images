@@ -7,6 +7,8 @@ RUBY_MAJOR=$(echo $RUBY_VERSION | sed -E 's/\.[0-9]+(-.*)?$//g')
 RUBYGEMS_VERSION=${RUBYGEMS_VERSION-3.2.3}
 PREFIX=${PREFIX-/usr/local}
 
+. "$HOME/.cargo/env"
+
 function get_released_ruby() {
   cat << RUBY | ruby - $1
 require "net/http"
@@ -93,7 +95,8 @@ fi
     --prefix="$PREFIX" \
     --disable-install-doc \
     --enable-shared \
-    --enable-yjit
+    --enable-yjit \
+    --enable-zjit
   )
 
   if [ -n "$cppflags" ]; then
