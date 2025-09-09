@@ -232,7 +232,7 @@ namespace :docker do
 
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
     if ruby_version == "master"
-      commit_hash = get_ruby_master_head_hash
+      commit_hash = ENV.fetch("ruby_sha", "").empty? ? get_ruby_master_head_hash : ENV.fetch("ruby_sha")
       commit_date = get_date_at_commit(commit_hash).then { |t| "%04d%02d%02d" % [t.year, t.month, t.day] }
       ruby_version = "master:#{commit_hash}"
       tags = ["master#{version_suffix}", "master#{version_suffix}-#{commit_hash}", "master#{version_suffix}-#{commit_date}"]

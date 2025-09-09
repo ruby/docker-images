@@ -14,9 +14,13 @@ on:
         required: true
         default: master
         description: '"master" or version nunmber ("3.1.2")'
+      ruby_sha:
+        required: false
+        description: 'optional: override sha for ruby_version "master"'
 
 env:
   ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
+  ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
