@@ -300,6 +300,7 @@ namespace :docker do
       _, tags = make_tags(ruby_version, image_version_suffix)
 
       amend_args = architectures.map {|arch|
+        # "-#{arch}-#{manifest_suffix}" should match `tag_suffix` on `docker:build`
         manifest_name = "#{tags[0]}-#{arch}"
         manifest_name = "#{manifest_name}-#{manifest_suffix}" if manifest_suffix
         ['--amend', manifest_name]
