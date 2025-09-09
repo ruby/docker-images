@@ -118,6 +118,7 @@ jobs:
 
   deploy_multiarch:
     strategy:
+      fail-fast: false
       matrix:
         registry_name: [ rubylang, ghcr.io/ruby ]
         ubuntu_version:
