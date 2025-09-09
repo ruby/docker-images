@@ -16,7 +16,7 @@ on:
         description: '"master" or version nunmber ("3.1.2")'
       ruby_sha:
         required: false
-        description: 'optional: override sha for ruby_version "master"'
+        description: 'SHA for master ruby_version (optional)'
 
 env:
   ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
