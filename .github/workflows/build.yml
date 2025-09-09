@@ -36,7 +36,7 @@ jobs:
     env:
       push: false
       ubuntu_version: "${{ matrix.ubuntu_version }}"
-      tag_suffix: "-${{ matrix.arch }}-${{ github.sha }}"
+      tag_suffix: "-${{ matrix.arch }}-${{ github.run_id }}"
       push_tags: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.sha }}
       dev_suffix: ${{ matrix.dev_suffix }}
       debug_suffix: ${{ matrix.debug_suffix }}
@@ -148,7 +148,7 @@ jobs:
              ruby_version="${{ env.ruby_version }}" \
              ubuntu_version="${{ matrix.ubuntu_version }}" \
              architectures="amd64 arm64" \
-             manifest_suffix=${{ github.sha }} \
+             manifest_suffix=${{ github.run_id }} \
              image_version_suffix=${{ matrix.image_version_suffix }}
 
     - name: Push manifest to ${{ matrix.registry_name }}
