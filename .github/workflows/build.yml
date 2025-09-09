@@ -80,8 +80,6 @@ jobs:
                           optflags="${{ env.optflags }}" \
                           cppflags="${{ env.cppflags }}" \
                           target=${{ env.target }} \
-      env:
-        GH_TOKEN: ${{ github.token }}
 
     - name: List images
       run: docker images
