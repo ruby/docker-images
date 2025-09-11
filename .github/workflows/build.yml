@@ -21,7 +21,7 @@ on:
         type: string
       ruby_commit_date_offset:
         required: false
-        description: 'Commit date offset in days (optional)'
+        description: 'Commit date offset in days ("0")'
         default: 0
         type: choice
         options:
