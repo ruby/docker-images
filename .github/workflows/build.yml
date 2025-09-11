@@ -15,10 +15,6 @@ on:
         default: master
         description: '"master" or version nunmber ("3.1.2")'
         type: string
-      ruby_sha:
-        required: false
-        description: 'SHA for master ruby_version (optional)'
-        type: string
       ruby_commit_date_offset:
         required: false
         description: 'Commit date offset in days ("0")'
@@ -27,11 +23,15 @@ on:
         options:
           - 0
           - 1
+      ruby_sha:
+        required: false
+        description: 'SHA for master ruby_version (optional)'
+        type: string
 
 env:
   ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
-  ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
   ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || '' }}
+  ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
