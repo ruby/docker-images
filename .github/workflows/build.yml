@@ -30,7 +30,7 @@ on:
 
 env:
   ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
-  ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || '' }}
+  ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || '0' }}
   ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
