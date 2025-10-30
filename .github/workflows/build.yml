@@ -4,10 +4,6 @@ on:
   schedule:
     - cron: '15 */8 * * *'
 
-  repository_dispatch:
-    types:
-      - build
-
   workflow_dispatch:
     inputs:
       ruby_version:
@@ -29,9 +25,9 @@ on:
         type: string
 
 env:
-  ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
+  ruby_version: ${{ github.event.inputs.ruby_version || 'master' }}
   ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || '0' }}
-  ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
+  ruby_sha: ${{ github.event.inputs.ruby_sha || '' }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -52,7 +48,7 @@ jobs:
       push: false
       ubuntu_version: "${{ matrix.ubuntu_version }}"
       tag_suffix: "-${{ matrix.arch }}-${{ github.run_id }}"
-      push_tags: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.run_id }}
+      push_tags: ${{ github.event.inputs.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.run_id }}
       dev_suffix: ${{ matrix.dev_suffix }}
       debug_suffix: ${{ matrix.debug_suffix }}
 
