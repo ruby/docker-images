@@ -35,8 +35,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dev_suffix: ['', '-dev']
         debug_suffix: ['', '-debug']
+        dev_suffix: ['', '-dev']
         ubuntu_version:
           - noble
           - jammy
