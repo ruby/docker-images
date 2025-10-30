@@ -158,7 +158,6 @@ jobs:
         # In docker:manifest:create:
         #   tags = ["master#{version_suffix}", ...]                                                       #=> "master${{ matrix.image_version_suffix }}"
         #   tags.collect! {|t| "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{tag_suffix}" } #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}"
-        #   tags[0]                                                                                       #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}"
         #   manifest_name = "#{tags[0]}-#{arch}"                                                          #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64"
         #   manifest_name = "#{manifest_name}-#{manifest_suffix}" if manifest_suffix                      #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64-${{ github.run_id }}"
         docker_image: ${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64-${{ github.run_id }}
