@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dev_suffix: [ '', '-dev' ]
+        dev_suffix: ['', '-dev']
         debug_suffix: ['', '-debug']
         ubuntu_version:
           - noble
@@ -125,8 +125,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        registry_name: [ rubylang, ghcr.io/ruby ]
-        image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
+        registry_name: [rubylang, ghcr.io/ruby]
+        image_version_suffix: ['', '-dev', '-debug', '-debug-dev']
         ubuntu_version:
           - noble
           - jammy
