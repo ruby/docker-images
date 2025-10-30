@@ -35,11 +35,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        dev_suffix: [ '', '-dev' ]
+        debug_suffix: ['', '-debug']
         ubuntu_version:
           - noble
           - jammy
-        dev_suffix: [ '', '-dev' ]
-        debug_suffix: ['', '-debug']
         arch: ['amd64', 'arm64']
 
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
@@ -126,10 +126,10 @@ jobs:
       fail-fast: false
       matrix:
         registry_name: [ rubylang, ghcr.io/ruby ]
+        image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
         ubuntu_version:
           - noble
           - jammy
-        image_version_suffix: [ '', '-dev', '-debug', '-debug-dev' ]
 
     runs-on: ubuntu-latest
 
