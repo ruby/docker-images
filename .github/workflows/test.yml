@@ -21,6 +21,7 @@ jobs:
           - 3.2.8
           - 3.3.7
           - 3.4.2
+          - 4.0.0-preview2
           - master
         arch:
           - amd64
