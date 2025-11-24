@@ -21,6 +21,7 @@ RUN set -ex && \
             gcc \
             git \
             g++ \
+            libatomic1 \
             libffi-dev \
             libgdbm-dev \
             libgmp-dev \
@@ -77,6 +78,7 @@ RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates \
+            libaatomic1 \
             libffi-dev \
             libgdbm-dev \
             libgmp-dev \
