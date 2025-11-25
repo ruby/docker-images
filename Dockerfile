@@ -113,9 +113,6 @@ RUN set -ex && \
 RUN mkdir -p /usr/local/etc
 
 COPY --from=build \
-     /usr/local/etc/gemrc /usr/local/etc
-
-COPY --from=build \
      /usr/local/bin/bundle \
      /usr/local/bin/bundler \
      /usr/local/bin/erb \
