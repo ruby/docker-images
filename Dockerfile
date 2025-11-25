@@ -157,6 +157,8 @@ COPY --from=build \
      /usr/local/share/man/man1/*.* \
      /usr/local/share/man/man1/
 
+# Verify that the built/copied ruby can at least run (has necessary OS dependencies, etc).
+RUN /usr/local/bin/ruby -v
 
 ### development ###
 FROM ruby AS development
