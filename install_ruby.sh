@@ -39,7 +39,7 @@ case $RUBY_VERSION in
   *)
     read RUBY_DOWNLOAD_URI RUBY_DOWNLOAD_SHA256 < <(get_released_ruby $RUBY_VERSION)
     if test -z "$RUBY_DOWNLOAD_URI"; then
-      echo "Unsupported RUBY_VERSION ($RUBY_VERSION)" >2
+      echo "Unsupported RUBY_VERSION ($RUBY_VERSION)" >&2
       exit 1
     fi
     echo $RUBY_DOWNLOAD_URI
