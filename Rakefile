@@ -269,6 +269,11 @@ namespace :docker do
       version_info = get_ruby_version_at_commit(commit_hash)
       ruby_so_suffix = version_info.values_at(:MAJOR, :MINOR, :TEENY).join(".")
       build_args << "RUBY_SO_SUFFIX=#{ruby_so_suffix}"
+    elsif ruby_version.match?(/\A\d+\.\d+\.\d+-(preview|rc|dev)\d*\z/)
+      # For preview, rc, and dev versions, extract just the numeric version
+      # e.g., "4.0.0-preview2" -> "4.0.0"
+      ruby_so_suffix = ruby_version.match(/\A(\d+\.\d+\.\d+)/)[1]
+      build_args << "RUBY_SO_SUFFIX=#{ruby_so_suffix}"
     end
     %w(cppflags optflags).each do |name|
       build_args << %Q(#{name}=#{ENV[name]}) if ENV.key?(name)
