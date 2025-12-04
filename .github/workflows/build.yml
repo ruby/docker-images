@@ -153,7 +153,7 @@ jobs:
 
     # Make sure the sha of "master-{sha}" tags agrees with the RUBY_REVISION in the image
     - name: Extract ruby_sha
-      run: echo "ruby_sha=$(docker run "$docker_image")" >> "$GITHUB_ENV"
+      run: echo "ruby_sha=$(docker run "$docker_image" ruby -e 'puts RUBY_REVISION')" >> "$GITHUB_ENV"
       env:
         # In docker:manifest:create:
         #   tags = ["master#{version_suffix}", ...]                                                       #=> "master${{ matrix.image_version_suffix }}"
