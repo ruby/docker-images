@@ -20,38 +20,49 @@ The list of image names in this repository is below:
 ### Ubuntu 24.04 (noble)
 
 - master
-  - rubylang/ruby:master-noble
-  - rubylang/ruby:master-dev-noble
-  - rubylang/ruby:master-debug-noble
-  - rubylang/ruby:master-debug-dev-noble
+  - `rubylang/ruby:master-noble`
+  - `rubylang/ruby:master-dev-noble`
+  - `rubylang/ruby:master-debug-noble`
+  - `rubylang/ruby:master-debug-dev-noble`
+- 4.0
+  - **`rubylang/ruby:latest`**
+  - `rubylang/ruby:4.0-noble`
+  - `rubylang/ruby:4.0.0-noble`
+- 3.4
+  - `rubylang/ruby:3.4-noble`
+  - `rubylang/ruby:3.4.8-noble`
 - 3.3
-  - rubylang/ruby:latest
-  - rubylang/ruby:3.3-noble
-  - rubylang/ruby:3.3.5-noble
+  - `rubylang/ruby:3.3-noble`
+  - `rubylang/ruby:3.3.10-noble`
 - 3.2
-  - rubylang/ruby:3.2-noble
-  - rubylang/ruby:3.2.5-noble
+  - `rubylang/ruby:3.2-noble`
+  - `rubylang/ruby:3.2.9-noble`
 - 3.1
-  - rubylang/ruby:3.1-noble
-  - rubylang/ruby:3.1.6-noble
+  - `rubylang/ruby:3.1-noble`
+  - `rubylang/ruby:3.1.7-noble`
 
 ### Ubuntu 22.04 (jammy)
 
 - master
-  - rubylang/ruby:master-jammy
-  - rubylang/ruby:master-dev-jammy
-  - rubylang/ruby:master-debug-jammy
-  - rubylang/ruby:master-debug-dev-jammy
+  - `rubylang/ruby:master-jammy`
+  - `rubylang/ruby:master-dev-jammy`
+  - `rubylang/ruby:master-debug-jammy`
+  - `rubylang/ruby:master-debug-dev-jammy`
+- 4.0
+  - `rubylang/ruby:4.0-jammy`
+  - `rubylang/ruby:4.0.0-jammy`
+- 3.4
+  - `rubylang/ruby:3.4-jammy`
+  - `rubylang/ruby:3.4.8-jammy`
 - 3.3
-  - rubylang/ruby:latest
-  - rubylang/ruby:3.3-jammy
-  - rubylang/ruby:3.3.5-jammy
+  - `rubylang/ruby:3.3-jammy`
+  - `rubylang/ruby:3.3.10-jammy`
 - 3.2
-  - rubylang/ruby:3.2-jammy
-  - rubylang/ruby:3.2.5-jammy
+  - `rubylang/ruby:3.2-jammy`
+  - `rubylang/ruby:3.2.9-jammy`
 - 3.1
-  - rubylang/ruby:3.1-jammy
-  - rubylang/ruby:3.1.6-jammy
+  - `rubylang/ruby:3.1-jammy`
+  - `rubylang/ruby:3.1.7-jammy`
 
 ### Misc
 
