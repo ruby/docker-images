@@ -96,25 +96,30 @@ def ruby_version_exist?(version)
 end
 
 namespace :debug do
+  desc "Display all available Ruby versions grouped by major.minor"
   task :versions do
     pp ruby_versions
   end
 
+  desc "Show the latest stable Ruby version"
   task :latest_stable_version do
     p latest_stable_version: ruby_latest_stable_version
   end
 
+  desc "Check if the specified Ruby version is the latest (env: ruby_version)"
   task :latest_version do
     ENV["latest_tag"] = "true"
     ruby_version = ENV["ruby_version"]
     p latest_version: ruby_latest_version?(ruby_version)
   end
 
+  desc "Check if the specified Ruby version is the latest full version (env: ruby_version)"
   task :latest_full_version do
     ruby_version = ENV["ruby_version"]
     p latest_full_version: ruby_latest_full_version?(ruby_version)
   end
 
+  desc "Check if the specified Ruby version exists (env: ruby_version)"
   task :version_exist do
     ruby_version = ENV["ruby_version"]
     p version_exist: ruby_version_exist?(ruby_version)
@@ -246,6 +251,7 @@ namespace :docker do
     return ruby_version, tags
   end
 
+  desc "Build Docker image for Ruby (env: ruby_version, ubuntu_version, arch, image_version_suffix, tag_suffix, tag, cppflags, optflags, target)"
   task :build do
     ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
@@ -296,6 +302,7 @@ namespace :docker do
   end
 
   namespace :manifest do
+    desc "Create multi-architecture Docker manifests (env: ruby_version, architectures, manifest_suffix, image_version_suffix)"
     task :create do
       ruby_version = ENV.fetch("ruby_version")
       architectures = ENV.fetch("architectures").split(' ')
@@ -325,6 +332,7 @@ namespace :docker do
       end
     end
 
+    desc "Push multi-architecture Docker manifests to registry (env: ruby_version, image_version_suffix)"
     task :push do
       ruby_version = ENV["ruby_version"]
       image_version_suffix = ENV["image_version_suffix"]
