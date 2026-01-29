@@ -73,7 +73,7 @@ We have some other images for special purposes.
 - Nightly debug built master (e.g. `rubylang/ruby:master-debug-nightly-jammy`)
 - EOL versions (e.g. `rubylang/ruby:2.4.10-jammy`)
 
-All the images are based on `ubuntu:jammy`, and made from just doing `make install` and installing bundler.
+All the images are based on Ubuntu (noble or jammy), and made from just doing `make install` and installing bundler.
 
 ## How to build images
 
@@ -87,16 +87,16 @@ You can specify the specific revision in the master branch like:
 rake docker:build ruby_version=master:ce798d08de
 ```
 
-## Build and push for the specific ruby and ubuntu versions
+## Build and push for the specific ruby
 
-Trigger CircleCI workflow with `ruby_version` and `ubuntu_version` pipeline parameters.
-Nightly build workflow is triggered if the workflow triggered with `ruby_version` of `"nightly"`.
-The nightly build workflow only builds images of linux/amd64 platform.
+You can trigger builds using GitHub Actions workflow_dispatch.
+Go to the Actions tab in the repository, select the "Build Docker image with multi-arch" workflow,
+and run it with the `ruby_version` parameter (e.g., "3.1.2" or "master").
 
-## Nightly build workflow
+## Scheduled build workflow
 
-Nightly build workflow is performed by CircleCI's scheduled pipeline system.
-The build is triggered at 16:00 UTC (01:00 JST) every night.
+Scheduled builds are performed by GitHub Actions and run every 8 hours.
+The builds are triggered at 00:15, 08:15, and 16:15 UTC (09:15, 17:15, and 01:15 JST).
 
 ## Author
 
