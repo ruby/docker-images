@@ -296,6 +296,8 @@ namespace :docker do
        *tags.map {|tag| ["-t", tag] }.flatten,
        *build_args.map {|arg| ["--build-arg", arg] }.flatten,
        '--target', target,
+       '--provenance=false',
+       '--sbom=false',
        '.'
 
     sh 'docker', 'images'
