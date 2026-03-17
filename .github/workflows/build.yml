@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '15 */8 * * *'
 
+  repository_dispatch:
+    types: [build]
+
   workflow_dispatch:
     inputs:
       ruby_version:
@@ -25,9 +28,9 @@ on:
         type: string
 
 env:
-  ruby_version: ${{ github.event.inputs.ruby_version || 'master' }}
-  ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || '0' }}
-  ruby_sha: ${{ github.event.inputs.ruby_sha || '' }}
+  ruby_version: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}
+  ruby_commit_date_offset: ${{ github.event.inputs.ruby_commit_date_offset || github.event.client_payload.ruby_commit_date_offset || '0' }}
+  ruby_sha: ${{ github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '' }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
