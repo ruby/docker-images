@@ -83,7 +83,9 @@ end
 
 def ruby_latest_full_version?(version)
   ver2 = version.split('.')[0,2].join('.')
-  ruby_versions[ver2][0] == version
+  candidates = ((ruby_versions[ver2] || []) + [version]).uniq.select { |v| v.match?(/\A\d+\.\d+\.\d+\z/) }
+  return false if candidates.empty?
+  candidates.max_by { |v| Gem::Version.new(v) } == version
 end
 
 def ruby_version_exist?(version)
