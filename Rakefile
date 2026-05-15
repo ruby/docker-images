@@ -328,7 +328,7 @@ namespace :docker do
         if tag =~ /#{LATEST_UBUNTU_VERSION}/
           non_ubuntu_tag = tag.sub(/-#{LATEST_UBUNTU_VERSION}/, '')
           sh 'docker', 'manifest', 'create', "#{non_ubuntu_tag}", *amend_args
-          if image_version_suffix.empty? && ruby_version =~ /^#{LATEST_RUBY_VERSION}/ && latest_tag.nil?
+          if image_version_suffix.empty? && ruby_version =~ /\A#{Regexp.escape(LATEST_RUBY_VERSION)}\.\d+\z/ && latest_tag.nil?
             latest_tag = tag.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
             sh 'docker', 'manifest', 'create', "#{latest_tag}", *amend_args
           end
@@ -349,7 +349,7 @@ namespace :docker do
         if tag =~ /#{LATEST_UBUNTU_VERSION}/
           non_ubuntu_tag = tag.sub(/-#{LATEST_UBUNTU_VERSION}/, '')
           sh 'docker', 'manifest', 'push', "#{non_ubuntu_tag}"
-          if image_version_suffix.empty? && ruby_version =~ /^#{LATEST_RUBY_VERSION}/ && latest_tag.nil?
+          if image_version_suffix.empty? && ruby_version =~ /\A#{Regexp.escape(LATEST_RUBY_VERSION)}\.\d+\z/ && latest_tag.nil?
             latest_tag = tag.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
             sh 'docker', 'manifest', 'push', "#{latest_tag}"
           end
