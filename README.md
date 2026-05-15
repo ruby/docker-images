@@ -1,19 +1,30 @@
-# ruby/docker-images
+# rubylang/ruby
 
-The Dockerfile is available in [this repository](https://github.com/ruby/ruby-docker-images/blob/master/Dockerfile).
+Official Ruby Docker images maintained by the Ruby core team.
 
-Built images are available here:
+* Docker Hub: https://hub.docker.com/r/rubylang/ruby/
+* GitHub Container Registry: https://github.com/ruby/docker-images/pkgs/container/ruby
+* Source: https://github.com/ruby/docker-images
 
-* https://hub.docker.com/r/rubylang/ruby/
-* https://github.com/ruby/ruby-docker-images/pkgs/container/ruby
+## Quick start
+
+Pull the latest stable Ruby image and run it:
+
+```
+docker pull rubylang/ruby:4.0
+docker run --rm rubylang/ruby:4.0 ruby -v
+```
+
+The `latest` tag points to the most recent stable release of the current latest series (4.0).
 
 ## What is this?
 
-This repository consists of two kinds of images. One is for production use, and the other is for development.
+This repository provides two flavors of Ruby images for each supported version:
 
-An image for development is based on the image for production of the same ruby and ubuntu versions and installed development tools such as build-essential and gdb, in addition. It has `-dev` suffix after the version number, like `rubylang/ruby:3.3.0-dev-noble`.
+- **Production** (e.g. `rubylang/ruby:4.0-noble`): minimal image with Ruby and bundler installed.
+- **Development** (e.g. `rubylang/ruby:4.0-dev-noble`): based on the production image, with `build-essential`, `gdb`, and other development tools added. The `-dev` suffix follows the version number.
 
-The list of image names in this repository is below:
+All images are based on Ubuntu (noble or jammy) and are built by running `make install` on the official Ruby source tarball.
 
 ## Images
 
@@ -27,19 +38,13 @@ The list of image names in this repository is below:
 - 4.0
   - **`rubylang/ruby:latest`**
   - `rubylang/ruby:4.0-noble`
-  - `rubylang/ruby:4.0.0-noble`
+  - `rubylang/ruby:4.0.4-noble`
 - 3.4
   - `rubylang/ruby:3.4-noble`
-  - `rubylang/ruby:3.4.8-noble`
+  - `rubylang/ruby:3.4.9-noble`
 - 3.3
   - `rubylang/ruby:3.3-noble`
-  - `rubylang/ruby:3.3.10-noble`
-- 3.2
-  - `rubylang/ruby:3.2-noble`
-  - `rubylang/ruby:3.2.9-noble`
-- 3.1
-  - `rubylang/ruby:3.1-noble`
-  - `rubylang/ruby:3.1.7-noble`
+  - `rubylang/ruby:3.3.11-noble`
 
 ### Ubuntu 22.04 (jammy)
 
@@ -50,53 +55,46 @@ The list of image names in this repository is below:
   - `rubylang/ruby:master-debug-dev-jammy`
 - 4.0
   - `rubylang/ruby:4.0-jammy`
-  - `rubylang/ruby:4.0.0-jammy`
+  - `rubylang/ruby:4.0.4-jammy`
 - 3.4
   - `rubylang/ruby:3.4-jammy`
-  - `rubylang/ruby:3.4.8-jammy`
+  - `rubylang/ruby:3.4.9-jammy`
 - 3.3
   - `rubylang/ruby:3.3-jammy`
-  - `rubylang/ruby:3.3.10-jammy`
-- 3.2
-  - `rubylang/ruby:3.2-jammy`
-  - `rubylang/ruby:3.2.9-jammy`
-- 3.1
-  - `rubylang/ruby:3.1-jammy`
-  - `rubylang/ruby:3.1.7-jammy`
+  - `rubylang/ruby:3.3.11-jammy`
 
 ### Misc
 
-We have some other images for special purposes.
+Additional images are published for special purposes:
 
-- Preview or Release-candidate versions (e.g. `rubylang/ruby:2.7.0-preview1-jammy`)
-- Nightly built master (e.g. `rubylang/ruby:master-nightly-jammy`)
-- Nightly debug built master (e.g. `rubylang/ruby:master-debug-nightly-jammy`)
-- EOL versions (e.g. `rubylang/ruby:2.4.10-jammy`)
+- Preview or release-candidate versions (e.g. `rubylang/ruby:4.0.0-preview2-noble`)
+- Nightly builds of master (e.g. `rubylang/ruby:master-nightly-noble`)
+- Nightly debug builds of master (e.g. `rubylang/ruby:master-debug-nightly-noble`)
+- EOL versions, for compatibility use only (e.g. `rubylang/ruby:2.4.10-jammy`)
 
-All the images are based on Ubuntu (noble or jammy), and made from just doing `make install` and installing bundler.
+## Contributing
 
-## How to build images
+The Dockerfile and build scripts live in the [ruby/docker-images](https://github.com/ruby/docker-images) repository.
+
+### Building locally
 
 ```
 rake docker:build ruby_version=<Ruby version you want to build>
 ```
 
-You can specify the specific revision in the master branch like:
+You can also specify a specific revision on the master branch:
 
 ```
 rake docker:build ruby_version=master:ce798d08de
 ```
 
-## Build and push for the specific ruby
+### Triggering a build
 
-You can trigger builds using GitHub Actions workflow_dispatch.
-Go to the Actions tab in the repository, select the "Build Docker image with multi-arch" workflow,
-and run it with the `ruby_version` parameter (e.g., "3.1.2" or "master").
+Builds can be triggered via GitHub Actions `workflow_dispatch`. Open the Actions tab, select the "Build Docker image with multi-arch" workflow, and run it with a `ruby_version` parameter (e.g. `3.4.9` or `master`).
 
-## Scheduled build workflow
+### Scheduled builds
 
-Scheduled builds are performed by GitHub Actions and run every 8 hours.
-The builds are triggered at 00:15, 08:15, and 16:15 UTC (09:15, 17:15, and 01:15 JST).
+Scheduled builds run every 8 hours on GitHub Actions, at 00:15, 08:15, and 16:15 UTC (09:15, 17:15, and 01:15 JST).
 
 ## Author
 
