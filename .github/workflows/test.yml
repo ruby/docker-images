@@ -19,10 +19,10 @@ jobs:
           - noble
           - jammy
         ruby_version:
-          - 3.2.8
-          - 3.3.7
-          - 3.4.2
-          - 4.0.0-preview2
+          - 3.2.11
+          - 3.3.11
+          - 3.4.9
+          - 4.0.4
           - master
         arch:
           - amd64
