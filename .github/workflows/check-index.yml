@@ -8,6 +8,9 @@ on:
     branches:
     - check-index-test
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
