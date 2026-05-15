@@ -1,5 +1,5 @@
 LATEST_UBUNTU_VERSION = "noble"
-LATEST_RUBY_VERSION = "3.4"
+LATEST_RUBY_VERSION = "4.0"
 
 def download(url)
   require "net/http"
