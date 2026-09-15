@@ -252,9 +252,13 @@ namespace :docker do
     end
   end
 
+  def ruby_master_commit_hash
+    ENV.fetch("ruby_sha", "").empty? ? get_ruby_master_head_hash : ENV.fetch("ruby_sha")
+  end
+
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
     if ruby_version == "master"
-      commit_hash = ENV.fetch("ruby_sha", "").empty? ? get_ruby_master_head_hash : ENV.fetch("ruby_sha")
+      commit_hash = ruby_master_commit_hash
       commit_date = get_date_at_commit(commit_hash).then do |date|
         date_offset = Integer(ENV.fetch("ruby_commit_date_offset", "0"))
         date += date_offset * 24 * 60 * 60
@@ -272,7 +276,7 @@ namespace :docker do
     return ruby_version, tags
   end
 
-  desc "Build Docker image for Ruby (env: ruby_version, ubuntu_version, arch, image_version_suffix, tag_suffix, tag, cppflags, optflags, target)"
+  desc "Build Docker image for Ruby (env: ruby_version, ubuntu_version, arch, image_version_suffix, tag_suffix, tag, cppflags, optflags, target, push_registries, metadata_file)"
   task :build do
     ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
@@ -284,8 +288,19 @@ namespace :docker do
     target = ENV.fetch("target", "ruby")
     arch = ENV.fetch("arch", "linux/amd64")
 
-    ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
-    tags << "#{docker_image_name}:#{tag}" if !tag.empty?
+    if (push_registries = ENV["push_registries"])
+      # Pushed untagged. docker:manifest:create tags the digests later.
+      ruby_version = "master:#{ruby_master_commit_hash}" if ruby_version == "master"
+      tags = []
+      images = push_registries.split.map {|name| "#{name}/ruby" }.join(",")
+      build_cmd_args = ['buildx', 'build', '--platform', arch,
+                        '--output', %Q(type=image,"name=#{images}",push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=false)]
+      build_cmd_args.push('--metadata-file', ENV["metadata_file"]) if ENV.key?("metadata_file")
+    else
+      ruby_version, tags = make_tags(ruby_version, version_suffix, tag_suffix)
+      tags << "#{docker_image_name}:#{tag}" if !tag.empty?
+      build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch, '--load'] : ['build']
+    end
 
     build_args = [
       "RUBY_VERSION=#{ruby_version}",
@@ -311,8 +326,6 @@ namespace :docker do
       IO.write('tmp/ruby/.keep', '')
     end
 
-    build_cmd_args = arch =~ /arm/ ? ['buildx', 'build', '--platform', arch, '--load'] : ['build']
-
     sh 'docker', *build_cmd_args, '-f', 'Dockerfile',
        *tags.map {|tag| ["-t", tag] }.flatten,
        *build_args.map {|arg| ["--build-arg", arg] }.flatten,
@@ -325,55 +338,21 @@ namespace :docker do
   end
 
   namespace :manifest do
-    desc "Create multi-architecture Docker manifests (env: ruby_version, architectures, manifest_suffix, image_version_suffix)"
+    desc "Create and push multi-architecture Docker manifests from image digests (env: registry_name, ruby_version, ubuntu_version, image_version_suffix, digests)"
     task :create do
       ruby_version = ENV.fetch("ruby_version")
-      architectures = ENV.fetch("architectures").split(' ')
-      manifest_suffix = ENV.fetch("manifest_suffix", nil)
       image_version_suffix = ENV["image_version_suffix"]
+      sources = ENV.fetch("digests").split.map {|digest| "#{docker_image_name}@#{digest}" }
 
       _, tags = make_tags(ruby_version, image_version_suffix)
 
-      amend_args = architectures.map {|arch|
-        # "-#{arch}-#{manifest_suffix}" should match `tag_suffix` on `docker:build`
-        manifest_name = "#{tags[0]}-#{arch}"
-        manifest_name = "#{manifest_name}-#{manifest_suffix}" if manifest_suffix
-        ['--amend', manifest_name]
-      }.flatten
-
-      latest_tag = nil
-      tags.each do |tag|
-        sh 'docker', 'manifest', 'create', "#{tag}", *amend_args
-        if tag =~ /#{LATEST_UBUNTU_VERSION}/
-          non_ubuntu_tag = tag.sub(/-#{LATEST_UBUNTU_VERSION}/, '')
-          sh 'docker', 'manifest', 'create', "#{non_ubuntu_tag}", *amend_args
-          if image_version_suffix.empty? && ruby_version =~ /\A#{Regexp.escape(LATEST_RUBY_VERSION)}\.\d+\z/ && latest_tag.nil?
-            latest_tag = tag.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
-            sh 'docker', 'manifest', 'create', "#{latest_tag}", *amend_args
-          end
-        end
+      latest_ubuntu_tags = tags.grep(/#{LATEST_UBUNTU_VERSION}/)
+      tags += latest_ubuntu_tags.map {|tag| tag.sub(/-#{LATEST_UBUNTU_VERSION}/, '') }
+      if image_version_suffix.empty? && ruby_version =~ /\A#{Regexp.escape(LATEST_RUBY_VERSION)}\.\d+\z/ && !latest_ubuntu_tags.empty?
+        tags << latest_ubuntu_tags.first.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
       end
-    end
 
-    desc "Push multi-architecture Docker manifests to registry (env: ruby_version, image_version_suffix)"
-    task :push do
-      ruby_version = ENV["ruby_version"]
-      image_version_suffix = ENV["image_version_suffix"]
-
-      _, tags = make_tags(ruby_version, image_version_suffix)
-
-      latest_tag = nil
-      tags.each do |tag|
-        sh 'docker', 'manifest', 'push', "#{tag}"
-        if tag =~ /#{LATEST_UBUNTU_VERSION}/
-          non_ubuntu_tag = tag.sub(/-#{LATEST_UBUNTU_VERSION}/, '')
-          sh 'docker', 'manifest', 'push', "#{non_ubuntu_tag}"
-          if image_version_suffix.empty? && ruby_version =~ /\A#{Regexp.escape(LATEST_RUBY_VERSION)}\.\d+\z/ && latest_tag.nil?
-            latest_tag = tag.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
-            sh 'docker', 'manifest', 'push', "#{latest_tag}"
-          end
-        end
-      end
+      sh 'docker', 'buildx', 'imagetools', 'create', *tags.map {|tag| ["-t", tag] }.flatten, *sources
     end
   end
 end

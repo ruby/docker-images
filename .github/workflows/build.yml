@@ -70,11 +70,8 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     env:
-      push: false
       ruby_sha: ${{ needs.prepare.outputs.ruby_sha }}
       ubuntu_version: "${{ matrix.ubuntu_version }}"
-      tag_suffix: "-${{ matrix.arch }}-${{ github.run_id }}"
-      push_tags: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.run_id }}
       dev_suffix: ${{ matrix.dev_suffix }}
       debug_suffix: ${{ matrix.debug_suffix }}
 
@@ -92,6 +89,8 @@ jobs:
         username: ${{ secrets.GHCR_USER }}
         password: ${{ secrets.GHCR_ACCESS_TOKEN }}
 
+    - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
     - run: |
         if [ "${{ env.dev_suffix }}" = "-dev" ]; then
           echo "target=development" >> $GITHUB_ENV
@@ -103,36 +102,25 @@ jobs:
           echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
         fi
 
-    - name: Build docker image
+    - name: Build and push docker image
       run: |-
         rake docker:build ruby_version=${{ env.ruby_version }} \
                           ubuntu_version=${{ env.ubuntu_version }} \
                           arch=linux/${{ matrix.arch }} \
-                          image_version_suffix=${{ env.debug_suffix }}${{ env.dev_suffix }} \
-                          tag_suffix=${{ env.tag_suffix }} \
                           optflags="${{ env.optflags }}" \
                           cppflags="${{ env.cppflags }}" \
                           target=${{ env.target }} \
+                          push_registries="rubylang ghcr.io/ruby" \
+                          metadata_file="$RUNNER_TEMP/metadata.json"
+        mkdir -p "$RUNNER_TEMP/digests"
+        jq -r '."containerimage.digest"' "$RUNNER_TEMP/metadata.json" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
 
-    - name: List images
-      run: docker images
-
-    - name: Push docker image to rubylang
-      if: "${{ env.push_tags }}"
-      run: |-
-        push_tags="${{ env.push_tags }}"
-        for tag in $push_tags; do
-          docker push rubylang/ruby:$tag
-        done
-
-    - name: Push docker image to ghcr.io/ruby
-      if: "${{ env.push_tags }}"
-      run: |-
-        push_tags="${{ env.push_tags }}"
-        for tag in $push_tags; do
-          docker tag rubylang/ruby:$tag ghcr.io/ruby/ruby:$tag
-          docker push ghcr.io/ruby/ruby:$tag
-        done
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: digests${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}
+        path: ${{ runner.temp }}/digests/*
+        if-no-files-found: error
+        retention-days: 1
 
     - uses: ruby/action-slack@d260b61aa817726d5bedd22dd6cc305787fa4cdd # v4.0.0
       with:
@@ -151,7 +139,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        registry_name: [rubylang, ghcr.io/ruby]
         image_version_suffix: ['', '-dev', '-debug', '-debug-dev']
         ubuntu_version:
           - resolute
@@ -172,39 +159,37 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASS }}
-      if: ${{ matrix.registry_name == 'rubylang' }}
 
     - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
       with:
         registry: ghcr.io
         username: ${{ secrets.GHCR_USER }}
         password: ${{ secrets.GHCR_ACCESS_TOKEN }}
-      if: ${{ matrix.registry_name == 'ghcr.io/ruby' }}
 
-    - name: Create manifest for ${{ matrix.registry_name }}
-      run: |-
-        rake docker:manifest:create \
-             registry_name="${{ matrix.registry_name }}" \
-             ruby_version="${{ env.ruby_version }}" \
-             ubuntu_version="${{ matrix.ubuntu_version }}" \
-             architectures="amd64 arm64" \
-             manifest_suffix=${{ github.run_id }} \
-             image_version_suffix=${{ matrix.image_version_suffix }}
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        pattern: digests${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-*
+        path: ${{ runner.temp }}/digests
+        merge-multiple: true
 
-    - name: Push manifest to ${{ matrix.registry_name }}
+    - name: Create and push manifests
       run: |-
-        rake docker:manifest:push \
-             registry_name="${{ matrix.registry_name }}" \
-             ruby_version="${{ env.ruby_version }}" \
-             ubuntu_version="${{ matrix.ubuntu_version }}" \
-             image_version_suffix=${{ matrix.image_version_suffix }}
+        digests=$(cat "$RUNNER_TEMP/digests/amd64" "$RUNNER_TEMP/digests/arm64")
+        for registry_name in rubylang ghcr.io/ruby; do
+          rake docker:manifest:create \
+               registry_name="$registry_name" \
+               ruby_version="${{ env.ruby_version }}" \
+               ubuntu_version="${{ matrix.ubuntu_version }}" \
+               image_version_suffix=${{ matrix.image_version_suffix }} \
+               digests="$digests"
+        done
 
     - uses: ruby/action-slack@d260b61aa817726d5bedd22dd6cc305787fa4cdd # v4.0.0
       with:
         payload: |
           {
             "attachments": [{
-              "text": "deploy_multiarch ${{ job.status }}: ${{ matrix.registry_name }} / ${{ matrix.ubuntu_version }} ${{ matrix.image_version_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "deploy_multiarch ${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.image_version_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
