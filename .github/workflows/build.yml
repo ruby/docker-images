@@ -99,14 +99,18 @@ jobs:
       run: |-
         mkdir -p "$RUNNER_TEMP/digests"
         for target in ruby development; do
-          rake docker:build ruby_version=${{ env.ruby_version }} \
-                            ubuntu_version=${{ env.ubuntu_version }} \
-                            arch=linux/${{ matrix.arch }} \
-                            optflags="${{ env.optflags }}" \
-                            cppflags="${{ env.cppflags }}" \
-                            target=$target \
-                            push_registries="rubylang ghcr.io/ruby" \
-                            metadata_file="$RUNNER_TEMP/$target.json"
+          for attempt in 1 2 3; do
+            rake docker:build ruby_version=${{ env.ruby_version }} \
+                              ubuntu_version=${{ env.ubuntu_version }} \
+                              arch=linux/${{ matrix.arch }} \
+                              optflags="${{ env.optflags }}" \
+                              cppflags="${{ env.cppflags }}" \
+                              target=$target \
+                              push_registries="rubylang ghcr.io/ruby" \
+                              metadata_file="$RUNNER_TEMP/$target.json" && break
+            if [ $attempt = 3 ]; then exit 1; fi
+            sleep 60
+          done
           jq -r '."containerimage.digest"' "$RUNNER_TEMP/$target.json" > "$RUNNER_TEMP/digests/$target-${{ matrix.arch }}"
         done
 

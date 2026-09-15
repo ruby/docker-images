@@ -352,7 +352,9 @@ namespace :docker do
         tags << latest_ubuntu_tags.first.sub(/#{ruby_version}-#{LATEST_UBUNTU_VERSION}/, "latest")
       end
 
-      sh 'docker', 'buildx', 'imagetools', 'create', *tags.map {|tag| ["-t", tag] }.flatten, *sources
+      with_retry do
+        sh 'docker', 'buildx', 'imagetools', 'create', *tags.map {|tag| ["-t", tag] }.flatten, *sources
+      end
     end
   end
 end
