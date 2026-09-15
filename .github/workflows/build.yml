@@ -34,7 +34,28 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    outputs:
+      ruby_sha: ${{ steps.ruby_sha.outputs.ruby_sha }}
+
+    steps:
+    - name: Resolve ruby_sha
+      id: ruby_sha
+      run: |-
+        if [ "$ruby_version" = master ] && [ -z "$ruby_sha" ]; then
+          for attempt in 1 2 3; do
+            ruby_sha=$(gh api repos/ruby/ruby/commits/master --jq .sha) && break
+            sleep 30
+          done
+          test -n "$ruby_sha"
+        fi
+        echo "ruby_sha=$ruby_sha" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: prepare
+
     strategy:
       fail-fast: false
       matrix:
@@ -50,6 +71,7 @@ jobs:
 
     env:
       push: false
+      ruby_sha: ${{ needs.prepare.outputs.ruby_sha }}
       ubuntu_version: "${{ matrix.ubuntu_version }}"
       tag_suffix: "-${{ matrix.arch }}-${{ github.run_id }}"
       push_tags: ${{ github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master' }}${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}-${{ github.run_id }}
@@ -138,7 +160,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: build
+    needs: [prepare, build]
+
+    env:
+      ruby_sha: ${{ needs.prepare.outputs.ruby_sha }}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -155,18 +180,6 @@ jobs:
         username: ${{ secrets.GHCR_USER }}
         password: ${{ secrets.GHCR_ACCESS_TOKEN }}
       if: ${{ matrix.registry_name == 'ghcr.io/ruby' }}
-
-    # Make sure the sha of "master-{sha}" tags agrees with the RUBY_REVISION in the image
-    - name: Extract ruby_sha
-      run: echo "ruby_sha=$(docker run "$docker_image" ruby -e 'puts RUBY_REVISION')" >> "$GITHUB_ENV"
-      env:
-        # In docker:manifest:create:
-        #   tags = ["master#{version_suffix}", ...]                                                       #=> "master${{ matrix.image_version_suffix }}"
-        #   tags.collect! {|t| "#{docker_image_name}:#{t}-#{ubuntu_version(ruby_version)}#{tag_suffix}" } #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}"
-        #   manifest_name = "#{tags[0]}-#{arch}"                                                          #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64"
-        #   manifest_name = "#{manifest_name}-#{manifest_suffix}" if manifest_suffix                      #=> "${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64-${{ github.run_id }}"
-        docker_image: ${{ matrix.registry_name}}/ruby:master${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-amd64-${{ github.run_id }}
-      if: ${{ (github.event.inputs.ruby_version || github.event.client_payload.ruby_version || 'master') == 'master' && (github.event.inputs.ruby_sha || github.event.client_payload.ruby_sha || '') == '' }}
 
     - name: Create manifest for ${{ matrix.registry_name }}
       run: |-
