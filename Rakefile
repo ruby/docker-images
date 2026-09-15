@@ -1,19 +1,34 @@
 LATEST_UBUNTU_VERSION = "noble"
 LATEST_RUBY_VERSION = "4.0"
 
+def with_retry(attempts: 3, wait: 10)
+  tries = 0
+  begin
+    yield
+  rescue => e
+    tries += 1
+    raise if tries >= attempts
+    warn "#{e.class}: #{e.message} (retrying in #{wait}s)"
+    sleep wait
+    retry
+  end
+end
+
 def download(url)
   require "net/http"
   url = URI.parse(url)
-  Net::HTTP.start(url.hostname, url.port, :use_ssl => (url.scheme == "https")) do |http|
-    path = url.path
-    path += "?#{url.query}" if url.query
-    request = Net::HTTP::Get.new(url.path)
-    http.request(request) do |response|
-      case response
-      when Net::HTTPSuccess
-        return response.read_body
-      else
-        response.error!
+  with_retry do
+    Net::HTTP.start(url.hostname, url.port, :use_ssl => (url.scheme == "https")) do |http|
+      path = url.path
+      path += "?#{url.query}" if url.query
+      request = Net::HTTP::Get.new(url.path)
+      http.request(request) do |response|
+        case response
+        when Net::HTTPSuccess
+          return response.read_body
+        else
+          response.error!
+        end
       end
     end
   end
@@ -94,7 +109,9 @@ def ruby_version_exist?(version)
   require "net/http"
   require "uri"
   ver2 = version.split('.')[0,2].join('.')
-  Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{version}.tar.gz")).code == "200"
+  with_retry do
+    Net::HTTP.get_response(URI.parse("https://cache.ruby-lang.org/pub/ruby/#{ver2}/ruby-#{version}.tar.gz")).code == "200"
+  end
 end
 
 namespace :debug do
@@ -227,10 +244,12 @@ namespace :docker do
   def github_api_get(path, accept: "application/vnd.github+json", token: ENV.fetch("GITHUB_TOKEN"))
     require "net/http"
     require "uri"
-    Net::HTTP.get_response(URI.join("https://api.github.com", path), {
-      "Accept" => accept,
-      "Authorization" => token&.then { "Bearer #{token}" },
-    }.compact).tap(&:value).then(&:body)
+    with_retry do
+      Net::HTTP.get_response(URI.join("https://api.github.com", path), {
+        "Accept" => accept,
+        "Authorization" => token&.then { "Bearer #{token}" },
+      }.compact).tap(&:value).then(&:body)
+    end
   end
 
   def make_tags(ruby_version, version_suffix=nil, tag_suffix=nil)
