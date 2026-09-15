@@ -148,6 +148,8 @@ jobs:
 
     needs: [prepare, build]
 
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+
     env:
       ruby_sha: ${{ needs.prepare.outputs.ruby_sha }}
 
