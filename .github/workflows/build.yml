@@ -60,7 +60,6 @@ jobs:
       fail-fast: false
       matrix:
         debug_suffix: ['', '-debug']
-        dev_suffix: ['', '-dev']
         ubuntu_version:
           - resolute
           - noble
@@ -72,7 +71,6 @@ jobs:
     env:
       ruby_sha: ${{ needs.prepare.outputs.ruby_sha }}
       ubuntu_version: "${{ matrix.ubuntu_version }}"
-      dev_suffix: ${{ matrix.dev_suffix }}
       debug_suffix: ${{ matrix.debug_suffix }}
 
     steps:
@@ -92,32 +90,29 @@ jobs:
     - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
     - run: |
-        if [ "${{ env.dev_suffix }}" = "-dev" ]; then
-          echo "target=development" >> $GITHUB_ENV
-        else
-          echo "target=ruby" >> $GITHUB_ENV
-        fi
         if [ "${{ env.debug_suffix }}" = "-debug" ]; then
           echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
           echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
         fi
 
-    - name: Build and push docker image
+    - name: Build and push docker images
       run: |-
-        rake docker:build ruby_version=${{ env.ruby_version }} \
-                          ubuntu_version=${{ env.ubuntu_version }} \
-                          arch=linux/${{ matrix.arch }} \
-                          optflags="${{ env.optflags }}" \
-                          cppflags="${{ env.cppflags }}" \
-                          target=${{ env.target }} \
-                          push_registries="rubylang ghcr.io/ruby" \
-                          metadata_file="$RUNNER_TEMP/metadata.json"
         mkdir -p "$RUNNER_TEMP/digests"
-        jq -r '."containerimage.digest"' "$RUNNER_TEMP/metadata.json" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
+        for target in ruby development; do
+          rake docker:build ruby_version=${{ env.ruby_version }} \
+                            ubuntu_version=${{ env.ubuntu_version }} \
+                            arch=linux/${{ matrix.arch }} \
+                            optflags="${{ env.optflags }}" \
+                            cppflags="${{ env.cppflags }}" \
+                            target=$target \
+                            push_registries="rubylang ghcr.io/ruby" \
+                            metadata_file="$RUNNER_TEMP/$target.json"
+          jq -r '."containerimage.digest"' "$RUNNER_TEMP/$target.json" > "$RUNNER_TEMP/digests/$target-${{ matrix.arch }}"
+        done
 
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: digests${{ matrix.debug_suffix }}${{ matrix.dev_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}
+        name: digests${{ matrix.debug_suffix }}-${{ matrix.ubuntu_version }}-${{ matrix.arch }}
         path: ${{ runner.temp }}/digests/*
         if-no-files-found: error
         retention-days: 1
@@ -127,7 +122,7 @@ jobs:
         payload: |
           {
             "attachments": [{
-              "text": "build ${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.arch }} ${{ matrix.debug_suffix }} ${{ matrix.dev_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "build ${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.arch }} ${{ matrix.debug_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
@@ -139,7 +134,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image_version_suffix: ['', '-dev', '-debug', '-debug-dev']
+        debug_suffix: ['', '-debug']
         ubuntu_version:
           - resolute
           - noble
@@ -168,20 +163,23 @@ jobs:
 
     - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
-        pattern: digests${{ matrix.image_version_suffix }}-${{ matrix.ubuntu_version }}-*
+        pattern: digests${{ matrix.debug_suffix }}-${{ matrix.ubuntu_version }}-*
         path: ${{ runner.temp }}/digests
         merge-multiple: true
 
     - name: Create and push manifests
       run: |-
-        digests=$(cat "$RUNNER_TEMP/digests/amd64" "$RUNNER_TEMP/digests/arm64")
-        for registry_name in rubylang ghcr.io/ruby; do
-          rake docker:manifest:create \
-               registry_name="$registry_name" \
-               ruby_version="${{ env.ruby_version }}" \
-               ubuntu_version="${{ matrix.ubuntu_version }}" \
-               image_version_suffix=${{ matrix.image_version_suffix }} \
-               digests="$digests"
+        for target in ruby development; do
+          if [ $target = development ]; then dev_suffix=-dev; else dev_suffix=; fi
+          digests=$(cat "$RUNNER_TEMP/digests/$target-amd64" "$RUNNER_TEMP/digests/$target-arm64")
+          for registry_name in rubylang ghcr.io/ruby; do
+            rake docker:manifest:create \
+                 registry_name="$registry_name" \
+                 ruby_version="${{ env.ruby_version }}" \
+                 ubuntu_version="${{ matrix.ubuntu_version }}" \
+                 image_version_suffix=${{ matrix.debug_suffix }}$dev_suffix \
+                 digests="$digests"
+          done
         done
 
     - uses: ruby/action-slack@d260b61aa817726d5bedd22dd6cc305787fa4cdd # v4.0.0
@@ -189,7 +187,7 @@ jobs:
         payload: |
           {
             "attachments": [{
-              "text": "deploy_multiarch ${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.image_version_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
+              "text": "deploy_multiarch ${{ job.status }}: ${{ matrix.ubuntu_version }} ${{ matrix.debug_suffix }} <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>",
               "color": "danger"
             }]
           }
