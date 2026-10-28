@@ -24,7 +24,7 @@ This repository provides two flavors of Ruby images for each supported version:
 - **Production** (e.g. `rubylang/ruby:4.0-resolute`): minimal image with Ruby and bundler installed.
 - **Development** (e.g. `rubylang/ruby:4.0-dev-resolute`): based on the production image, with `build-essential`, `gdb`, and other development tools added. The `-dev` suffix follows the version number.
 
-The images listed below are based on Ubuntu resolute, noble, or jammy, and are built by running `make install` on the official Ruby source tarball. Unsuffixed tags such as `rubylang/ruby:4.0` and `rubylang/ruby:latest` currently track the noble images.
+The images listed below are based on Ubuntu resolute, noble, or jammy, and are built by running `make install` on the official Ruby source tarball. Unsuffixed tags such as `rubylang/ruby:4.0` and `rubylang/ruby:latest` currently track the resolute images.
 
 ## Images
 
@@ -36,6 +36,7 @@ The images listed below are based on Ubuntu resolute, noble, or jammy, and are b
   - `rubylang/ruby:master-debug-resolute`
   - `rubylang/ruby:master-debug-dev-resolute`
 - 4.0
+  - **`rubylang/ruby:latest`**
   - `rubylang/ruby:4.0-resolute`
   - `rubylang/ruby:4.0.9-resolute`
 - 3.4
@@ -53,7 +54,6 @@ The images listed below are based on Ubuntu resolute, noble, or jammy, and are b
   - `rubylang/ruby:master-debug-noble`
   - `rubylang/ruby:master-debug-dev-noble`
 - 4.0
-  - **`rubylang/ruby:latest`**
   - `rubylang/ruby:4.0-noble`
   - `rubylang/ruby:4.0.9-noble`
 - 3.4

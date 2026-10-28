@@ -1,4 +1,4 @@
-LATEST_UBUNTU_VERSION = "noble"
+LATEST_UBUNTU_VERSION = "resolute"
 LATEST_RUBY_VERSION = "4.0"
 
 def with_retry(attempts: 3, wait: 10)
