@@ -26,6 +26,12 @@ This repository provides two flavors of Ruby images for each supported version:
 
 The images listed below are based on Ubuntu resolute, noble, or jammy, and are built by running `make install` on the official Ruby source tarball. Unsuffixed tags such as `rubylang/ruby:4.0` and `rubylang/ruby:latest` currently track the resolute images.
 
+Images may be rebuilt under the same tag, including full version tags such as `4.0.9-resolute`, and environment variables or other details may change without notice. To keep using the same image, pin it by digest:
+
+```
+FROM rubylang/ruby:4.0.9-resolute@sha256:<digest>
+```
+
 ## Images
 
 ### Ubuntu 26.04 (resolute)
