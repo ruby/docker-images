@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - README.md
+      - .github/workflows/dockerhub-description.yml
   workflow_dispatch:
 
 jobs:
@@ -19,3 +20,4 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
           repository: rubylang/ruby
+          short-description: Ruby docker images officially provided by ruby-lang.org
