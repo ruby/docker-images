@@ -18,8 +18,6 @@ jobs:
           - image: ubuntu
             tag: resolute
           - image: ubuntu
-            tag: plucky
-          - image: ubuntu
             tag: noble
           - image: ubuntu
             tag: jammy

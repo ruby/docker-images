@@ -23,9 +23,9 @@ jobs:
           - jammy
         ruby_version:
           - 3.2.11
-          - 3.3.11
-          - 3.4.9
-          - 4.0.4
+          - 3.3.13
+          - 3.4.12
+          - 4.0.9
           - master
         arch:
           - amd64

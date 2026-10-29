@@ -21,30 +21,18 @@ The `latest` tag points to the most recent stable release of the current latest 
 
 This repository provides two flavors of Ruby images for each supported version:
 
-- **Production** (e.g. `rubylang/ruby:4.0-noble`): minimal image with Ruby and bundler installed.
-- **Development** (e.g. `rubylang/ruby:4.0-dev-noble`): based on the production image, with `build-essential`, `gdb`, and other development tools added. The `-dev` suffix follows the version number.
+- **Production** (e.g. `rubylang/ruby:4.0-resolute`): minimal image with Ruby and bundler installed.
+- **Development** (e.g. `rubylang/ruby:4.0-dev-resolute`): based on the production image, with `build-essential`, `gdb`, and other development tools added. The `-dev` suffix follows the version number.
 
-The images listed below are based on Ubuntu noble, resolute, or jammy, and are built by running `make install` on the official Ruby source tarball. Unsuffixed tags such as `rubylang/ruby:4.0` and `rubylang/ruby:latest` currently track the noble images.
+The images listed below are based on Ubuntu resolute, noble, or jammy, and are built by running `make install` on the official Ruby source tarball. Unsuffixed tags such as `rubylang/ruby:4.0` and `rubylang/ruby:latest` currently track the resolute images.
+
+Images may be rebuilt under the same tag, including full version tags such as `4.0.9-resolute`, and environment variables or other details may change without notice. To keep using the same image, pin it by digest:
+
+```
+FROM rubylang/ruby:4.0.9-resolute@sha256:<digest>
+```
 
 ## Images
-
-### Ubuntu 24.04 (noble)
-
-- master
-  - `rubylang/ruby:master-noble`
-  - `rubylang/ruby:master-dev-noble`
-  - `rubylang/ruby:master-debug-noble`
-  - `rubylang/ruby:master-debug-dev-noble`
-- 4.0
-  - **`rubylang/ruby:latest`**
-  - `rubylang/ruby:4.0-noble`
-  - `rubylang/ruby:4.0.4-noble`
-- 3.4
-  - `rubylang/ruby:3.4-noble`
-  - `rubylang/ruby:3.4.9-noble`
-- 3.3
-  - `rubylang/ruby:3.3-noble`
-  - `rubylang/ruby:3.3.11-noble`
 
 ### Ubuntu 26.04 (resolute)
 
@@ -54,14 +42,32 @@ The images listed below are based on Ubuntu noble, resolute, or jammy, and are b
   - `rubylang/ruby:master-debug-resolute`
   - `rubylang/ruby:master-debug-dev-resolute`
 - 4.0
+  - **`rubylang/ruby:latest`**
   - `rubylang/ruby:4.0-resolute`
-  - `rubylang/ruby:4.0.4-resolute`
+  - `rubylang/ruby:4.0.9-resolute`
 - 3.4
   - `rubylang/ruby:3.4-resolute`
-  - `rubylang/ruby:3.4.9-resolute`
+  - `rubylang/ruby:3.4.12-resolute`
 - 3.3
   - `rubylang/ruby:3.3-resolute`
-  - `rubylang/ruby:3.3.11-resolute`
+  - `rubylang/ruby:3.3.13-resolute`
+
+### Ubuntu 24.04 (noble)
+
+- master
+  - `rubylang/ruby:master-noble`
+  - `rubylang/ruby:master-dev-noble`
+  - `rubylang/ruby:master-debug-noble`
+  - `rubylang/ruby:master-debug-dev-noble`
+- 4.0
+  - `rubylang/ruby:4.0-noble`
+  - `rubylang/ruby:4.0.9-noble`
+- 3.4
+  - `rubylang/ruby:3.4-noble`
+  - `rubylang/ruby:3.4.12-noble`
+- 3.3
+  - `rubylang/ruby:3.3-noble`
+  - `rubylang/ruby:3.3.13-noble`
 
 ### Ubuntu 22.04 (jammy)
 
@@ -72,22 +78,22 @@ The images listed below are based on Ubuntu noble, resolute, or jammy, and are b
   - `rubylang/ruby:master-debug-dev-jammy`
 - 4.0
   - `rubylang/ruby:4.0-jammy`
-  - `rubylang/ruby:4.0.4-jammy`
+  - `rubylang/ruby:4.0.9-jammy`
 - 3.4
   - `rubylang/ruby:3.4-jammy`
-  - `rubylang/ruby:3.4.9-jammy`
+  - `rubylang/ruby:3.4.12-jammy`
 - 3.3
   - `rubylang/ruby:3.3-jammy`
-  - `rubylang/ruby:3.3.11-jammy`
+  - `rubylang/ruby:3.3.13-jammy`
 
 ### Misc
 
 Additional images are published for special purposes:
 
-- Preview or release-candidate versions (e.g. `rubylang/ruby:4.0.0-preview2-noble`)
+- Preview or release-candidate versions (e.g. `rubylang/ruby:4.1.0-preview1-resolute`)
 - Nightly builds of master (e.g. `rubylang/ruby:master-nightly-noble`)
 - Nightly debug builds of master (e.g. `rubylang/ruby:master-debug-nightly-noble`)
-- EOL versions, for compatibility use only (e.g. `rubylang/ruby:2.4.10-jammy`)
+- EOL versions, for compatibility use only (e.g. `rubylang/ruby:3.2.11-noble`)
 
 ## Contributing
 
@@ -107,7 +113,7 @@ rake docker:build ruby_version=master:ce798d08de
 
 ### Triggering a build
 
-Builds can be triggered via GitHub Actions `workflow_dispatch`. Open the Actions tab, select the "Build Docker image with multi-arch" workflow, and run it with a `ruby_version` parameter (e.g. `3.4.9` or `master`).
+Builds can be triggered via GitHub Actions `workflow_dispatch`. Open the Actions tab, select the "Build Docker image with multi-arch" workflow, and run it with a `ruby_version` parameter (e.g. `4.0.9` or `master`).
 
 ### Scheduled builds
 
