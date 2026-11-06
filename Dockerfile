@@ -75,6 +75,7 @@ ENV LANG=C.UTF-8 \
 
 RUN set -ex && \
     apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
             ca-certificates \
             libffi-dev \
