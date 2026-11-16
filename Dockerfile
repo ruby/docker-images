@@ -21,6 +21,7 @@ RUN set -ex && \
             gcc \
             git \
             g++ \
+            libcrypt-dev \
             libffi-dev \
             libgdbm-dev \
             libgmp-dev \
