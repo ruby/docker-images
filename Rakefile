@@ -276,7 +276,7 @@ namespace :docker do
     return ruby_version, tags
   end
 
-  desc "Build Docker image for Ruby (env: ruby_version, ubuntu_version, arch, image_version_suffix, tag_suffix, tag, cppflags, optflags, target, push_registries, metadata_file)"
+  desc "Build Docker image for Ruby (env: ruby_version, ubuntu_version, arch, image_version_suffix, tag_suffix, tag, cppflags, optflags, modular_gc, target, push_registries, metadata_file)"
   task :build do
     ruby_version = default_ruby_version
     unless ruby_version_exist?(ruby_version)
@@ -317,7 +317,7 @@ namespace :docker do
       ruby_so_suffix = ruby_version.match(/\A(\d+\.\d+\.\d+)/)[1]
       build_args << "RUBY_SO_SUFFIX=#{ruby_so_suffix}"
     end
-    %w(cppflags optflags).each do |name|
+    %w(cppflags optflags modular_gc).each do |name|
       build_args << %Q(#{name}=#{ENV[name]}) if ENV.key?(name)
     end
 
