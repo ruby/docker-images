@@ -53,6 +53,7 @@ COPY tmp/ruby /usr/src/ruby
 ARG optflags
 ARG debugflags
 ARG cppflags
+ARG modular_gc
 
 RUN set -ex && \
 # skip installing gem documentation
@@ -158,6 +159,12 @@ COPY --from=build \
 
 # Verify that the built/copied ruby can at least run (has necessary OS dependencies, etc).
 RUN /usr/local/bin/ruby -v
+
+ARG modular_gc
+RUN set -ex && \
+    for gc in $modular_gc; do \
+        RUBY_GC_LIBRARY=$gc /usr/local/bin/ruby -v -e 'GC.start'; \
+    done
 
 ### development ###
 FROM ruby AS development

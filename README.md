@@ -41,6 +41,8 @@ FROM rubylang/ruby:4.0.9-resolute@sha256:<digest>
   - `rubylang/ruby:master-dev-resolute`
   - `rubylang/ruby:master-debug-resolute`
   - `rubylang/ruby:master-debug-dev-resolute`
+  - `rubylang/ruby:master-modular-gc-resolute`
+  - `rubylang/ruby:master-modular-gc-dev-resolute`
 - 4.0
   - **`rubylang/ruby:latest`**
   - `rubylang/ruby:4.0-resolute`
@@ -59,6 +61,8 @@ FROM rubylang/ruby:4.0.9-resolute@sha256:<digest>
   - `rubylang/ruby:master-dev-noble`
   - `rubylang/ruby:master-debug-noble`
   - `rubylang/ruby:master-debug-dev-noble`
+  - `rubylang/ruby:master-modular-gc-noble`
+  - `rubylang/ruby:master-modular-gc-dev-noble`
 - 4.0
   - `rubylang/ruby:4.0-noble`
   - `rubylang/ruby:4.0.9-noble`
@@ -76,6 +80,8 @@ FROM rubylang/ruby:4.0.9-resolute@sha256:<digest>
   - `rubylang/ruby:master-dev-jammy`
   - `rubylang/ruby:master-debug-jammy`
   - `rubylang/ruby:master-debug-dev-jammy`
+  - `rubylang/ruby:master-modular-gc-jammy`
+  - `rubylang/ruby:master-modular-gc-dev-jammy`
 - 4.0
   - `rubylang/ruby:4.0-jammy`
   - `rubylang/ruby:4.0.9-jammy`
@@ -95,6 +101,24 @@ Additional images are published for special purposes:
 - Nightly debug builds of master (e.g. `rubylang/ruby:master-debug-nightly-noble`)
 - EOL versions, for compatibility use only (e.g. `rubylang/ruby:3.2.11-noble`)
 
+## Modular GC
+
+The `master-modular-gc` images contain Ruby master built with `--with-modular-gc=/usr/local/lib/ruby/gc` and the [MMTk](https://www.mmtk.io/) GC library. Ruby uses the built-in GC when `RUBY_GC_LIBRARY` is not set. Set `RUBY_GC_LIBRARY` to a library name to load that library:
+
+```
+docker run --rm -e RUBY_GC_LIBRARY=mmtk rubylang/ruby:master-modular-gc-resolute ruby -v
+```
+
+To use a custom GC, copy `librubygc.<name>.so` into `/usr/local/lib/ruby/gc/` and set `RUBY_GC_LIBRARY=<name>`:
+
+```
+FROM rubylang/ruby:master-modular-gc-resolute
+COPY librubygc.mygc.so /usr/local/lib/ruby/gc/
+ENV RUBY_GC_LIBRARY=mygc
+```
+
+The modular GC interface is internal to Ruby. Build the library from the same Ruby commit as the image. The `master-modular-gc-<commit>-resolute` tag names that commit. Configure the Ruby source with `--with-modular-gc`, then run `make modular-gc MODULAR_GC=<name>` in the build directory. This command writes `gc/<name>/librubygc.<name>.so` in the build directory.
+
 ## Contributing
 
 The Dockerfile and build scripts live in the [ruby/docker-images](https://github.com/ruby/docker-images) repository.
@@ -109,6 +133,12 @@ You can also specify a specific revision on the master branch:
 
 ```
 rake docker:build ruby_version=master:ce798d08de
+```
+
+To build an image with modular GC enabled, list the GC libraries from Ruby's `gc/` directory in `modular_gc`:
+
+```
+rake docker:build ruby_version=master image_version_suffix=-modular-gc modular_gc=mmtk
 ```
 
 ### Triggering a build

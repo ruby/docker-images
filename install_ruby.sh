@@ -99,6 +99,10 @@ fi
     --enable-zjit
   )
 
+  if [ -n "$modular_gc" ]; then
+    configure_args+=(--with-modular-gc="$PREFIX/lib/ruby/gc")
+  fi
+
   if [ -n "$cppflags" ]; then
     export cppflags=$cppflags
   else
@@ -128,6 +132,10 @@ fi
 
   make -j "$(nproc)"
   make install
+
+  for gc in $modular_gc; do
+    MMTK_LTO=0 make install-modular-gc MODULAR_GC="$gc" MMTK_BUILD=release
+  done
 
   popd
   rm -rf /tmp/ruby-build
